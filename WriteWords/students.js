@@ -1,18 +1,13 @@
 /**
  * 英语单词默写 · 学生列表（扩展学生只改这里）
- *
- * 默认：满满 → words-mm.xls / words-mm.xlsx
- * 新增学生示例：
- *   { key: "bb", label: "贝贝", icon: "👦" }  → words-bb.xls
- *
- * 入口页按本列表自动出按钮；练习页用 ?grade=key 进入。
+ * 词库：words-{key}.xls / .xlsx
  */
 (function (global) {
   "use strict";
 
   var STUDENTS = [
-    { key: "mm", label: "满满", icon: "👧" },
-    // { key: "bb", label: "贝贝", icon: "👦" },
+    { key: "mm", label: "满满", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
+    { key: "xx", label: "萱萱", icon: "👧", color: "#7eb8ff", bg: "#eef6ff" },
   ];
 
   var FILE_PREFIX = "words";
@@ -38,12 +33,13 @@
         key: st.key,
         label: st.label,
         icon: st.icon || "🙂",
+        color: st.color || "#a78bfa",
+        bg: st.bg || "#f5f0ff",
         files: getStudentFiles(st),
       };
     });
   }
 
-  /** 从 URL 解析当前学生；单学生时可省略参数 */
   function resolveFromUrl() {
     var params = new URLSearchParams(location.search);
     var key = (params.get("grade") || params.get("student") || "").trim().toLowerCase();

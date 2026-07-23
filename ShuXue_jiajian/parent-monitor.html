@@ -5,26 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>数学练习 · 学习进度</title>
     <style>
-        :root {
-            --text: #37474f;
-            --muted: #607d8b;
-            --panel: #fffef9;
-            --border: #b2ebf2;
-            --accent: #00838f;
-            --accent-bg: #e0f7fa;
-            --done: #5dd9a8;
-            --partial: #ffb347;
-            --none: #cfd8dc;
-        }
+        :root { --text: #37474f; --muted: #607d8b; --panel: #fffef9; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
-            min-height: 100vh;
-            color: var(--text);
+            min-height: 100vh; color: var(--text);
             background: linear-gradient(160deg, #e0f7fa 0%, #e8d4ff 42%, #fff8e1 100%);
             background-attachment: fixed;
         }
-        .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
         header { text-align: center; margin-bottom: 18px; }
         header h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 1.85rem); color: #00695c; }
         .toolbar {
@@ -35,100 +24,75 @@
             font-family: inherit; font-weight: 800; font-size: 0.95rem;
             padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer;
             background: linear-gradient(135deg, #26c6da, #00838f); color: #fff;
-            box-shadow: 0 4px 14px rgba(0, 131, 143, 0.3);
         }
-        .btn:active { transform: scale(0.98); }
-        .btn-ghost {
-            background: #fff; color: #00838f;
-            border: 2px solid #b2ebf2; box-shadow: none;
-        }
+        .btn-ghost { background: #fff; color: #00838f; border: 2px solid #b2ebf2; }
         .meta { font-size: 0.88rem; color: var(--muted); font-weight: 700; }
-
         .week-select-group {
             display: flex; gap: 14px; align-items: center;
             justify-content: center; margin-bottom: 16px; flex-wrap: wrap;
         }
-        .week-select-label { font-weight: 800; color: #00695c; font-size: 1rem; }
+        .week-select-label { font-weight: 800; color: #00695c; }
         .week-select {
-            font-family: inherit; font-weight: 800; font-size: 1rem;
-            border-radius: 8px; border: 2px solid #b2ebf2; background: #f0fffe;
-            color: #00695c; padding: 4px 12px;
+            font-family: inherit; font-weight: 800; border-radius: 8px;
+            border: 2px solid #b2ebf2; background: #f0fffe; color: #00695c; padding: 4px 12px;
         }
-        .week-select:focus { border-color: #00838f; outline: none; }
-
+        .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; }
         .summary-card {
-            background: var(--panel); border: 3px solid var(--border);
-            border-radius: 18px; padding: 18px; text-align: center;
-            box-shadow: 0 10px 28px rgba(0, 131, 143, 0.1); margin-bottom: 16px;
+            background: var(--panel); border: 3px solid #b2ebf2;
+            border-radius: 18px; padding: 16px; text-align: center;
         }
-        .summary-card h2 { margin: 0 0 8px; font-size: 1.15rem; color: #00838f; }
-        .big-num { font-size: 2rem; font-weight: 900; line-height: 1.2; color: #00695c; }
-        .summary-sub { font-size: 0.9rem; color: var(--muted); font-weight: 700; margin-top: 4px; }
-        .summary-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-        .summary-item { font-size: 0.88rem; font-weight: 700; color: #455a64; }
-
-        .day-list { display: flex; flex-direction: column; gap: 10px; }
-        .day-row {
-            background: #fff; border: 2px solid #e0f2f1;
-            border-radius: 14px; padding: 12px 14px;
+        .summary-card h2 { margin: 0 0 6px; font-size: 1.05rem; }
+        .big-num { font-size: 1.8rem; font-weight: 900; line-height: 1.2; }
+        .summary-sub { font-size: 0.85rem; color: var(--muted); font-weight: 700; margin-top: 4px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+        .student-panel {
+            background: #fff; border: 3px solid #e0f2f1; border-radius: 18px; overflow: hidden;
         }
-        .day-row.today { border-color: #ffc857; box-shadow: 0 0 0 2px rgba(255, 200, 87, 0.35); }
-        .day-row.all-done { border-color: #a8e8d0; background: #f8fffc; }
-        .day-top {
-            display: flex; justify-content: space-between;
-            align-items: center; gap: 8px; margin-bottom: 8px;
+        .panel-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 14px; font-weight: 800;
         }
-        .day-date { font-weight: 800; font-size: 0.98rem; }
-        .day-date .tag-today {
-            display: inline-block; margin-left: 6px; font-size: 0.72rem;
-            background: #fff3cd; color: #b45309; padding: 2px 8px;
-            border-radius: 999px; vertical-align: middle;
-        }
-        .status-pill {
+        .badge {
             font-size: 0.78rem; font-weight: 800; padding: 4px 10px;
-            border-radius: 999px; white-space: nowrap;
+            border-radius: 999px; background: rgba(255,255,255,.7);
         }
+        .panel-body { padding: 12px 14px 16px; }
+        .err-box { color: #b91c1c; font-weight: 700; font-size: 0.9rem; line-height: 1.5; }
+        .day-list { display: flex; flex-direction: column; gap: 8px; }
+        .day-row { background: #f7fffe; border: 2px solid #e0f2f1; border-radius: 12px; padding: 10px 12px; }
+        .day-row.today { border-color: #ffc857; }
+        .day-row.all-done { border-color: #a8e8d0; background: #f8fffc; }
+        .day-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .day-date { font-weight: 800; font-size: 0.92rem; }
+        .tag-today {
+            display: inline-block; margin-left: 6px; font-size: 0.7rem;
+            background: #fff3cd; color: #b45309; padding: 2px 7px; border-radius: 999px;
+        }
+        .status-pill { font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 999px; }
         .status-pill.done { background: #d1fae5; color: #047857; }
         .status-pill.partial { background: #ffedd5; color: #c2410c; }
         .status-pill.none { background: #f3f4f6; color: #6b7280; }
-        .progress-track {
-            height: 10px; background: #e0f2f1;
-            border-radius: 999px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; border-radius: 999px;
-            background: linear-gradient(90deg, #26c6da, #00838f);
-            transition: width 0.4s ease;
-        }
-        .day-meta { margin-top: 6px; font-size: 0.82rem; color: var(--muted); font-weight: 700; }
-        .day-activity { color: #455a64; }
-        .loading-all {
-            text-align: center; padding: 40px 20px;
-            font-weight: 800; color: #00695c;
-        }
-        .foot-note {
-            text-align: center; margin-top: 20px; font-size: 0.85rem;
-            color: var(--muted); font-weight: 600; line-height: 1.6;
-        }
+        .progress-track { height: 8px; background: #e0f2f1; border-radius: 999px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 999px; transition: width .3s; }
+        .day-meta { margin-top: 5px; font-size: 0.78rem; color: var(--muted); font-weight: 700; }
+        .loading-all { text-align: center; padding: 40px 20px; font-weight: 800; color: #00695c; }
+        .foot-note { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
         .foot-note a { color: #00838f; font-weight: 800; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="wrap">
-        <header>
-            <h1>📊 数学练习 · 学习进度</h1>
-        </header>
+        <header><h1>📊 数学练习 · 学习进度</h1></header>
         <div class="toolbar">
             <button type="button" class="btn" id="refreshBtn">🔄 刷新</button>
-            <select id="studentSelect" class="week-select" style="display:none;"></select>
             <a href="index.html" class="btn btn-ghost" style="text-decoration:none;display:inline-block;">返回入口</a>
             <span class="meta" id="lastUpdate">正在加载…</span>
         </div>
-        <div id="loadingAll" class="loading-all">正在读取数学练习数据…</div>
+        <div id="loadingAll" class="loading-all">正在读取各学生练习数据…</div>
         <div class="week-select-group" id="weekSelectGroup" style="display:none;"></div>
         <div id="mainContent" style="display:none;">
-            <div id="summaryCard"></div>
-            <div id="dayListContainer"></div>
+            <div class="summary" id="summaryRow"></div>
+            <div class="grid" id="studentGrid"></div>
         </div>
         <div class="foot-note" id="footNote" style="display:none;">
             每 60 秒自动刷新 · <a href="index.html">返回入口</a>
@@ -143,18 +107,11 @@
     (function () {
     'use strict';
 
-    var wb = null, fileName = '';
+    var STUDENTS = (window.StudentRoster && StudentRoster.list()) || [];
     var refreshTimer = null;
     var lastFingerprint = '';
     var selectedWeekMonday = null;
-    var totalCount = 20;
-    var STUDENTS = (window.StudentRoster && StudentRoster.list()) || [];
-    var currentStudentKey = STUDENTS.length ? STUDENTS[0].key : '';
-
-    function currentStudentFiles() {
-        var st = STUDENTS.find(function (s) { return s.key === currentStudentKey; });
-        return st && st.files ? st.files.slice() : [];
-    }
+    var studentCache = {}; // key -> { ok, wb, totalCount, error }
 
     function formatYYYYMMDD(d) {
         return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
@@ -197,19 +154,35 @@
         return -1;
     }
 
-    function readConfig() {
-        if (!wb) return;
+    function injectThemeCss() {
+        var style = document.createElement('style');
+        style.textContent = STUDENTS.map(function (st) {
+            var k = st.key, c = st.color, bg = st.bg;
+            return '.summary-card.' + k + ',.student-panel.' + k + '{border-color:' + c + '}' +
+                '.summary-card.' + k + ' h2,.summary-card.' + k + ' .big-num{color:' + c + '}' +
+                '.student-panel.' + k + ' .panel-head{background:' + bg + ';color:' + c + '}' +
+                '.student-panel.' + k + ' .progress-fill{background:' + c + '}';
+        }).join('\n');
+        document.head.appendChild(style);
+    }
+
+    function readConfig(wb) {
+        var totalCount = 20;
+        if (!wb) return totalCount;
         var sheet = null;
-        ['配置', 'config', 'Config'].forEach(function (n) { if (!sheet && wb.SheetNames.includes(n)) sheet = wb.Sheets[n]; });
-        if (!sheet) return;
+        ['配置', 'config', 'Config'].forEach(function (n) {
+            if (!sheet && wb.SheetNames.includes(n)) sheet = wb.Sheets[n];
+        });
+        if (!sheet) return totalCount;
         var d = XLSX.utils.sheet_to_json(sheet, { header: 1 }), m = {};
         for (var i = 0; i < d.length; i++) {
             var r = d[i]; if (r && r[0]) m[String(r[0]).trim()] = r[1];
         }
         if (m['每日题数']) totalCount = parseInt(m['每日题数']) || 20;
+        return totalCount;
     }
 
-    function getDailyRecords() {
+    function getDailyRecords(wb) {
         if (!wb || !wb.SheetNames.includes('每日记录')) return {};
         var data = XLSX.utils.sheet_to_json(wb.Sheets['每日记录'], { header: 1 });
         if (data.length < 2) return {};
@@ -225,8 +198,7 @@
         for (var i = 1; i < data.length; i++) {
             var row = data[i];
             if (!row || !row[iDate]) continue;
-            var key = String(row[iDate]).trim();
-            map[key] = {
+            map[String(row[iDate]).trim()] = {
                 done: iDone >= 0 ? (parseInt(row[iDone]) || 0) : 0,
                 errors: iErr >= 0 ? (parseInt(row[iErr]) || 0) : 0,
                 rate: iRate >= 0 ? String(row[iRate] || '0%') : '0%',
@@ -237,9 +209,9 @@
         return map;
     }
 
-    function collectAllDates() {
+    function collectAllDates(wb) {
         var names = new Set(getWeekDateNames());
-        var records = getDailyRecords();
+        var records = getDailyRecords(wb);
         Object.keys(records).forEach(function (k) { if (isDateStr(k)) names.add(k); });
         return Array.from(names).sort();
     }
@@ -254,6 +226,27 @@
         return Object.keys(weeks).sort().reverse().map(function (mon) {
             return { monday: mon, dates: weeks[mon].sort() };
         });
+    }
+
+    function buildUnifiedWeeks() {
+        var all = new Set(getWeekDateNames());
+        Object.keys(studentCache).forEach(function (k) {
+            var item = studentCache[k];
+            if (!item || !item.ok || !item.wb) return;
+            collectAllDates(item.wb).forEach(function (d) { all.add(d); });
+        });
+        return splitWeeks(Array.from(all).sort());
+    }
+
+    function weekDatesForSelected(weeks) {
+        for (var i = 0; i < weeks.length; i++) {
+            if (weeks[i].monday === selectedWeekMonday) return weeks[i].dates;
+        }
+        if (weeks.length) {
+            selectedWeekMonday = weeks[0].monday;
+            return weeks[0].dates;
+        }
+        return [];
     }
 
     function renderWeekSelect(weeks) {
@@ -271,102 +264,104 @@
             fri.setDate(fri.getDate() + 4);
             var label = wk.monday.slice(5) + ' ~ ' + formatYYYYMMDD(fri).slice(5);
             if (wk.monday === todayMon) label += '（本周）';
-            var sel = wk.monday === selectedWeekMonday ? ' selected' : '';
-            html += '<option value="' + wk.monday + '"' + sel + '>' + label + '</option>';
+            html += '<option value="' + wk.monday + '"' + (wk.monday === selectedWeekMonday ? ' selected' : '') + '>' + label + '</option>';
         });
         html += '</select>';
         group.innerHTML = html;
         group.style.display = '';
-        document.getElementById('weekSelect').addEventListener('change', function () {
+        document.getElementById('weekSelect').onchange = function () {
             selectedWeekMonday = this.value;
             renderAll();
-        });
+        };
     }
 
-    function renderAll() {
-        var allDates = collectAllDates();
-        var weeks = splitWeeks(allDates);
-        renderWeekSelect(weeks);
-
-        var weekDates = [];
-        for (var i = 0; i < weeks.length; i++) {
-            if (weeks[i].monday === selectedWeekMonday) { weekDates = weeks[i].dates; break; }
+    function studentWeekHtml(st, weekDates) {
+        var item = studentCache[st.key];
+        if (!item || !item.ok) {
+            return '<div class="err-box">' + escHtml((item && item.error) || '未加载') +
+                '<br>请确认 Gitee ' + GITEE_DATA_DIR + ' 下有 ' + escHtml((st.files || []).join(' / ')) + '</div>';
         }
-        if (!weekDates.length && weeks.length) {
-            selectedWeekMonday = weeks[0].monday;
-            weekDates = weeks[0].dates;
-        }
-
+        var records = getDailyRecords(item.wb);
+        var totalCount = item.totalCount || 20;
         var todayStr = getTodayStr();
-        var records = getDailyRecords();
-
-        var totalDoneAll = 0, totalErrAll = 0, totalTimeAll = 0;
-        var daysCompleted = 0, daysStarted = 0;
-        weekDates.forEach(function (name) {
-            var rec = records[name];
-            if (rec) {
-                totalDoneAll += rec.done;
-                totalErrAll += rec.errors;
-                totalTimeAll += rec.timeSec;
-                if (rec.completed) daysCompleted++;
-                if (rec.done > 0) daysStarted++;
-            }
-        });
-        var weekQuestions = weekDates.length * totalCount;
-        var overallPct = weekQuestions > 0 ? Math.round(totalDoneAll / weekQuestions * 100) : 0;
-        var overallRate = totalDoneAll > 0 ? Math.round((totalDoneAll - totalErrAll) / totalDoneAll * 100) : 0;
-        if (overallRate < 0) overallRate = 0;
-
-        var summaryHtml =
-            '<div class="summary-card">' +
-            '<h2>🧮 本周概览</h2>' +
-            '<div class="big-num">' + overallPct + '%</div>' +
-            '<div class="summary-sub">整体完成率（' + totalDoneAll + '/' + weekQuestions + ' 题）</div>' +
-            '<div class="summary-row">' +
-            '<span class="summary-item">✅ 完成 ' + daysCompleted + '/' + weekDates.length + ' 天</span>' +
-            '<span class="summary-item">❌ 总错 ' + totalErrAll + ' 次</span>' +
-            (totalTimeAll > 0 ? '<span class="summary-item">⏱ 累计 ' + formatDuration(totalTimeAll) + '</span>' : '') +
-            '</div></div>';
-        document.getElementById('summaryCard').innerHTML = summaryHtml;
-
-        var dayHtml = '<div class="day-list">';
+        var html = '<div class="day-list">';
         weekDates.forEach(function (name) {
             var rec = records[name];
             var isToday = name === todayStr;
             var doneCnt = rec ? rec.done : 0;
             var isDone = rec ? rec.completed : false;
             var pct = Math.min(100, Math.round(doneCnt / totalCount * 100));
-            var rowCls = 'day-row' + (isToday ? ' today' : '') + (isDone ? ' all-done' : '');
-
-            var statusCls, statusText;
-            if (!rec || doneCnt === 0) {
-                statusCls = 'none'; statusText = '未开始';
-            } else if (isDone) {
-                statusCls = 'done'; statusText = '已完成';
-            } else {
-                statusCls = 'partial'; statusText = '进行中 ' + pct + '%';
-            }
-
-            dayHtml += '<div class="' + rowCls + '">';
-            dayHtml += '<div class="day-top">';
-            dayHtml += '<span class="day-date">' + escHtml(name) + (isToday ? '<span class="tag-today">今天</span>' : '') + '</span>';
-            dayHtml += '<span class="status-pill ' + statusCls + '">' + statusText + '</span>';
-            dayHtml += '</div>';
-            dayHtml += '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
-
+            var statusCls = 'none', statusText = '未开始';
+            if (!rec || doneCnt === 0) { statusCls = 'none'; statusText = '未开始'; }
+            else if (isDone) { statusCls = 'done'; statusText = '已完成'; }
+            else { statusCls = 'partial'; statusText = '进行中 ' + pct + '%'; }
+            html += '<div class="day-row' + (isToday ? ' today' : '') + (isDone ? ' all-done' : '') + '">';
+            html += '<div class="day-top"><span class="day-date">' + escHtml(name) +
+                (isToday ? '<span class="tag-today">今天</span>' : '') + '</span>';
+            html += '<span class="status-pill ' + statusCls + '">' + statusText + '</span></div>';
+            html += '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
             if (rec && doneCnt > 0) {
-                var metaParts = [];
-                metaParts.push('📝 ' + doneCnt + '/' + totalCount + ' 题');
-                metaParts.push('正确率 ' + (rec.rate || '0%'));
-                if (rec.errors > 0) metaParts.push('❌ 错 ' + rec.errors + ' 次');
-                if (rec.timeSec > 0) metaParts.push('⏱ 耗时 ' + formatDuration(rec.timeSec));
-                dayHtml += '<div class="day-meta day-activity">' + metaParts.join(' · ') + '</div>';
+                var meta = [];
+                meta.push('📝 ' + doneCnt + '/' + totalCount + ' 题');
+                meta.push('正确率 ' + (rec.rate || '0%'));
+                if (rec.errors > 0) meta.push('❌ 错 ' + rec.errors + ' 次');
+                if (rec.timeSec > 0) meta.push('⏱ ' + formatDuration(rec.timeSec));
+                html += '<div class="day-meta">' + meta.join(' · ') + '</div>';
             }
-
-            dayHtml += '</div>';
+            html += '</div>';
         });
-        dayHtml += '</div>';
-        document.getElementById('dayListContainer').innerHTML = dayHtml;
+        return html + '</div>';
+    }
+
+    function studentSummary(st, weekDates) {
+        var item = studentCache[st.key];
+        if (!item || !item.ok) {
+            return '<div class="summary-card ' + st.key + '"><h2>' + (st.icon || '') + ' ' + st.label +
+                '</h2><div class="big-num">—</div><div class="summary-sub">数据未加载</div></div>';
+        }
+        var records = getDailyRecords(item.wb);
+        var totalCount = item.totalCount || 20;
+        var totalDoneAll = 0, daysCompleted = 0;
+        weekDates.forEach(function (name) {
+            var rec = records[name];
+            if (rec) {
+                totalDoneAll += rec.done;
+                if (rec.completed) daysCompleted++;
+            }
+        });
+        var weekQuestions = weekDates.length * totalCount;
+        var pct = weekQuestions > 0 ? Math.round(totalDoneAll / weekQuestions * 100) : 0;
+        return '<div class="summary-card ' + st.key + '"><h2>' + (st.icon || '') + ' ' + st.label +
+            '</h2><div class="big-num">' + pct + '%</div>' +
+            '<div class="summary-sub">本周 ' + totalDoneAll + '/' + weekQuestions + ' 题 · 完成 ' +
+            daysCompleted + '/' + weekDates.length + ' 天</div></div>';
+    }
+
+    function renderAll() {
+        var weeks = buildUnifiedWeeks();
+        renderWeekSelect(weeks);
+        var weekDates = weekDatesForSelected(weeks);
+        if (!weekDates.length) weekDates = getWeekDateNames();
+
+        document.getElementById('summaryRow').innerHTML = STUDENTS.map(function (st) {
+            return studentSummary(st, weekDates);
+        }).join('');
+
+        document.getElementById('studentGrid').innerHTML = STUDENTS.map(function (st) {
+            var item = studentCache[st.key];
+            var badge = '未加载';
+            if (item && item.ok) {
+                var records = getDailyRecords(item.wb);
+                var totalCount = item.totalCount || 20;
+                var done = 0, target = weekDates.length * totalCount;
+                weekDates.forEach(function (n) { if (records[n]) done += records[n].done; });
+                badge = done + '/' + target;
+            }
+            return '<section class="student-panel ' + st.key + '">' +
+                '<div class="panel-head"><span>' + (st.icon || '') + ' ' + st.label +
+                '</span><span class="badge">' + badge + '</span></div>' +
+                '<div class="panel-body">' + studentWeekHtml(st, weekDates) + '</div></section>';
+        }).join('');
 
         document.getElementById('loadingAll').style.display = 'none';
         document.getElementById('mainContent').style.display = '';
@@ -374,80 +369,45 @@
         document.getElementById('lastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString();
     }
 
-    async function fetchWorkbook() {
-        try {
-            var candidates = currentStudentFiles();
-            if (!candidates.length) {
-                try {
-                    candidates = await GiteeData.listWorkbookFiles(GITEE_DATA_DIR);
-                } catch (_) {}
-            }
-            if (!candidates.length) {
-                candidates = ['shuxue-mm.xlsx', 'shuxue-mm.xls'];
-            }
-            for (var i = 0; i < candidates.length; i++) {
-                try {
-                    var buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, candidates[i]));
-                    if (buf.byteLength < 256) continue;
-                    wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
-                    fileName = candidates[i];
-                    readConfig();
-                    return true;
-                } catch (e) { continue; }
-            }
-        } catch (e) {}
-        return false;
-    }
-
-    function dataFingerprint() {
-        if (!wb) return '';
-        var parts = [];
-        wb.SheetNames.forEach(function (n) {
-            var s = wb.Sheets[n];
-            if (!s || !s['!ref']) return;
-            parts.push(n + ':' + s['!ref']);
-        });
-        return parts.join('|');
+    async function fetchOneStudent(st) {
+        var candidates = st.files && st.files.length ? st.files.slice() : [];
+        for (var i = 0; i < candidates.length; i++) {
+            try {
+                var buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, candidates[i]));
+                if (buf.byteLength < 256) continue;
+                var wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+                return { ok: true, wb: wb, fileName: candidates[i], totalCount: readConfig(wb) };
+            } catch (e) { /* next */ }
+        }
+        return { ok: false, error: '未找到 ' + candidates.join(' / ') };
     }
 
     async function loadAll(silent) {
         if (!silent) document.getElementById('loadingAll').style.display = '';
-        var ok = await fetchWorkbook();
-        if (!ok) {
-            document.getElementById('loadingAll').innerHTML = '⚠️ 未找到数学练习文件，请确认 Gitee LearningData/' + GITEE_DATA_DIR + ' 已上传 .xls/.xlsx，并检查 gitee-data.js 配置';
+        if (!STUDENTS.length) {
+            document.getElementById('loadingAll').innerHTML = '⚠️ 请先在 students.js 配置学生';
             return;
         }
-        var fp = dataFingerprint();
+        var next = {};
+        for (var i = 0; i < STUDENTS.length; i++) {
+            next[STUDENTS[i].key] = await fetchOneStudent(STUDENTS[i]);
+        }
+        var fp = Object.keys(next).map(function (k) {
+            var it = next[k];
+            if (!it.ok) return k + ':err';
+            return k + ':' + (it.wb.SheetNames || []).join(',');
+        }).join('|');
         if (silent && fp === lastFingerprint) return;
         lastFingerprint = fp;
+        studentCache = next;
         renderAll();
     }
 
-    function startAutoRefresh() {
-        if (refreshTimer) clearInterval(refreshTimer);
+    injectThemeCss();
+    document.getElementById('refreshBtn').onclick = function () { loadAll(false); };
+    loadAll(false).then(function () {
         refreshTimer = setInterval(function () { loadAll(true); }, 60000);
-    }
-
-    document.getElementById('refreshBtn').addEventListener('click', function () {
-        loadAll(false);
     });
-
-    (function initStudentSelect() {
-        var sel = document.getElementById('studentSelect');
-        if (!sel || STUDENTS.length <= 1) return;
-        sel.style.display = '';
-        sel.innerHTML = STUDENTS.map(function (st) {
-            return '<option value="' + st.key + '">' + (st.icon ? st.icon + ' ' : '') + st.label + '</option>';
-        }).join('');
-        sel.value = currentStudentKey;
-        sel.addEventListener('change', function () {
-            currentStudentKey = this.value;
-            lastFingerprint = '';
-            loadAll(false);
-        });
-    })();
-
-    loadAll(false).then(startAutoRefresh);
     })();
     </script>
 </body>

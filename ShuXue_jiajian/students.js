@@ -1,16 +1,13 @@
 /**
  * 数学加减法 · 学生列表（扩展学生只改这里）
- *
- * 默认：满满 → shuxue-mm.xlsx / shuxue-mm.xls
- * 新增学生示例：
- *   { key: "bb", label: "贝贝", icon: "👦" }  → shuxue-bb.xlsx
+ * 数据：shuxue-{key}.xlsx / .xls
  */
 (function (global) {
   "use strict";
 
   var STUDENTS = [
-    { key: "mm", label: "满满", icon: "👧" },
-    // { key: "bb", label: "贝贝", icon: "👦" },
+    { key: "mm", label: "满满", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
+    { key: "xx", label: "萱萱", icon: "👧", color: "#7eb8ff", bg: "#eef6ff" },
   ];
 
   var FILE_PREFIX = "shuxue";
@@ -36,6 +33,8 @@
         key: st.key,
         label: st.label,
         icon: st.icon || "🙂",
+        color: st.color || "#a78bfa",
+        bg: st.bg || "#f5f0ff",
         files: getStudentFiles(st),
       };
     });
