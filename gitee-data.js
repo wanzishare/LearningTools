@@ -27,10 +27,16 @@
     return d + "/" + n;
   }
 
-  function apiContentsUrl(filePath, withRef) {
-    var q = "access_token=" + encodeURIComponent(CONFIG.TOKEN);
-    if (withRef !== false) {
-      q += "&ref=" + encodeURIComponent(CONFIG.BRANCH);
+  function apiContentsUrl(filePath, options) {
+    options = options || {};
+    var withRef = options.withRef !== false;
+    var withToken = !!options.withToken;
+    var q = [];
+    if (withToken && CONFIG.TOKEN) {
+      q.push("access_token=" + encodeURIComponent(CONFIG.TOKEN));
+    }
+    if (withRef) {
+      q.push("ref=" + encodeURIComponent(CONFIG.BRANCH));
     }
     return (
       CONFIG.API_BASE +
@@ -38,9 +44,38 @@
       CONFIG.REPOSITORY +
       "/contents/" +
       String(filePath).replace(/^\/+/, "") +
-      "?" +
-      q
+      (q.length ? "?" + q.join("&") : "")
     );
+  }
+
+  /** GET：优先带 Token；若 401/403 再降级为无 Token（公开仓库可读） */
+  async function fetchContentsJson(filePath, preferToken) {
+    var useTokenFirst = preferToken !== false;
+    var attempts = useTokenFirst
+      ? [{ withToken: true }, { withToken: false }]
+      : [{ withToken: false }, { withToken: true }];
+    var lastErr = null;
+    for (var i = 0; i < attempts.length; i++) {
+      var opt = attempts[i];
+      if (opt.withToken && !CONFIG.TOKEN) continue;
+      try {
+        var res = await fetch(apiContentsUrl(filePath, opt), {
+          method: "GET",
+          headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+        });
+        if (res.status === 401 || res.status === 403) {
+          lastErr = new Error("Gitee 鉴权失败: " + res.status);
+          continue;
+        }
+        if (!res.ok) {
+          throw new Error("Gitee API 错误: " + res.status + " " + res.statusText);
+        }
+        return await res.json();
+      } catch (e) {
+        lastErr = e;
+      }
+    }
+    throw lastErr || new Error("Gitee 请求失败");
   }
 
   function uint8ToBase64(u8) {
@@ -87,15 +122,7 @@
    * @returns {Promise<string[]>}
    */
   async function listWorkbookFiles(dirPath) {
-    var url = apiContentsUrl(dirPath);
-    var res = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json", "Cache-Control": "no-cache" },
-    });
-    if (!res.ok) {
-      throw new Error("Gitee 列出目录失败: " + res.status + " " + res.statusText);
-    }
-    var data = await res.json();
+    var data = await fetchContentsJson(dirPath);
     if (!Array.isArray(data)) {
       // 可能是单文件
       if (data && data.type === "file" && isWorkbookName(data.name)) {
@@ -125,12 +152,7 @@
    */
   async function getFileMeta(filePath) {
     try {
-      var res = await fetch(apiContentsUrl(filePath), {
-        method: "GET",
-        headers: { Accept: "application/json", "Cache-Control": "no-cache" },
-      });
-      if (!res.ok) return null;
-      var data = await res.json();
+      var data = await fetchContentsJson(filePath);
       if (Array.isArray(data) || !data || data.type !== "file") return null;
       if (data.sha) shaCache[filePath] = data.sha;
       return {
@@ -158,17 +180,10 @@
    */
   async function fetchFile(filePath) {
     var path = String(filePath).replace(/^\/+/, "");
-    console.log("[GiteeData] 开始获取:", path);
+    console.log("[GiteeData] 开始获取:", path, "repo=", CONFIG.REPOSITORY, "branch=", CONFIG.BRANCH);
 
     try {
-      var res = await fetch(apiContentsUrl(path), {
-        method: "GET",
-        headers: { Accept: "application/json", "Cache-Control": "no-cache" },
-      });
-      if (!res.ok) {
-        throw new Error("Gitee API 错误: " + res.status + " " + res.statusText);
-      }
-      var fileData = await res.json();
+      var fileData = await fetchContentsJson(path);
       if (fileData.sha) shaCache[path] = fileData.sha;
 
       if (fileData.content && fileData.encoding === "base64") {

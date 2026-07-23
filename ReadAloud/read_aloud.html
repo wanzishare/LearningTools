@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="../gitee-data.js"></script>
+    <script src="../gitee-data.js?v=20260723b"></script>
     <script src="students.js"></script>
     <title>句子朗读录音系统</title>
     <div class="browser-notice" id="browserNotice" style="display: none;">
@@ -1294,7 +1294,7 @@
                 // 尝试备用方法：使用直接链接（不使用代理）
                 console.log('尝试备用方法获取文件...');
                 try {
-                    const directUrl = `https://gitee.com/${GITEE_CONFIG.REPOSITORY}/raw/master/${AppState.excelUrl}`;
+                    const directUrl = `https://gitee.com/${GITEE_CONFIG.REPOSITORY}/raw/${(window.GiteeData && GiteeData.CONFIG.BRANCH) || 'main'}/${AppState.excelUrl}`;
                     console.log('备用方法URL:', directUrl);
                     
                     const response = await fetch(directUrl, {
