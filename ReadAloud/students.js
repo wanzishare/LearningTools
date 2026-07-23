@@ -44,6 +44,8 @@
         key: st.key,
         label: st.label,
         icon: st.icon || "🙂",
+        color: st.color || "#ff7eb3",
+        bg: st.bg || "#ffe8f3",
         files: getStudentFiles(st),
       };
     });

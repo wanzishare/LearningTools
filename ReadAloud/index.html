@@ -45,7 +45,7 @@
             gap: 10px; min-width: 220px; padding: 16px 28px;
             border-radius: 18px; font-weight: 800; text-decoration: none;
             color: #fff; font-size: 1.1rem;
-            background: #a78bfa;
+            /* 颜色由 students.js 的 color 动态设置 */
             box-shadow: 0 6px 20px rgba(124,92,191,.25);
             transition: transform .14s, box-shadow .15s;
             font-family: inherit;
@@ -79,7 +79,7 @@
             词库与录音保存在 Gitee LearningData/ReadAloud
         </div>
     </div>
-    <script src="students.js"></script>
+    <script src="students.js?v=20260723pink"></script>
     <script>
         (function () {
             var box = document.getElementById("entryList");
@@ -91,8 +91,10 @@
             students.forEach(function (st) {
                 var a = document.createElement("a");
                 a.href = "read_aloud.html?grade=" + encodeURIComponent(st.key);
-                var c = st.color || "#a78bfa";
-                a.style.background = "linear-gradient(135deg, " + c + ", " + c + ")";
+                var c = st.color || "#ff7eb3";
+                a.style.cssText +=
+                    ";background:" + c +
+                    ";background-image:linear-gradient(135deg," + c + "," + c + ");";
                 a.innerHTML = '<span class="icon" aria-hidden="true">' + (st.icon || "🎤") + "</span>" + st.label;
                 box.appendChild(a);
             });

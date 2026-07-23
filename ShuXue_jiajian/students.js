@@ -6,8 +6,8 @@
   "use strict";
 
   var STUDENTS = [
-    { key: "mm", label: "满满", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
-    { key: "xx", label: "萱萱", icon: "👧", color: "#7eb8ff", bg: "#eef6ff" },
+    { key: "mm", label: "满满", icon: "👧", color: "#ff7eb3", bg: "#ffe8f3" },
+    { key: "xx", label: "萱萱", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
   ];
 
   var FILE_PREFIX = "shuxue";
