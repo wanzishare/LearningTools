@@ -1,0 +1,6 @@
+{
+  "name": "句子朗读录音",
+  "entry": "index.html",
+  "icon": "🎤",
+  "description": "按日期朗读句子并上传录音"
+}

@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>听写小程序</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f3f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 430px;
+            padding: 32px 18px 42px 18px;
+            margin: 38px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 14px #c4d3e38c;
+        }
+        h2 {
+            margin: 0 0 16px 0;
+            font-weight: 600;
+            color: #29487d;
+            letter-spacing: 1px;
+            font-size: 1.36rem;
+            text-align: center;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .input-row label {
+            flex: 1 0 90px;
+        }
+        .input-row input[type="number"] {
+            width: 70px;
+            margin-left: 5px;
+            padding: 4px 7px;
+            border-radius: 5px;
+            border: 1px solid #b8bac4;
+        }
+        .early-settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .early-setting {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-row {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background: #3679e0;
+            color: #fff;
+            font-weight: 500;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 20px;
+            font-size: 1.04rem;
+            cursor: pointer;
+            margin-right: 9px;
+            transition: background .18s;
+        }
+        button:disabled {
+            background: #90acd6;
+            cursor: not-allowed;
+        }
+        .status-bar {
+            color: #93a1b1;
+            font-size: .98rem;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .tips {
+            margin-top: 13px;
+            background: #e7f3fc;
+            color: #3872c1;
+            border-left: 4px solid #6aa2df;
+            padding: 7px 13px;
+            border-radius: 5px;
+            font-size: .97rem;
+        }
+        .range-row {
+            margin: 14px 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .range-row label {
+            font-size: .98rem;
+            margin-right: 2px;
+        }
+        .range-select {
+            padding: 3px;
+            border-radius: 5px;
+            border: 1px solid #b8bac4;
+            font-size: 1rem;
+        }
+        #wordsPreview {
+            margin: 15px 0 10px 0;
+            padding: 10px;
+            background: #f4f7fa;
+            color: #285285;
+            border-radius: 6px;
+            font-size: 1.11rem;
+            min-height: 32px;
+            line-height: 2;
+            word-break: break-all;
+            text-align: left;
+            letter-spacing: 2px;
+            transition: opacity 0.3s;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            white-space: normal; 
+            overflow-wrap: anywhere; 
+            max-height: 208px;
+            overflow-y: auto;
+        }
+        #wordsPreview.hide {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+        .preview-lesson-title {
+            font-weight:bold;
+            font-size:1.08em;
+            color:#397bbe;
+            margin-bottom:3px;
+        }
+        .preview-lesson-words {
+            display: flex;
+            flex-wrap: wrap;
+            line-height:2.1;
+            font-size:1.08em;
+            gap:0 22px;
+            margin-bottom: 7px;
+        }
+        .pinyin-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0.5em;
+            margin-right: 0;
+            margin-bottom: 6px;
+        }
+        .zi-text {
+            font-size: 1.08em;
+            margin-bottom: 3px;
+        }
+        .pinyin-text {
+            font-size: 0.92em;
+            color: #8495bb;
+            line-height: 1.32;
+            margin-bottom: 0;
+            user-select: none;
+            pointer-events: none;
+        }
+        @media (max-width: 500px) {
+            .container {
+                margin: 6px;
+                padding: 14px 3vw 22px 3vw;
+            }
+            h2 {
+                font-size: 1.02rem;
+            }
+            button {
+                padding: 6px 4vw;
+            }
+            .range-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            #wordsPreview {
+                font-size: .99rem;
+                padding: 7px 2vw;
+                max-height: 44vw;
+            }
+            .early-settings-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 7px;
+            }
+        }
+        #restartBtn {
+            background: #45d6a1;
+            color: #fff;
+            margin-right: 9px;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 20px;
+            font-size: 1.04rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .18s;
+        }
+        #restartBtn:disabled {
+            background: #90e6c6;
+            cursor: not-allowed;
+        }
+        .relisten-row {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .relisten-row button {
+            background: #45d6a1;
+            margin: 0 auto;
+            display: inline-block;
+            box-shadow: 0 1px 3px #9fe5cb4d;
+        }
+        .early-setting.hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>听写播报</h2>
+    <div class="early-settings-row">
+        <div class="early-setting" style="width:100%;margin-bottom:6px;">
+            <span>顺序：</span>
+            <label>
+                <input type="radio" name="shuffleOrder" value="order" id="orderRadio" checked> 顺序
+            </label>
+            <label>
+                <input type="radio" name="shuffleOrder" value="shuffle" id="shuffleRadio"> 乱序
+            </label>
+        </div>
+        <div class="early-setting" style="width:100%;margin-bottom:6px;">
+            <span>播放：</span>
+            <label>
+                <input type="radio" name="autoPlayType" value="manual" id="manualRadio" checked> 手动
+            </label>
+            <label>
+                <input type="radio" name="autoPlayType" value="auto" id="autoRadio"> 自动
+            </label>
+        </div>
+        <div class="early-setting" style="display:flex;gap:16px;width:100%;">
+            <div id="intervalSetting" style="display:flex;align-items:center;">
+                <label for="intervalEarly" style="margin-bottom:0;">间隔(秒):</label>
+                <input type="number" id="intervalEarly" value="10" min="1" style="width:60px;margin-left:5px;" disabled>
+            </div>
+            <div style="display:flex;align-items:center;">
+                <label for="repeatCountEarly" style="margin-bottom:0;">每词读次数:</label>
+                <input type="number" id="repeatCountEarly" value="2" min="1" max="10" style="width:60px;margin-left:5px;">
+            </div>
+        </div>
+        <div class="early-setting" style="width:100%;">
+            <label for="rateEarly" style="margin-bottom:0;">语速(1-3):</label>
+            <input type="number" id="rateEarly" value="1" min="1" max="3" step="1" style="width:60px;margin-left:5px;">
+        </div>
+    </div>
+    <div class="range-row">
+        <label for="startLesson">课文范围：</label>
+        <select id="startLesson" class="range-select"></select>
+        <span>—</span>
+        <select id="endLesson" class="range-select"></select>
+    </div>
+    <div id="wordsPreview"></div>
+    <textarea id="words" style="display:none;"></textarea>
+    <div class="btn-row">
+        <button id="startBtn">开始</button>
+        <button id="prevBtn" disabled>上一个</button>
+        <button id="nextBtn" disabled>下一个</button>
+        <button id="pauseContinueBtn" disabled>暂停</button>
+        <button id="resetBtn" style="display:none;">结束</button>
+    </div>
+    <div class="status-bar" id="status"></div>
+    <div class="relisten-row" id="relistenRow">
+        <button id="restartBtn">重新开始</button>
+    </div>
+</div>
+
+<script>
+// 将 LESSONS 提前到全局，供 getWordZhongwen 正常访问
+const LESSONS = [
+    {
+        "name": "Unit 2",
+        "words": ["wash my hands", "brush my teeth", "wash my face"],
+        "zhongwen": ["洗手", "刷牙", "洗脸"]
+    },
+    {
+        "name": "Unit 3",
+        "words": ["do paper-cutting", "do the lion dance", "kick a shuttlecock"],
+        "zhongwen": ["剪纸", "舞狮", "踢毽子"]
+    },
+    {
+        "name": "Unit 4",
+        "words": ["run", "climb", "fly", "walk"],
+        "zhongwen": ["跑", "爬", "飞", "步行；走"]
+    },
+    {
+        "name": "Unit 5",
+        "words": ["helpful", "kind", "warm"],
+        "zhongwen": ["乐于助人的", "友好的；友善的", "友好的；热心的"]
+    },
+    {
+        "name": "Unit 6",
+        "words": ["farm", "farmer", "sleep", "boy", "wolf"],
+        "zhongwen": ["农场", "农民", "睡觉", "男孩", "狼"]
+    }
+];
+// 从数据列表获取中文释义
+function getWordZhongwen(word) {
+    for (let lesson of LESSONS) {
+        for (let i = 0; i < lesson.words.length; i++) {
+            if (lesson.words[i] === word && lesson.zhongwen && lesson.zhongwen[i]) {
+                return lesson.zhongwen[i];
+            }
+        }
+    }
+    return "";
+}
+
+// ========== 英语朗读支持方案 begin ==========
+
+// 检测用户希望的语言包的可用性
+function getBestEnglishVoice() {
+    let voices = window.speechSynthesis.getVoices();
+    let preferred = [
+        // Google Chrome 优质美音
+        "Google 英语(美国)", // Android Firefox/Wework
+        "Google US English",
+        "Google 英语（美国）",
+        // 微软Edge默认的
+        "Microsoft Aria Online (Natural) - 英语(美国)",
+        "Microsoft Jenny Online (Natural) - 英语(美国)",
+        "Microsoft Guy Online (Natural) - 英语(美国)",
+        "Microsoft Zira Desktop - English (United States)",
+        "Microsoft David Desktop - English (United States)",
+        // 其它优质英音
+        "Google UK English Female",
+        "Google UK English Male",
+        // macOS
+        "Samantha",
+        "Daniel",
+        // 其它英文
+        "en-US", "en-GB"
+    ];
+    for (let label of preferred) {
+        let match = voices.find(v => v.name === label);
+        if (match) return match;
+    }
+    for (let lang of ["en-US", "en-GB"]) {
+        let match = voices.find(v => v.lang === lang);
+        if (match) return match;
+    }
+    let enVoices = voices.filter(v => v.lang && v.lang.startsWith("en"));
+    if (enVoices.length) return enVoices[0];
+    if (voices.length) return voices[0];
+    return null;
+}
+
+// 自动判断当前单词是英语还是中文
+function isEnglishWord(text) {
+    return /^[a-zA-Z\s'\-.,;:()?!]+$/.test(text.trim());
+}
+
+// 朗读函数增强：英语用优质voice
+function enhancedSpeak(text, opts, onend) {
+    if (!('speechSynthesis' in window)) {
+        alert("该浏览器不支持语音朗读(speechSynthesis)！");
+        if (onend) onend();
+        return;
+    }
+    if (speechSynthesis.speaking) {
+        try { speechSynthesis.cancel(); } catch(e) {}
+    }
+
+    let msg = new window.SpeechSynthesisUtterance(text.trim());
+    let rateVal = 1;
+    if (typeof opts?.rate === 'string' || typeof opts?.rate === 'number') {
+        rateVal = Number(opts.rate);
+    }
+    if (rateVal < 1) rateVal = 1;
+    if (rateVal > 3) rateVal = 3;
+    let realRate = 1;
+    if (rateVal === 1) realRate = 0.4;
+    else if (rateVal === 2) realRate = 1;
+    else if (rateVal === 3) realRate = 1.4;
+    msg.rate = realRate;
+
+    let voices = window.speechSynthesis.getVoices?.() || [];
+
+    if (isEnglishWord(text)) {
+        let enVoice = getBestEnglishVoice();
+        if (enVoice) {
+            msg.voice = enVoice;
+            msg.lang = enVoice.lang;
+        } else {
+            msg.lang = 'en-US';
+        }
+    } else {
+        let zhVoice = voices.find(v=>v.lang && v.lang.toLowerCase().includes('zh'));
+        if (zhVoice) {
+            msg.voice = zhVoice;
+            msg.lang = zhVoice.lang;
+        } else {
+            msg.lang = 'zh-CN';
+        }
+    }
+    speaking = true;
+    msg.onend = function() {
+        speaking = false;
+        if (onend) onend();
+    };
+    msg.onerror = function() {
+        speaking = false;
+        if (onend) onend();
+    };
+    window.speechSynthesis.speak(msg);
+}
+
+(function preloadVoices(){
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function() {
+        window.speechSynthesis.getVoices();
+    };
+})();
+
+// 自动从 LESSONS 数据中提取包含空格的复合词
+function getNeverSplitWords() {
+    const neverSplitWords = new Set();
+    for (let lesson of LESSONS) {
+        for (let word of lesson.words) {
+            // 如果单词包含空格，就加入永不分割列表
+            if (word.includes(' ')) {
+                neverSplitWords.add(word);
+            }
+        }
+    }
+    return Array.from(neverSplitWords);
+}
+
+// 仅对自定义输入文本做切分（课文范围内的词不拆分！）
+function splitCustomWordIfPair(word) {
+    const trimmedWord = word.trim();
+    const neverSplitWords = getNeverSplitWords();
+    
+    if (typeof word === "string" && neverSplitWords.some(ws => trimmedWord.toLowerCase() === ws.toLowerCase())) {
+        return [word];
+    }
+    if (typeof word !== "string") return [word];
+    let arr = word.split(/\s*[,，；;、]\s*/g);
+    arr = arr.map(w=>w.trim()).filter(Boolean);
+    return arr.length>1 ? arr : [word];
+}
+
+// ========== 播放一组单词（如有并列，需要串起来播报） ==========
+function speakWordsGroup(wordsArr, opts, onend) {
+    // 连成一句播报
+    let text = wordsArr.join("，");
+    enhancedSpeak(text, opts, onend);
+}
+
+(function() {
+    // LESSONS 已在外部声明
+    const wordsInput = document.getElementById('words');
+    const shuffleRadio = document.getElementById('shuffleRadio');
+    const orderRadio = document.getElementById('orderRadio');
+    const autoRadio = document.getElementById('autoRadio');
+    const manualRadio = document.getElementById('manualRadio');
+    const intervalEarly = document.getElementById('intervalEarly');
+    const repeatCountEarly = document.getElementById('repeatCountEarly');
+    const rateEarly = document.getElementById('rateEarly');
+    const intervalSetting = document.getElementById('intervalSetting');
+
+    let shuffleCb = { checked: false };
+    let autoNextCb = { checked: false };
+    let intervalInput = { value: intervalEarly.value, disabled: intervalEarly.disabled };
+    let repeatCountInput = { value: repeatCountEarly.value };
+    let rateInput = { value: rateEarly.value };
+
+    const startBtn = document.getElementById('startBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pauseContinueBtn = document.getElementById('pauseContinueBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const statusDiv = document.getElementById('status');
+    const startLessonSel = document.getElementById('startLesson');
+    const endLessonSel = document.getElementById('endLesson');
+    const wordsPreview = document.getElementById('wordsPreview');
+    const relistenRow = document.getElementById('relistenRow');
+
+    let words = [];
+    let groupWords = []; // 新增，每个单词项实际为一组
+    let currentIndex = 0;
+    let playing = false;
+    let paused = false;
+    let timer = null;
+    let orderedList = [];
+    let orderedGroupList = [];
+    let speechSynthesis = window.speechSynthesis;
+    let speaking = false;
+    let currentRepeat = 1;
+    let stopped = false;
+    let lastWordsArr = [];
+    let lastOrderedList = [];
+    let lastShuffleChecked = false;
+    let lastAutoNextChecked = false;
+    let lastIntervalValue = 4;
+    let lastRepeatCount = 1;
+    let lastRate = 1;
+
+    function updateShuffle() {
+        shuffleCb.checked = shuffleRadio.checked;
+    }
+    shuffleRadio.addEventListener('change', function() {
+        updateShuffle();
+    });
+    orderRadio.addEventListener('change', function() {
+        updateShuffle();
+    });
+    updateShuffle();
+
+    function updateAutoNext() {
+        autoNextCb.checked = autoRadio.checked;
+        intervalEarly.disabled = !autoRadio.checked;
+        if (autoRadio.checked) {
+            intervalSetting.classList.remove('hide');
+        } else {
+            intervalSetting.classList.add('hide');
+        }
+    }
+    autoRadio.addEventListener('change', function(){
+        updateAutoNext();
+        if(playing && !paused) {
+            if(autoNextCb.checked) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            } else {
+                if (timer) clearTimeout(timer);
+            }
+        }
+    });
+    manualRadio.addEventListener('change', function(){
+        updateAutoNext();
+        if(playing && !paused) {
+            if(autoNextCb.checked) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            } else {
+                if (timer) clearTimeout(timer);
+            }
+        }
+    });
+    updateAutoNext();
+
+    intervalEarly.addEventListener('input', function() {
+        intervalInput.value = intervalEarly.value;
+        if(playing && !paused && autoNextCb.checked) {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(function autoGo(){
+                if (speaking || paused) {
+                    setTimeout(autoGo, 100);
+                    return;
+                }
+                nextWord(true);
+            }, Number(intervalInput.value)*1000);
+        }
+    });
+    repeatCountEarly.addEventListener('input', function() {
+        repeatCountInput.value = repeatCountEarly.value;
+        if(playing && !paused && orderedGroupList.length > 0){
+            if (speechSynthesis.speaking) {
+                try { speechSynthesis.cancel(); }catch(e){}
+            }
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && orderedGroupList.length > 0 && currentIndex < orderedGroupList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+    rateEarly.addEventListener('input', function() {
+        let intVal = parseInt(rateEarly.value) || 1;
+        if (intVal < 1) intVal = 1;
+        if (intVal > 3) intVal = 3;
+        rateEarly.value = intVal;
+        rateInput.value = rateEarly.value;
+        if(playing && !paused && orderedGroupList.length > 0){
+            if (speechSynthesis.speaking) {
+                try { speechSynthesis.cancel(); }catch(e){}
+            }
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && orderedGroupList.length > 0 && currentIndex < orderedGroupList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+    intervalInput.value = intervalEarly.value;
+    intervalInput.disabled = intervalEarly.disabled;
+    repeatCountInput.value = repeatCountEarly.value;
+    rateInput.value = rateEarly.value;
+
+    function populateLessonSelects() {
+        startLessonSel.innerHTML = "";
+        endLessonSel.innerHTML = "";
+        for (let i = 0; i < LESSONS.length; i++) {
+            const opt1 = document.createElement("option");
+            const opt2 = document.createElement("option");
+            opt1.value = i;
+            opt2.value = i;
+            opt1.textContent = LESSONS[i].name;
+            opt2.textContent = LESSONS[i].name;
+            startLessonSel.appendChild(opt1);
+            endLessonSel.appendChild(opt2);
+        }
+        endLessonSel.selectedIndex = LESSONS.length - 1;
+    }
+    function getWordsGroupedByLessonRange(startIdx, endIdx) {
+        if (startIdx > endIdx) return {};
+        const res = {};
+        for (let i = startIdx; i <= endIdx; i++) {
+            res[LESSONS[i].name] = LESSONS[i].words.slice();
+        }
+        return res;
+    }
+    function getWordsByLessonRange(startIdx, endIdx) {
+        if (startIdx > endIdx) return [];
+        const res = [];
+        for (let i = startIdx; i <= endIdx; i++) {
+            res.push(...LESSONS[i].words);
+        }
+        return res;
+    }
+    function getWordsArrayFromInput() {
+        // 保持原有的换行分割，不要用空格分割
+        let arr = wordsInput.value
+            .split(/[\r\n]+/)  // 只按换行分割
+            .map(w => w.trim())
+            .filter(w => w.length);
+        return arr;
+    }
+
+    // 自定义输入文本才按分隔符转组，其余（课文内的词）绝不切分
+    function getGroupWordsArray(wordsArr, isCustom = false) {
+        if(!isCustom) {
+            // 课文内的词保持原样，不进行任何分割
+            return wordsArr.map(word => [word]);
+        } else {
+            // 自定义输入才进行分割处理
+            return wordsArr.map(word => splitCustomWordIfPair(word));
+        }
+    }
+
+    function showWordsPreview() {
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        const grouped = getWordsGroupedByLessonRange(startIdx, endIdx);
+        let hasWords = false;
+        Object.values(grouped).forEach(arr => { if (arr.length) hasWords = true; });
+        if (!hasWords) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        let html = '';
+        let lessonIdx = 0;
+        for (const [lessonName, wordArr] of Object.entries(grouped)) {
+            html += `<div class="preview-lesson-title">${lessonName}</div>`;
+            html += `<div class="preview-lesson-words">`;
+            for (let i = 0; i < wordArr.length; i++) {
+                let word = wordArr[i];
+                // 课文内的词永远不切分
+                let group = [word];
+                let displayWord = group.join(' / ');
+                let zhongwen = getWordZhongwen(word) || '';
+                let ziHTML = `<div class="zi-text">${displayWord}</div>`;
+                let zhHTML = `<div class="pinyin-text">${zhongwen}</div>`;
+                html += `<span class="pinyin-item">${ziHTML}${zhHTML}</span>`;
+            }
+            html += "</div>";
+            lessonIdx++;
+        }
+        wordsPreview.innerHTML = html;
+        wordsPreview.classList.remove("hide");
+    }
+    function hideWordsPreview() {
+        wordsPreview.classList.add("hide");
+    }
+    function updateWordsPreviewOnRangeChange() {
+        syncWordsInput();
+        showWordsPreview();
+    }
+    function syncWordsInput() {
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        const selectedWords = getWordsByLessonRange(startIdx, endIdx);
+        wordsInput.value = selectedWords.join('\n');
+    }
+    function syncRangeSelection(e) {
+        let startIdx = Number(startLessonSel.value);
+        let endIdx = Number(endLessonSel.value);
+        if (startIdx > endIdx) {
+            if (e && e.target === startLessonSel) {
+                endLessonSel.value = startLessonSel.value;
+            } else {
+                startLessonSel.value = endLessonSel.value;
+            }
+            [startIdx, endIdx] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
+        }
+        updateWordsPreviewOnRangeChange();
+    }
+    function shuffleArr(arr) {
+        let a = arr.slice();
+        for(let i=a.length-1;i>0;i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [a[i],a[j]]=[a[j],a[i]];
+        }
+        return a;
+    }
+    // ====== 替换 speak，支持一组朗读 ======
+    function speak(text, opts, onend) {
+        enhancedSpeak(text, opts, onend);
+    }
+
+    function showStatus(idx, repeatN, totalWords, repeatMax) {
+        if (!totalWords || idx < 0 || idx >= totalWords) {
+            statusDiv.textContent = "";
+            return;
+        }
+        statusDiv.textContent = `第 ${idx+1} / ${totalWords} 个  |  第 ${repeatN} / ${repeatMax} 次`;
+    }
+
+    // 重点改造：一组（group）一起朗读
+    function playCurrentWordWithRepeat(cb) {
+        if (!orderedGroupList.length || paused) {
+            if (cb) cb();
+            return;
+        }
+        let repeatMax = Number(repeatCountInput.value) || 1;
+        currentRepeat = 1;
+        function playOneRepeat() {
+            if (paused) {
+                return;
+            }
+            showStatus(currentIndex, currentRepeat, orderedGroupList.length, repeatMax);
+            let intRate = parseInt(rateInput.value) || 1;
+            if (intRate < 1) intRate = 1;
+            if (intRate > 3) intRate = 3;
+            let group = orderedGroupList[currentIndex]; // a group is an array of one或多个
+            speakWordsGroup(group, { rate: intRate }, function() {
+                if (!playing) { if (cb) cb(); return; }
+                if (paused) return;
+                if (currentRepeat < repeatMax) {
+                    currentRepeat++;
+                    setTimeout(playOneRepeat, 450);
+                } else {
+                    currentRepeat = 1;
+                    if (cb) cb();
+                }
+            });
+        }
+        playOneRepeat();
+    }
+
+    // 关键修正点：用 isCustom 来源区分“分组”行为
+    function startPlay() {
+        if (stopped) return;
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+
+        // 判断是否自定义输入（和范围选择区分）
+        let isCustom = false;
+        // 只有自定义输入才可能有逗号或分号等
+        let inputValue = wordsInput.value.trim();
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        // 如果输入框内容和当前课文范围选择对应的内容不同，就认为自定义了
+        let fromRange = getWordsByLessonRange(startIdx, endIdx).join('\n');
+        if (inputValue !== fromRange) isCustom = true;
+
+        words = getWordsArrayFromInput();
+        groupWords = getGroupWordsArray(words, isCustom);
+        if (groupWords.length === 0) {
+            alert("请先选择课文范围，或填写词语！");
+            return;
+        }
+        orderedList = shuffleCb.checked ? shuffleArr(words) : words.slice();
+        orderedGroupList = shuffleCb.checked ? shuffleArr(groupWords) : groupWords.slice();
+
+        currentIndex = 0;
+        currentRepeat = 1;
+        playing = true;
+        paused = false;
+        stopped = false;
+        lastWordsArr = words.slice();
+        lastShuffleChecked = shuffleCb.checked;
+        lastAutoNextChecked = autoNextCb.checked;
+        lastIntervalValue = intervalInput.value;
+        lastRepeatCount = repeatCountInput.value;
+        lastRate = rateInput.value;
+        lastOrderedList = orderedList.slice();
+
+        startBtn.disabled = true;
+        pauseContinueBtn.disabled = false;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        resetBtn.style.display = 'none';
+        hideWordsPreview();
+        statusDiv.textContent = "";
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused && orderedGroupList.length > 0 && currentIndex < orderedGroupList.length - 1) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+
+    function restartPlay() {
+        if (!lastWordsArr.length) {
+            alert("没有可重新听写的词语（请先点击“开始”完整听写一轮）");
+            return;
+        }
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+
+        // 判别上一次是不是自定义
+        let isCustom = false;
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        let inputValue = wordsInput.value.trim();
+        let fromRange = getWordsByLessonRange(startIdx, endIdx).join('\n');
+        if (inputValue !== fromRange) isCustom = true;
+
+        words = getWordsArrayFromInput();
+        groupWords = getGroupWordsArray(words, isCustom);
+        if (groupWords.length === 0) {
+            alert("请先选择课文范围，或填写词语！");
+            return;
+        }
+        orderedList = shuffleCb.checked ? shuffleArr(words) : words.slice();
+        orderedGroupList = shuffleCb.checked ? shuffleArr(groupWords) : groupWords.slice();
+
+        currentIndex = 0;
+        currentRepeat = 1;
+        playing = true;
+        paused = false;
+        stopped = false;
+        lastWordsArr = words.slice();
+        lastShuffleChecked = shuffleCb.checked;
+        lastAutoNextChecked = autoNextCb.checked;
+        lastIntervalValue = intervalInput.value;
+        lastRepeatCount = repeatCountInput.value;
+        lastRate = rateInput.value;
+        lastOrderedList = orderedList.slice();
+
+        startBtn.disabled = true;
+        pauseContinueBtn.disabled = false;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        resetBtn.style.display = 'none';
+        hideWordsPreview();
+        statusDiv.textContent = "";
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused && orderedGroupList.length > 0 && currentIndex < orderedGroupList.length - 1) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+
+    function nextWord(auto=false) {
+        if (!orderedGroupList.length || paused) return;
+        currentIndex += 1;
+        if (currentIndex >= orderedGroupList.length) {
+            currentIndex = orderedGroupList.length-1;
+            pausePlay(true);
+            return;
+        }
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused) {
+                timer = setTimeout(function waitIfSpeaking(){
+                    if (speaking || paused) {
+                        setTimeout(waitIfSpeaking, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+    function prevWord() {
+        if (!orderedGroupList.length || paused) return;
+        if (currentIndex > 0) {
+            currentIndex -= 1;
+            currentRepeat = 1;
+            playCurrentWordWithRepeat();
+        } else {
+            currentRepeat = 1;
+            playCurrentWordWithRepeat();
+        }
+    }
+    function pausePlay(forceStop = false) {
+        if (timer) clearTimeout(timer);
+        timer = null;
+        if (forceStop) {
+            playing = false;
+            paused = false;
+            stopped = true;
+            startBtn.disabled = true;
+            pauseContinueBtn.disabled = true;
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            resetBtn.style.display = '';
+            pauseContinueBtn.textContent = "暂停";
+            statusDiv.textContent += "｜已停止";
+            try { speechSynthesis.cancel(); } catch(e) {}
+            showWordsPreview();
+            return;
+        }
+        if (!playing || paused) {
+            return;
+        }
+        paused = true;
+        pauseContinueBtn.textContent = "继续";
+        pauseContinueBtn.disabled = false;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        try { speechSynthesis.cancel(); } catch(e) {}
+        statusDiv.textContent += "｜已暂停";
+    }
+    function continuePlay() {
+        if (!paused) return;
+        paused = false;
+        pauseContinueBtn.textContent = "暂停";
+        pauseContinueBtn.disabled = false;
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        if (!playing || stopped) return;
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+        statusDiv.textContent = statusDiv.textContent.replace(/｜已暂停$/, "");
+    }
+    function resetAll(){
+        stopped = false;
+        playing = false;
+        paused = false;
+        timer = null;
+        currentIndex = 0;
+        words = [];
+        groupWords = [];
+        orderedList = [];
+        orderedGroupList = [];
+        currentRepeat = 1;
+        statusDiv.textContent = "";
+        startBtn.disabled = false;
+        pauseContinueBtn.disabled = true;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        resetBtn.style.display = 'none';
+        populateLessonSelects();
+        updateWordsPreviewOnRangeChange();
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+        try{ speechSynthesis.cancel(); }catch(e){}
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (!stopped && !playing) startPlay();
+    });
+
+    pauseContinueBtn.addEventListener('click', () => {
+        if (!playing) return;
+        if (!paused) {
+            pausePlay();
+        } else {
+            continuePlay();
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        resetAll();
+    });
+
+    restartBtn.addEventListener('click', () => {
+        restartPlay();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (!orderedGroupList.length || paused) return;
+        if (timer) clearTimeout(timer);
+        if (currentIndex < orderedGroupList.length-1) {
+            currentIndex++;
+            currentRepeat = 1;
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && currentIndex < orderedGroupList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (!orderedGroupList.length || paused) return;
+        if (timer) clearTimeout(timer);
+        prevWord();
+    });
+
+    startLessonSel.addEventListener('change', syncRangeSelection);
+    endLessonSel.addEventListener('change', syncRangeSelection);
+
+    populateLessonSelects();
+    updateWordsPreviewOnRangeChange();
+
+    wordsInput.addEventListener('input', function() {
+        let arr = getWordsArrayFromInput();
+        let groupArr = getGroupWordsArray(arr, true); // 这里始终以自定义分组处理
+        if(arr.length === 0) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        let html = '<div class="preview-lesson-title">自定义词语</div>';
+        html += `<div class="preview-lesson-words">`;
+        for (let i = 0; i < arr.length; i++) {
+            let word = arr[i];
+            let group = groupArr[i];
+            let displayWord = group.join(' / ');
+            let zhongwen = getWordZhongwen(word) || '';
+            let ziHTML = `<div class="zi-text">${displayWord}</div>`;
+            let zhHTML = `<div class="pinyin-text">${zhongwen}</div>`;
+            html += `<span class="pinyin-item">${ziHTML}${zhHTML}</span>`;
+        }
+        html += "</div>";
+        wordsPreview.innerHTML = html;
+        wordsPreview.classList.remove("hide");
+    });
+
+    document.addEventListener('keydown', function(e){
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if(!stopped && !playing) startPlay();
+        }
+    });
+
+    showWordsPreview();
+    updateShuffle();
+    updateAutoNext();
+    intervalInput.value = intervalEarly.value;
+    intervalInput.disabled = intervalEarly.disabled;
+    repeatCountInput.value = repeatCountEarly.value;
+    rateInput.value = rateEarly.value;
+    updateAutoNext();
+})();
+</script>

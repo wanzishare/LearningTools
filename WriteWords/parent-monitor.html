@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语默写 · 学习进度</title>
+    <style>
+        :root {
+            --text: #4a3568;
+            --muted: #6b5b8a;
+            --panel: #fffef9;
+            --border: #e8d4f8;
+            --accent: #12a0e3;
+            --accent-bg: #e8f7ff;
+            --done: #5dd9a8;
+            --partial: #ffb347;
+            --none: #d4c4e8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            background: linear-gradient(160deg, #b8e6ff 0%, #e8d4ff 42%, #ffe8d4 100%);
+            background-attachment: fixed;
+        }
+        .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+        header { text-align: center; margin-bottom: 18px; }
+        header h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 1.85rem); color: #6b4a9a; }
+        .toolbar {
+            display: flex; flex-wrap: wrap; gap: 10px;
+            justify-content: center; align-items: center; margin-bottom: 16px;
+        }
+        .btn {
+            font-family: inherit; font-weight: 800; font-size: 0.95rem;
+            padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer;
+            background: linear-gradient(135deg, #64b5f6, #12a0e3); color: #fff;
+            box-shadow: 0 4px 14px rgba(18, 160, 227, 0.3);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-ghost {
+            background: #fff; color: #12a0e3;
+            border: 2px solid #b5e2fa; box-shadow: none;
+        }
+        .meta { font-size: 0.88rem; color: var(--muted); font-weight: 700; }
+
+        .week-select-group {
+            display: flex; gap: 14px; align-items: center;
+            justify-content: center; margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .week-select-label { font-weight: 800; color: #2d6a9f; font-size: 1rem; }
+        .week-select {
+            font-family: inherit; font-weight: 800; font-size: 1rem;
+            border-radius: 8px; border: 2px solid #b5e2fa; background: #f0f8ff;
+            color: #2d6a9f; padding: 4px 12px;
+        }
+        .week-select:focus { border-color: #12a0e3; outline: none; }
+
+        .summary-card {
+            background: var(--panel); border: 3px solid var(--border);
+            border-radius: 18px; padding: 18px; text-align: center;
+            box-shadow: 0 10px 28px rgba(100, 160, 220, 0.12); margin-bottom: 16px;
+        }
+        .summary-card h2 { margin: 0 0 8px; font-size: 1.15rem; color: #12a0e3; }
+        .big-num { font-size: 2rem; font-weight: 900; line-height: 1.2; color: #2d6a9f; }
+        .summary-sub { font-size: 0.9rem; color: var(--muted); font-weight: 700; margin-top: 4px; }
+        .summary-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+        .summary-item { font-size: 0.88rem; font-weight: 700; color: #5b4a8a; }
+
+        .day-list { display: flex; flex-direction: column; gap: 10px; }
+        .day-row {
+            background: #fff; border: 2px solid #f0e8ff;
+            border-radius: 14px; padding: 12px 14px;
+        }
+        .day-row.today { border-color: #ffc857; box-shadow: 0 0 0 2px rgba(255, 200, 87, 0.35); }
+        .day-row.all-done { border-color: #a8e8d0; background: #f8fffc; }
+        .day-top {
+            display: flex; justify-content: space-between;
+            align-items: center; gap: 8px; margin-bottom: 8px;
+        }
+        .day-date { font-weight: 800; font-size: 0.98rem; }
+        .day-date .tag-today {
+            display: inline-block; margin-left: 6px; font-size: 0.72rem;
+            background: #fff3cd; color: #b45309; padding: 2px 8px;
+            border-radius: 999px; vertical-align: middle;
+        }
+        .status-pill {
+            font-size: 0.78rem; font-weight: 800; padding: 4px 10px;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .status-pill.done { background: #d1fae5; color: #047857; }
+        .status-pill.partial { background: #ffedd5; color: #c2410c; }
+        .status-pill.none { background: #f3f4f6; color: #6b7280; }
+        .progress-track {
+            height: 10px; background: #f0e8ff;
+            border-radius: 999px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 999px;
+            background: linear-gradient(90deg, #64b5f6, #12a0e3);
+            transition: width 0.4s ease;
+        }
+        .day-meta { margin-top: 6px; font-size: 0.82rem; color: var(--muted); font-weight: 700; }
+        .day-activity { color: #5b4a8a; }
+        .loading-all {
+            text-align: center; padding: 40px 20px;
+            font-weight: 800; color: #6b4a9a;
+        }
+        .foot-note {
+            text-align: center; margin-top: 20px; font-size: 0.85rem;
+            color: var(--muted); font-weight: 600; line-height: 1.6;
+        }
+        .foot-note a { color: #12a0e3; font-weight: 800; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1>📊 英语默写 · 学习进度</h1>
+        </header>
+        <div class="toolbar">
+            <button type="button" class="btn" id="refreshBtn">🔄 刷新</button>
+            <select id="studentSelect" class="week-select" style="display:none;"></select>
+            <a href="index.html" class="btn btn-ghost" style="text-decoration:none;display:inline-block;">返回入口</a>
+            <span class="meta" id="lastUpdate">正在加载…</span>
+        </div>
+        <div id="loadingAll" class="loading-all">正在读取词库文件…</div>
+        <div class="week-select-group" id="weekSelectGroup" style="display:none;"></div>
+        <div id="mainContent" style="display:none;">
+            <div id="summaryCard"></div>
+            <div id="dayListContainer"></div>
+        </div>
+        <div class="foot-note" id="footNote" style="display:none;">
+            每 60 秒自动刷新 · <a href="index.html">返回入口</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../gitee-data.js"></script>
+    <script src="students.js"></script>
+    <script>
+    var GITEE_DATA_DIR = 'WriteWords';
+    (function () {
+    'use strict';
+
+    var wb = null, fileName = '';
+    var refreshTimer = null;
+    var lastFingerprint = '';
+    var selectedWeekMonday = null;
+    var STUDENTS = (window.StudentRoster && StudentRoster.list()) || [];
+    var currentStudentKey = STUDENTS.length ? STUDENTS[0].key : '';
+
+    function currentStudentFiles() {
+        var st = STUDENTS.find(function (s) { return s.key === currentStudentKey; });
+        return st && st.files ? st.files.slice() : [];
+    }
+
+    function formatYYYYMMDD(d) {
+        return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+    }
+    function getTodayStr() {
+        return formatYYYYMMDD(new Date());
+    }
+    function isDateSheet(name) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(name);
+    }
+    function getMondayOf(dateStr) {
+        var d = new Date(dateStr + 'T00:00:00');
+        var dow = d.getDay();
+        var off = dow === 0 ? -6 : 1 - dow;
+        return formatYYYYMMDD(new Date(d.getFullYear(), d.getMonth(), d.getDate() + off));
+    }
+    function getWeekDateNames() {
+        var d = new Date(), dow = d.getDay();
+        var off = dow === 0 ? -6 : 1 - dow;
+        var mon = new Date(d.getFullYear(), d.getMonth(), d.getDate() + off);
+        var names = [];
+        for (var i = 0; i < 5; i++) {
+            names.push(formatYYYYMMDD(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i)));
+        }
+        return names;
+    }
+    function escHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+    function formatDuration(sec) {
+        sec = parseInt(sec) || 0;
+        if (sec < 60) return sec + ' 秒';
+        var m = Math.floor(sec / 60), s = sec % 60;
+        if (m < 60) return m + ' 分' + (s > 0 ? ' ' + s + ' 秒' : '');
+        var h = Math.floor(m / 60); m = m % 60;
+        return h + ' 小时' + (m > 0 ? ' ' + m + ' 分' : '');
+    }
+    function colIndex(header, names) {
+        if (!header) return -1;
+        for (var n = 0; n < names.length; n++) {
+            for (var i = 0; i < header.length; i++) {
+                if (String(header[i] || '').trim() === names[n]) return i;
+            }
+        }
+        return -1;
+    }
+
+    function collectDateSheets() {
+        if (!wb) return [];
+        var names = new Set(getWeekDateNames());
+        wb.SheetNames.forEach(function (n) { if (isDateSheet(n)) names.add(n); });
+        return Array.from(names).sort();
+    }
+
+    function splitWeeks(dateNames) {
+        var weeks = {};
+        dateNames.forEach(function (n) {
+            var mon = getMondayOf(n);
+            if (!weeks[mon]) weeks[mon] = [];
+            weeks[mon].push(n);
+        });
+        return Object.keys(weeks).sort().reverse().map(function (mon) {
+            return { monday: mon, dates: weeks[mon].sort() };
+        });
+    }
+
+    function getSheetStats(sheetName) {
+        if (!wb || !wb.Sheets[sheetName]) return { total: 0, done: 0, pct: 0, exists: false };
+        var list = XLSX.utils.sheet_to_json(wb.Sheets[sheetName]);
+        var total = 0, done = 0;
+        list.forEach(function (row) {
+            var eng = row['英文'] || row['English'] || row['english'] || '';
+            var chi = row['中文'] || row['Chinese'] || row['chinese'] || '';
+            if (!eng || !chi) return;
+            total++;
+            var p = row['通过'] || row['passed'] || '';
+            if (String(p).trim() === '是') done++;
+        });
+        return { total: total, done: done, pct: total > 0 ? Math.round(done / total * 100) : 0, exists: true };
+    }
+
+    function getDailyStats() {
+        if (!wb) return {};
+        var sheetName = '每日统计';
+        if (!wb.SheetNames.includes(sheetName)) return {};
+        var data = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+        if (data.length < 2) return {};
+        var h = data[0];
+        var iDate = colIndex(h, ['日期']);
+        var iTime = colIndex(h, ['当日耗时']);
+        if (iDate < 0) return {};
+        var map = {};
+        for (var i = 1; i < data.length; i++) {
+            var row = data[i];
+            if (!row || !row[iDate]) continue;
+            var key = String(row[iDate]).trim();
+            map[key] = { timeSec: iTime >= 0 ? (parseInt(row[iTime]) || 0) : 0 };
+        }
+        return map;
+    }
+
+    function renderWeekSelect(weeks) {
+        var group = document.getElementById('weekSelectGroup');
+        if (weeks.length <= 1) {
+            group.style.display = 'none';
+            if (weeks.length === 1) selectedWeekMonday = weeks[0].monday;
+            return;
+        }
+        var todayMon = getMondayOf(getTodayStr());
+        if (!selectedWeekMonday) selectedWeekMonday = todayMon;
+        var html = '<span class="week-select-label">📅 选择周：</span><select class="week-select" id="weekSelect">';
+        weeks.forEach(function (wk) {
+            var fri = new Date(wk.monday + 'T00:00:00');
+            fri.setDate(fri.getDate() + 4);
+            var label = wk.monday.slice(5) + ' ~ ' + formatYYYYMMDD(fri).slice(5);
+            if (wk.monday === todayMon) label += '（本周）';
+            var sel = wk.monday === selectedWeekMonday ? ' selected' : '';
+            html += '<option value="' + wk.monday + '"' + sel + '>' + label + '</option>';
+        });
+        html += '</select>';
+        group.innerHTML = html;
+        group.style.display = '';
+        document.getElementById('weekSelect').addEventListener('change', function () {
+            selectedWeekMonday = this.value;
+            renderAll();
+        });
+    }
+
+    function renderAll() {
+        var allDates = collectDateSheets();
+        var weeks = splitWeeks(allDates);
+        renderWeekSelect(weeks);
+
+        var weekDates = [];
+        for (var i = 0; i < weeks.length; i++) {
+            if (weeks[i].monday === selectedWeekMonday) { weekDates = weeks[i].dates; break; }
+        }
+        if (!weekDates.length && weeks.length) {
+            selectedWeekMonday = weeks[0].monday;
+            weekDates = weeks[0].dates;
+        }
+
+        var todayStr = getTodayStr();
+        var dailyStats = getDailyStats();
+
+        var totalWords = 0, totalDone = 0, totalTime = 0;
+        var daysCompleted = 0;
+        weekDates.forEach(function (name) {
+            var st = getSheetStats(name);
+            totalWords += st.total;
+            totalDone += st.done;
+            var ds = dailyStats[name];
+            if (ds) totalTime += ds.timeSec;
+            if (st.total > 0 && st.done >= st.total) daysCompleted++;
+        });
+        var overallPct = totalWords > 0 ? Math.round(totalDone / totalWords * 100) : 0;
+
+        var summaryHtml =
+            '<div class="summary-card">' +
+            '<h2>📝 本周概览</h2>' +
+            '<div class="big-num">' + overallPct + '%</div>' +
+            '<div class="summary-sub">整体完成率</div>' +
+            '<div class="summary-row">' +
+            '<span class="summary-item">✅ 完成 ' + daysCompleted + '/' + weekDates.length + ' 天</span>' +
+            '<span class="summary-item">📖 ' + totalDone + '/' + totalWords + ' 词</span>' +
+            (totalTime > 0 ? '<span class="summary-item">⏱ 累计 ' + formatDuration(totalTime) + '</span>' : '') +
+            '</div></div>';
+        document.getElementById('summaryCard').innerHTML = summaryHtml;
+
+        var dayHtml = '<div class="day-list">';
+        weekDates.forEach(function (name) {
+            var st = getSheetStats(name);
+            var ds = dailyStats[name];
+            var isToday = name === todayStr;
+            var isDone = st.exists && st.total > 0 && st.done >= st.total;
+            var rowCls = 'day-row' + (isToday ? ' today' : '') + (isDone ? ' all-done' : '');
+
+            var statusCls, statusText;
+            if (!st.exists || st.total === 0) {
+                statusCls = 'none'; statusText = '无题目';
+            } else if (st.done === 0) {
+                statusCls = 'none'; statusText = '未开始';
+            } else if (st.done >= st.total) {
+                statusCls = 'done'; statusText = '已完成';
+            } else {
+                statusCls = 'partial'; statusText = '进行中 ' + st.pct + '%';
+            }
+
+            dayHtml += '<div class="' + rowCls + '">';
+            dayHtml += '<div class="day-top">';
+            dayHtml += '<span class="day-date">' + escHtml(name) + (isToday ? '<span class="tag-today">今天</span>' : '') + '</span>';
+            dayHtml += '<span class="status-pill ' + statusCls + '">' + statusText + '</span>';
+            dayHtml += '</div>';
+            dayHtml += '<div class="progress-track"><div class="progress-fill" style="width:' + st.pct + '%"></div></div>';
+
+            var metaParts = [];
+            if (st.exists && st.total > 0) metaParts.push('📖 ' + st.done + '/' + st.total + ' 词');
+            if (ds && ds.timeSec > 0) metaParts.push('⏱ 耗时 ' + formatDuration(ds.timeSec));
+            if (metaParts.length) {
+                dayHtml += '<div class="day-meta day-activity">' + metaParts.join(' · ') + '</div>';
+            }
+
+            dayHtml += '</div>';
+        });
+        dayHtml += '</div>';
+        document.getElementById('dayListContainer').innerHTML = dayHtml;
+
+        document.getElementById('loadingAll').style.display = 'none';
+        document.getElementById('mainContent').style.display = '';
+        document.getElementById('footNote').style.display = '';
+        document.getElementById('lastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString();
+    }
+
+    async function fetchWorkbook() {
+        try {
+            var candidates = currentStudentFiles();
+            if (!candidates.length) {
+                try {
+                    candidates = await GiteeData.listWorkbookFiles(GITEE_DATA_DIR);
+                } catch (_) {}
+            }
+            if (!candidates.length) {
+                candidates = ['words-mm.xls', 'words-mm.xlsx'];
+            }
+            for (var i = 0; i < candidates.length; i++) {
+                try {
+                    var buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, candidates[i]));
+                    if (buf.byteLength < 512) continue;
+                    wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+                    fileName = candidates[i];
+                    return true;
+                } catch (e) { continue; }
+            }
+        } catch (e) {}
+        return false;
+    }
+
+    function dataFingerprint() {
+        if (!wb) return '';
+        var parts = [];
+        wb.SheetNames.forEach(function (n) {
+            var s = wb.Sheets[n];
+            if (!s || !s['!ref']) return;
+            parts.push(n + ':' + s['!ref']);
+        });
+        return parts.join('|');
+    }
+
+    async function loadAll(silent) {
+        if (!silent) document.getElementById('loadingAll').style.display = '';
+        var ok = await fetchWorkbook();
+        if (!ok) {
+            document.getElementById('loadingAll').innerHTML = '⚠️ 未找到词库文件，请确认 Gitee LearningData/' + GITEE_DATA_DIR + ' 已上传 .xls/.xlsx，并检查 gitee-data.js 配置';
+            return;
+        }
+        var fp = dataFingerprint();
+        if (silent && fp === lastFingerprint) return;
+        lastFingerprint = fp;
+        renderAll();
+    }
+
+    function startAutoRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(function () { loadAll(true); }, 60000);
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', function () {
+        loadAll(false);
+    });
+
+    (function initStudentSelect() {
+        var sel = document.getElementById('studentSelect');
+        if (!sel || STUDENTS.length <= 1) return;
+        sel.style.display = '';
+        sel.innerHTML = STUDENTS.map(function (st) {
+            return '<option value="' + st.key + '">' + (st.icon ? st.icon + ' ' : '') + st.label + '</option>';
+        }).join('');
+        sel.value = currentStudentKey;
+        sel.addEventListener('change', function () {
+            currentStudentKey = this.value;
+            lastFingerprint = '';
+            loadAll(false);
+        });
+    })();
+
+    loadAll(false).then(startAutoRefresh);
+    })();
+    </script>
+</body>
+</html>

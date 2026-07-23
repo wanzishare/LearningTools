@@ -1,0 +1,3665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>英文中文对对碰</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text: #4a3568;
+            --text-muted: #6b5b8a;
+            --accent: #ff7eb3;
+            --accent-dark: #e85d9a;
+            --accent-warm: #ffb347;
+            --select-ring: #ffc107;
+            --panel: #fffef9;
+            --panel-border: #e8d4f8;
+            --shadow-soft: 0 14px 40px rgba(140, 100, 200, 0.16);
+            --shadow-tile: 0 5px 16px rgba(130, 90, 180, 0.12);
+            --tile-en-bg: linear-gradient(145deg, #fff9e6 0%, #ffeab8 100%);
+            --tile-en-border: #ffc857;
+            --tile-zh-bg: linear-gradient(145deg, #ecfff6 0%, #c8f7e4 100%);
+            --tile-zh-border: #5dd9a8;
+            --tile-text: #4a3568;
+            --head-en: linear-gradient(135deg, #ffb347 0%, #ff9a5c 100%);
+            --head-zh: linear-gradient(135deg, #5dd9a8 0%, #3ecda0 100%);
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #5a4578;
+            background: linear-gradient(160deg, #b8e6ff 0%, #e8d4ff 42%, #ffe8d4 100%);
+            background-size: 220% 220%;
+            animation: bgSoft 18s ease-in-out infinite;
+        }
+        @keyframes bgSoft {
+            0%, 100% { background-position: 0% 40%; }
+            50% { background-position: 100% 60%; }
+        }
+        .bubbles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.65), rgba(255, 182, 213, 0.35));
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            animation: rise linear infinite;
+        }
+        .sky-star {
+            position: absolute;
+            font-size: 1rem;
+            opacity: 0.75;
+            animation: starTwinkle 2.5s ease-in-out infinite;
+            filter: drop-shadow(0 1px 3px rgba(255, 200, 100, 0.4));
+        }
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.5; transform: scale(0.9) rotate(-5deg); }
+            50% { opacity: 1; transform: scale(1.15) rotate(5deg); }
+        }
+        @keyframes rise {
+            to { transform: translateY(-110vh) rotate(120deg); opacity: 0; }
+        }
+        .wrap {
+            position: relative;
+            z-index: 1;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 16px 20px 32px;
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 16px;
+            animation: heroIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes heroIn {
+            from { opacity: 0; transform: translateY(-30px) scale(0.9); }
+            to { opacity: 1; transform: none; }
+        }
+        .hero h1 {
+            font-family: "Fredoka", "Nunito", "PingFang SC", sans-serif;
+            font-size: clamp(1.75rem, 5.5vw, 2.6rem);
+            font-weight: 700;
+            margin: 0 0 6px;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.2em 0.35em;
+            animation: titleBounce 2.8s ease-in-out infinite;
+        }
+        .hero h1 .hero-title-text {
+            background: linear-gradient(90deg, #ff6b9d, #ffb347, #5dd9a8, #6eb5ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            filter: drop-shadow(0 3px 0 rgba(255, 255, 255, 0.9)) drop-shadow(0 6px 14px rgba(255, 126, 179, 0.25));
+        }
+        .hero-rainbow {
+            display: inline-block;
+            flex-shrink: 0;
+            font-size: 1.15em;
+            line-height: 1;
+            vertical-align: -0.06em;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+            -webkit-text-fill-color: initial;
+            color: initial;
+            filter: drop-shadow(0 2px 4px rgba(255, 140, 180, 0.35));
+        }
+        .rainbow-svg-bands {
+            overflow: visible;
+        }
+        .rainbow-arc .rainbow-svg-bands {
+            width: clamp(220px, 76vw, 360px);
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 10px 24px rgba(120, 100, 180, 0.22));
+        }
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+        .hero .sub {
+            font-size: 1rem;
+            opacity: 0.95;
+            font-weight: 600;
+        }
+        .panel {
+            background: var(--panel);
+            border: 3px solid var(--panel-border);
+            border-radius: 24px;
+            padding: 20px 18px 24px;
+            box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+            animation: panelIn 0.6s 0.15s both;
+            color: var(--text);
+        }
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: none; }
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        #dateSelector {
+            font-family: "Fredoka", inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 18px;
+            border: 2px solid #e0c8ff;
+            border-radius: 16px;
+            background: #fff;
+            color: var(--text);
+            box-shadow: var(--shadow-tile);
+            cursor: pointer;
+            min-width: 200px;
+        }
+        .btn {
+            font-family: "Fredoka", inherit;
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 12px 22px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+            min-height: 44px;
+        }
+        @media (hover: hover) {
+            .btn:hover { transform: translateY(-1px); }
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff7eb3 0%, #ffb86c 100%);
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(180, 60, 100, 0.25);
+            box-shadow: 0 6px 20px rgba(255, 126, 179, 0.4);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff6ba8 0%, #ffaa55 100%);
+            box-shadow: 0 8px 24px rgba(255, 126, 179, 0.5);
+        }
+        .btn-ghost {
+            background: #fff;
+            color: var(--accent-dark);
+            border: 2px solid #f0d8ff;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            margin-bottom: 14px;
+        }
+        .stat-pill {
+            background: linear-gradient(135deg, #fff 0%, #f8eeff 100%);
+            color: var(--text-muted);
+            font-weight: 800;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 1rem;
+            border: 2px solid #f0d8ff;
+            box-shadow: var(--shadow-tile);
+        }
+        .stat-pill span {
+            color: #e85d9a;
+            font-size: 1.15rem;
+        }
+        .stat-pill.warn {
+            border-color: #ffd699;
+            background: linear-gradient(135deg, #fff8e0, #fff);
+        }
+        .stat-pill.warn span { color: #f59e0b; }
+        .stat-pill.danger {
+            border-color: #ffb4b4;
+            background: linear-gradient(135deg, #ffe8f0, #fff);
+            animation: errorPulse 0.8s ease-in-out infinite;
+        }
+        .stat-pill.danger span { color: #e85d7a; }
+        @keyframes errorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .load-error {
+            text-align: center;
+            color: #b84a6a;
+            font-weight: 700;
+            padding: 16px;
+            line-height: 1.6;
+            background: #fff0f5;
+            border: 2px solid #ffc8dd;
+            border-radius: 14px;
+            margin-bottom: 12px;
+        }
+        #loadArea.done { display: none; }
+        .game-board {
+            min-height: 60px;
+        }
+        .match-board {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: stretch;
+        }
+        @media (max-width: 600px) {
+            .match-board { grid-template-columns: 1fr; }
+        }
+        .match-col {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            background: #fff;
+            border-radius: 18px;
+            padding: 10px 10px 12px;
+            border: 2px solid #f0e4ff;
+            box-shadow: var(--shadow-tile);
+        }
+        .match-col-head {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 10px 12px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            color: #fff;
+        }
+        .match-col:first-child .match-col-head {
+            background: var(--head-en);
+            box-shadow: 0 4px 12px rgba(255, 160, 60, 0.35);
+        }
+        .match-col:last-child .match-col-head {
+            background: var(--head-zh);
+            box-shadow: 0 4px 12px rgba(61, 205, 160, 0.35);
+        }
+        .match-col-title {
+            font-family: "Fredoka", inherit;
+            margin: 0;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            white-space: nowrap;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+        .match-col-count {
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.18);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .tile-scroll {
+            flex: 1;
+            min-height: 0;
+            max-height: min(52vh, 420px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px 6px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #d4b8f0 transparent;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tile-scroll::-webkit-scrollbar { width: 8px; }
+        .tile-scroll::-webkit-scrollbar-thumb {
+            background: #d4b8f0;
+            border-radius: 8px;
+        }
+        .tile-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+            gap: 10px;
+            align-content: start;
+        }
+        @media (min-width: 900px) {
+            .tile-list {
+                grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+            }
+        }
+        .tile {
+            font-family: "Fredoka", "Nunito", inherit;
+            --tile-line-h: 1.35;
+            --tile-lines: 1;
+            --tile-pad-y: 12px;
+            min-height: calc(var(--tile-line-h) * 1em * var(--tile-lines) + var(--tile-pad-y) * 2);
+            height: calc(var(--tile-line-h) * 1em * var(--tile-lines) + var(--tile-pad-y) * 2);
+            padding: var(--tile-pad-y) 10px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: clamp(0.95rem, 2.6vw, 1.12rem);
+            line-height: var(--tile-line-h);
+            text-align: center;
+            color: var(--tile-text);
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-tile);
+            border: 2px solid transparent;
+            transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+        }
+        .tile.tile-lines-2 {
+            --tile-lines: 2;
+        }
+        .tile-label {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
+            word-break: break-word;
+            hyphens: auto;
+            line-height: var(--tile-line-h);
+            max-width: 100%;
+        }
+        .tile.tile-enter {
+            animation: tileIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes tileIn {
+            from { opacity: 0; transform: scale(0.88); }
+            to { opacity: 1; transform: none; }
+        }
+        .tile[data-type="en"] {
+            background: var(--tile-en-bg);
+            border-color: var(--tile-en-border);
+            border-width: 2px;
+        }
+        .tile[data-type="zh"] {
+            background: var(--tile-zh-bg);
+            border-color: var(--tile-zh-border);
+            border-width: 2px;
+        }
+        @media (hover: hover) {
+            .tile:hover:not(.removing) {
+                transform: translateY(-3px) scale(1.02);
+                box-shadow: 0 8px 20px rgba(255, 160, 100, 0.2);
+            }
+        }
+        .tile.selected {
+            border-color: var(--select-ring);
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.55), 0 8px 20px rgba(255, 126, 179, 0.25);
+            z-index: 1;
+            animation: selectPulse 1s ease-in-out infinite;
+        }
+        .tile[data-type="en"].selected {
+            background: linear-gradient(145deg, #fffef5 0%, #ffdc7a 100%);
+        }
+        .tile[data-type="zh"].selected {
+            background: linear-gradient(145deg, #f5fffb 0%, #aaf0d4 100%);
+        }
+        @keyframes selectPulse {
+            0%, 100% { box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.45), 0 6px 16px rgba(255, 126, 179, 0.2); }
+            50% { box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.65), 0 10px 22px rgba(255, 126, 179, 0.3); }
+        }
+        .tile.shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .tile.removing {
+            pointer-events: none;
+            animation: tileOut 0.38s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+        }
+        @keyframes tileOut {
+            0% { opacity: 1; transform: scale(1); }
+            28% { opacity: 1; transform: scale(1.08); filter: brightness(1.06); }
+            100% { opacity: 0; transform: scale(0.78); filter: none; }
+        }
+        .match-hint {
+            text-align: center;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin: 0 0 12px;
+            padding: 12px 14px;
+            background: linear-gradient(135deg, #fff8e8, #f5eeff);
+            border-radius: 14px;
+            border: 2px solid #f0d8ff;
+        }
+        #gameOverMsg {
+            display: none;
+            text-align: center;
+            font-family: "Fredoka", inherit;
+            font-size: clamp(1.15rem, 3vw, 1.4rem);
+            font-weight: 700;
+            color: #6b4a9a;
+            background: linear-gradient(135deg, #fff9e6, #f0fff8, #ffe8f5);
+            border: 3px solid #ffc857;
+            padding: 18px 22px;
+            border-radius: 20px;
+            margin: 14px 0;
+            box-shadow: 0 10px 28px rgba(255, 160, 100, 0.2);
+        }
+        #gameOverMsg.show-win {
+            animation: winPop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), winGlow 2.5s 0.7s ease-in-out infinite alternate;
+        }
+        #gameOverMsg.show-done-quiet {
+            animation: none;
+            box-shadow: 0 6px 20px rgba(90, 130, 150, 0.1);
+        }
+        @keyframes winGlow {
+            from { box-shadow: 0 8px 24px rgba(255, 160, 100, 0.2); }
+            to { box-shadow: 0 12px 32px rgba(255, 126, 179, 0.35); }
+        }
+        @keyframes winPop {
+            from { opacity: 0; transform: scale(0.85); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .celebration-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9000;
+            overflow: hidden;
+        }
+        .celebration-layer.off {
+            visibility: hidden;
+        }
+        #fxCanvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+        .surprise-scene {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .surprise-scene.active {
+            opacity: 1;
+            background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.42) 0%, transparent 68%);
+        }
+        .surprise-hero {
+            text-align: center;
+            animation: heroZoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .surprise-hero .badge {
+            font-size: clamp(4rem, 18vw, 7rem);
+            line-height: 1;
+            filter: drop-shadow(0 8px 20px rgba(240, 180, 80, 0.5));
+            animation: badgeSpin 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes badgeSpin {
+            from { transform: rotate(-8deg) scale(1); }
+            to { transform: rotate(8deg) scale(1.08); }
+        }
+        @keyframes heroZoom {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .surprise-hero h2 {
+            margin: 12px 0 6px;
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            color: #fff;
+            text-shadow: 0 2px 12px rgba(45, 106, 82, 0.6);
+        }
+        .surprise-hero p {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff9e6;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.2);
+        }
+        .emoji-parade {
+            position: absolute;
+            font-size: clamp(2.5rem, 10vw, 4rem);
+            animation: paradeMove 4s linear forwards;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+        @keyframes paradeMove {
+            from { transform: translateX(-120vw) rotate(-10deg); }
+            to { transform: translateX(120vw) rotate(10deg); }
+        }
+        .balloon {
+            position: absolute;
+            bottom: -80px;
+            width: 48px;
+            height: 58px;
+            border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+            animation: balloonUp 4.5s ease-in forwards;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            width: 2px;
+            height: 28px;
+            background: rgba(0,0,0,0.15);
+            transform: translateX(-50%);
+        }
+        @keyframes balloonUp {
+            to { transform: translateY(-115vh) translateX(var(--drift, 0)); opacity: 0.9; }
+        }
+        .rainbow-arc {
+            animation: rainbowIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        @keyframes rainbowIn {
+            from { transform: scale(0) rotate(-30deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .scene-label {
+            margin-top: 16px;
+            padding: 10px 22px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 999px;
+            font-weight: 900;
+            font-size: 1.05rem;
+            color: #e85d9a;
+            border: 2px solid #ffc857;
+            box-shadow: 0 4px 16px rgba(255, 126, 179, 0.2);
+            animation: labelPop 0.6s 0.4s both;
+        }
+        @keyframes labelPop {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+        .rocket-msg {
+            font-size: clamp(2rem, 8vw, 3.2rem);
+            animation: rocketFly 2.5s ease-in-out infinite;
+        }
+        @keyframes rocketFly {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-24px) rotate(5deg); }
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #fff;
+            color: var(--text);
+            font-weight: 800;
+            padding: 14px 24px;
+            border-radius: 14px;
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--shadow-soft);
+            z-index: 9999;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            max-width: 90vw;
+            text-align: center;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        .toast.err { background: #fff0f5; color: #b84a6a; border-color: #ffc8dd; }
+        .loading {
+            text-align: center;
+            color: #6b4a9a;
+            font-weight: 800;
+            padding: 20px;
+            animation: pulse 1.2s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.55; }
+            50% { opacity: 1; }
+        }
+        /* 平板横竖屏：更大触控区、更高游戏区 */
+        @media (min-width: 600px) and (max-width: 1366px) {
+            .wrap { padding: 20px 28px 36px; }
+            .hero h1 { font-size: clamp(1.75rem, 4vw, 2.1rem); }
+            .panel { padding: 22px 24px 28px; }
+            #dateSelector { font-size: 1.05rem; min-height: 48px; }
+            .btn { font-size: 1.05rem; padding: 14px 26px; min-height: 48px; }
+            .stat-pill { font-size: 1.05rem; padding: 11px 20px; }
+            .tile-list {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+            .tile {
+                min-height: 58px;
+                padding: 14px 12px;
+                font-size: clamp(1.02rem, 2.2vw, 1.22rem);
+            }
+            .tile-scroll {
+                max-height: min(62vh, 520px);
+            }
+            .match-col-title { font-size: 1.08rem; }
+        }
+        @media (min-width: 768px) {
+            .tile-list {
+                grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+            }
+            .tile {
+                min-height: 56px;
+                font-size: clamp(1rem, 1.8vw, 1.18rem);
+            }
+        }
+        @media (max-width: 520px) {
+            .stats { gap: 10px; }
+            .wrap { padding: 12px 14px 28px; }
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(120, 80, 180, 0.35);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.show {
+            display: flex;
+        }
+        #reviewModal.show {
+            overflow: hidden;
+            overscroll-behavior: none;
+        }
+        body.review-modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            left: 0;
+            right: 0;
+        }
+        .modal-box {
+            width: min(420px, 100%);
+            background: #fff;
+            border-radius: 18px;
+            padding: 22px 20px 18px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            border: 1px solid var(--panel-border);
+            animation: winPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-box h3 {
+            margin: 0 0 10px;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+        .modal-box p {
+            margin: 0 0 8px;
+            line-height: 1.55;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .modal-warn {
+            color: #a65c42 !important;
+            font-size: 0.88rem !important;
+            background: #fff5f0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #f0d4c8;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+        .modal-actions .btn { min-width: 120px; }
+        .btn-danger {
+            background: #c75b4a;
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(199, 91, 74, 0.3);
+        }
+        .btn-danger:hover { background: #b04a3a; }
+        .btn-danger:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-sound {
+            min-width: 48px;
+            padding: 10px 14px;
+            font-size: 1.15rem;
+            line-height: 1;
+        }
+        .btn-sound.off { opacity: 0.55; }
+        .modal-box-review {
+            width: min(560px, 100%);
+            max-height: min(82vh, 720px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            touch-action: pan-y;
+        }
+        .modal-box-review h3 { flex-shrink: 0; }
+        #reviewModalMeta {
+            flex-shrink: 0;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .review-list {
+            flex: 1;
+            min-height: 0;
+            max-height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            border: 2px solid #f0e4ff;
+            border-radius: 14px;
+            background: #faf8ff;
+            padding: 8px 10px;
+        }
+        .review-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 10px 8px;
+            border-bottom: 1px dashed #e8dcf8;
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+        .review-row:last-child { border-bottom: none; }
+        .review-en { color: #b86a00; }
+        .review-zh { color: #2a8f6a; text-align: right; }
+        @media (max-width: 480px) {
+            .review-row { grid-template-columns: 1fr; gap: 4px; }
+            .review-zh { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+    <div class="celebration-layer off" id="celebrationLayer">
+        <canvas id="fxCanvas"></canvas>
+        <div class="surprise-scene" id="surpriseScene"></div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <div class="modal-overlay" id="resetModal" aria-hidden="true">
+        <div class="modal-box" role="dialog" aria-labelledby="resetModalTitle">
+            <h3 id="resetModalTitle">再玩一次？</h3>
+            <p id="resetModalText">将清空当前选择日期的全部消除记录，并重新开始配对。</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="resetCancelBtn">取消</button>
+                <button type="button" class="btn btn-danger" id="resetConfirmBtn">确定清空并重玩</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="eliminateConfirmModal" aria-hidden="true">
+        <div class="modal-box" role="dialog" aria-labelledby="eliminateConfirmTitle">
+            <h3 id="eliminateConfirmTitle">确认消除？</h3>
+            <p id="eliminateConfirmText">确定要消除这一对单词吗？</p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-ghost" id="eliminateCancelBtn">取消</button>
+                <button type="button" class="btn btn-primary" id="eliminateConfirmBtn">确认消除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="reviewModal" aria-hidden="true">
+        <div class="modal-box modal-box-review" role="dialog" aria-labelledby="reviewModalTitle">
+            <h3 id="reviewModalTitle">复习一下</h3>
+            <p id="reviewModalMeta"></p>
+            <div class="review-list" id="reviewList"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="reviewCloseBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <header class="hero">
+            <h1 id="heroTitle"><span class="hero-rainbow" aria-hidden="true">🌈</span><span class="hero-title-text">英语中文对对碰</span></h1>
+            <p class="sub" id="heroSub" style="display:none;"></p>
+        </header>
+
+        <div class="panel">
+            <div id="loadArea">
+                <div class="loading" id="loadingMsg">正在读取词库…</div>
+                <p class="load-error" id="loadError" style="display:none;"></p>
+                <div style="text-align:center;margin-top:10px;">
+                    <button type="button" class="btn btn-primary" id="retryBtn" style="display:none;">重新加载</button>
+                    <button type="button" class="btn btn-ghost" id="pickWordsBtn" style="display:none;margin-left:8px;">选择词库文件</button>
+                </div>
+            </div>
+            <input type="file" id="pickWordsInput" accept=".xls,.xlsx" hidden>
+
+            <div class="toolbar" id="toolbar" style="display:none;">
+                <select id="dateSelector">
+                    <option value="">📅 选择日期（Sheet）</option>
+                </select>
+                <button class="btn btn-ghost btn-sound" id="soundToggleBtn" type="button" title="音效开关" aria-pressed="true">🔊</button>
+                <button class="btn btn-ghost" id="reviewBtn" type="button" title="查看当日英文与中文对照（每日最多 3 次）">复习一下 📖</button>
+                <button class="btn btn-primary" id="resetBtn" type="button" style="display:none;" title="清空当前选择日期的消除记录并重新开始">再玩一次 🎮</button>
+            </div>
+
+            <div class="stats" id="statsBar" style="display:none;">
+                <div class="stat-pill">✅ 已消除 <span id="matchedCount">0</span> / <span id="totalPairs">0</span></div>
+                <div class="stat-pill" id="errorStatPill">❌ 错误次数 <span id="wrongCount">0</span> / <span id="errorLimit">0</span></div>
+                <div class="stat-pill">👣 步数 <span id="moveCount">0</span></div>
+                <div class="stat-pill">⏱️ <span id="timer">0</span> 秒</div>
+            </div>
+
+            <div id="gameOverMsg"></div>
+            <div class="game-board" id="gameBoard"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../gitee-data.js"></script>
+    <script src="students.js"></script>
+    <script>
+    // 词库数据目录（对应 Gitee LearningData 仓库下的业务文件夹）
+    const GITEE_DATA_DIR = "EnglishChineseMatchingGame";
+    // 学生与词库来自 students.js（扩展学生只改 students.js）
+    const WORDS_PRESETS = (window.StudentRoster && StudentRoster.buildPresets()) || {};
+    const ELIMINATED_MARK = "已消除";
+
+    function getWordsConfig() {
+        const params = new URLSearchParams(location.search);
+        const gradeKey = (params.get("grade") || params.get("student") || "").trim().toLowerCase();
+        const preset = WORDS_PRESETS[gradeKey];
+        if (preset) {
+            return {
+                gradeKey,
+                gradeLabel: preset.label,
+                candidates: preset.files.slice(),
+                primary: preset.files[0],
+                missingGrade: false
+            };
+        }
+        let words = (params.get("words") || "").trim();
+        if (words) {
+            words = words.replace(/^\/+/, "");
+            const keysRe = (window.StudentRoster && StudentRoster.keysPattern()) || "[\\w-]+";
+            const re = new RegExp("^words-(" + keysRe + ")\\.(xls|xlsx)$", "i");
+            if (re.test(words) || /^words-[\w.-]+\.(xls|xlsx)$/i.test(words)) {
+                const base = words.replace(/\.(xls|xlsx)$/i, "");
+                const ext = (words.match(/\.(xls|xlsx)$/i) || ["", "xls"])[1].toLowerCase();
+                const alt = ext === "xls" ? base + ".xlsx" : base + ".xls";
+                const gk = base.replace(/^words-/i, "").toLowerCase();
+                const pl = WORDS_PRESETS[gk];
+                return {
+                    gradeKey: gk,
+                    gradeLabel: pl ? pl.label : gk.toUpperCase(),
+                    candidates: [words, alt],
+                    primary: words,
+                    missingGrade: false
+                };
+            }
+        }
+        return {
+            gradeKey: "",
+            gradeLabel: "",
+            candidates: [],
+            primary: "",
+            missingGrade: true
+        };
+    }
+
+    const wordsConfig = getWordsConfig();
+    let WORDS_CANDIDATES = wordsConfig.candidates.slice();
+
+    let gameData = {};
+    /** 单词列表 Sheet 中的全量单词（按表顺序） */
+    let wordListPairs = [];
+    let gWorkbook = null;
+    let gWordsFilename = wordsConfig.primary;
+    let currentSheet = "";
+    let saveQueue = Promise.resolve();
+    let saveQueuedToastShown = false;
+    let backgroundSaveTask = null;
+    const SAVE_RETRY_MS = 3000;
+
+    const RAINBOW_BANDS = [
+        { r: 50, sw: 7, c: "#ff8fab" },
+        { r: 42, sw: 7, c: "#ffbc6e" },
+        { r: 34, sw: 7, c: "#ffe66d" },
+        { r: 26, sw: 7, c: "#7dcea0" },
+        { r: 18, sw: 7, c: "#7eb8ff" },
+        { r: 10, sw: 6, c: "#b28dff" }
+    ];
+
+    function buildRainbowSvg() {
+        const cx = 60;
+        const y = 56;
+        let paths = "";
+        RAINBOW_BANDS.forEach(b => {
+            paths +=
+                '<path d="M ' + (cx - b.r) + " " + y + " A " + b.r + " " + b.r +
+                ' 0 0 1 ' + (cx + b.r) + " " + y + '" fill="none" stroke="' + b.c +
+                '" stroke-width="' + b.sw + '" stroke-linecap="round"/>';
+        });
+        return (
+            '<svg class="rainbow-svg rainbow-svg-bands" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+            paths +
+            "</svg>"
+        );
+    }
+
+    function ensureRainbowIcon(container) {
+        if (!container || container.querySelector(".rainbow-svg")) return;
+        container.innerHTML = buildRainbowSvg();
+    }
+
+    function ensureHeroRainbow(rainbow) {
+        if (!rainbow) return;
+        if (!rainbow.textContent.trim()) rainbow.textContent = "🌈";
+    }
+
+    function setHeroTitle(text) {
+        const root = document.getElementById("heroTitle");
+        if (!root) return;
+        let rainbow = root.querySelector(".hero-rainbow");
+        let textEl = root.querySelector(".hero-title-text");
+        if (!rainbow || !textEl) {
+            root.innerHTML =
+                '<span class="hero-rainbow" aria-hidden="true">🌈</span>' +
+                '<span class="hero-title-text"></span>';
+            rainbow = root.querySelector(".hero-rainbow");
+            textEl = root.querySelector(".hero-title-text");
+        }
+        ensureHeroRainbow(rainbow);
+        textEl.textContent = text;
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function isSaveLockMessage(text) {
+        const s = String(text || "").toLowerCase();
+        if (/busy|locked|sharing|正在使用|被占用|cannot access|another process|ebusy|eperm|resource busy|进程无法访问/.test(s)) return true;
+        return /save failed/i.test(s) && /busy|eperm|access|sharing|占用|正在使用|locked/.test(s);
+    }
+    let curPairs = [];
+    let moveCount = 0, timer = 0, timerInt = null, matchedCount = 0;
+    let activityPersistedMoves = 0;
+    let activityPersistedTime = 0;
+    let dailyActivityFlushInt = null;
+    const DAILY_ACTIVITY_FLUSH_MS = 10000;
+    let selectedTile = null, lockBoard = false, pendingMatchConfirm = null, pairAwaitingConfirm = null;
+    let replayMode = false;
+    let wrongCount = 0;
+    let errorLimit = 0;
+
+    const Sfx = (function () {
+        let ctx = null;
+        let enabled = true;
+        try {
+            enabled = localStorage.getItem("gameSfx") !== "0";
+        } catch (_) {}
+
+        function getCtx() {
+            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            return ctx;
+        }
+
+        function unlock() {
+            if (!enabled) return;
+            const c = getCtx();
+            if (c.state === "suspended") return c.resume();
+            return Promise.resolve();
+        }
+
+        function playTone(freq, duration, opts) {
+            if (!enabled) return;
+            opts = opts || {};
+            const c = getCtx();
+            const t0 = c.currentTime;
+            const o = c.createOscillator();
+            const g = c.createGain();
+            o.type = opts.type || "sine";
+            o.frequency.setValueAtTime(freq, t0);
+            if (opts.slideTo) {
+                o.frequency.exponentialRampToValueAtTime(opts.slideTo, t0 + duration);
+            }
+            const vol = opts.vol != null ? opts.vol : 0.14;
+            g.gain.setValueAtTime(0.001, t0);
+            g.gain.linearRampToValueAtTime(vol, t0 + 0.02);
+            g.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+            o.connect(g);
+            g.connect(c.destination);
+            o.start(t0);
+            o.stop(t0 + duration + 0.02);
+        }
+
+        function playSeq(notes, gap) {
+            notes.forEach((n, i) => {
+                setTimeout(() => playTone(n[0], n[1] || 0.12, n[2] || {}), i * (gap || 90));
+            });
+        }
+
+        return {
+            isEnabled() { return enabled; },
+            setEnabled(on) {
+                enabled = !!on;
+                try { localStorage.setItem("gameSfx", on ? "1" : "0"); } catch (_) {}
+                updateSoundToggleUi();
+            },
+            unlock,
+            select() {
+                unlock();
+                playTone(587, 0.07, { vol: 0.1 });
+            },
+            switchTile() {
+                unlock();
+                playTone(659, 0.06, { vol: 0.09 });
+            },
+            match() {
+                unlock();
+                playSeq([
+                    [523, 0.1, { vol: 0.13 }],
+                    [659, 0.1, { vol: 0.13 }],
+                    [784, 0.18, { vol: 0.15, slideTo: 1047 }]
+                ], 85);
+            },
+            wrong() {
+                unlock();
+                playTone(220, 0.22, { type: "triangle", vol: 0.11, slideTo: 165 });
+            },
+            win() {
+                unlock();
+                playSeq([
+                    [523, 0.12, { vol: 0.14 }],
+                    [659, 0.12, { vol: 0.14 }],
+                    [784, 0.12, { vol: 0.14 }],
+                    [1047, 0.28, { vol: 0.16 }],
+                    [1319, 0.35, { vol: 0.14, slideTo: 1568 }]
+                ], 120);
+            },
+            tap() {
+                unlock();
+                playTone(440, 0.05, { vol: 0.08 });
+            }
+        };
+    })();
+
+    function updateSoundToggleUi() {
+        const btn = document.getElementById("soundToggleBtn");
+        if (!btn) return;
+        const on = Sfx.isEnabled();
+        btn.textContent = on ? "🔊" : "🔇";
+        btn.classList.toggle("off", !on);
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.title = on ? "关闭音效" : "开启音效";
+    }
+
+    const EnglishSpeech = (function () {
+        const synth = window.speechSynthesis;
+        let enVoice = null;
+        let speaking = false;
+
+        const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie/i;
+        const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)/i;
+        const QUALITY_HINT = /neural|natural|premium|enhanced|online|google|microsoft.*online|wavenet/i;
+
+        function scoreEnVoice(v) {
+            if (!/^en(-|_)/i.test(v.lang || "")) return -1;
+            const name = String(v.name || "");
+            const blob = (name + " " + (v.voiceURI || "")).toLowerCase();
+            let score = 0;
+            if (FEMALE_HINT.test(blob)) score += 80;
+            if (MALE_HINT.test(blob)) score -= 60;
+            if (QUALITY_HINT.test(blob)) score += 45;
+            if (/google/i.test(blob)) score += 25;
+            if (/microsoft/i.test(blob) && FEMALE_HINT.test(blob)) score += 20;
+            if (/^en-us/i.test(v.lang || "")) score += 12;
+            else if (/^en-gb/i.test(v.lang || "")) score += 6;
+            if (!v.localService) score += 8;
+            return score;
+        }
+
+        function pickBestFemaleEnVoice(voices) {
+            const ranked = voices
+                .map(v => ({ v, score: scoreEnVoice(v) }))
+                .filter(x => x.score >= 0)
+                .sort((a, b) => b.score - a.score);
+            const female = ranked.find(x => FEMALE_HINT.test((x.v.name + " " + x.v.voiceURI).toLowerCase()));
+            if (female) return female.v;
+            return ranked[0] ? ranked[0].v : null;
+        }
+
+        function refreshVoice() {
+            if (!synth) return;
+            const voices = synth.getVoices();
+            enVoice = pickBestFemaleEnVoice(voices) ||
+                voices.find(v => /^en(-|_)/i.test(v.lang || "")) ||
+                voices.find(v => /english/i.test(v.name || "")) ||
+                null;
+        }
+
+        function clearSpeaking() {
+            speaking = false;
+            Sfx.unlock();
+        }
+
+        function isBusy() {
+            if (!synth) return false;
+            return speaking || synth.speaking || !!synth.pending;
+        }
+
+        if (synth) {
+            refreshVoice();
+            synth.addEventListener("voiceschanged", refreshVoice);
+        }
+
+        function speak(tile) {
+            if (!synth) return false;
+            const label = tile.querySelector(".tile-label");
+            const text = (label && label.textContent || "").trim();
+            if (!text) return false;
+            if (!enVoice) refreshVoice();
+            synth.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = "en-US";
+            u.rate = 0.8; // 慢速
+            if (enVoice) u.voice = enVoice;
+            u.onstart = () => { speaking = true; };
+            u.onend = clearSpeaking;
+            u.onerror = clearSpeaking;
+            synth.speak(u);
+            speaking = synth.speaking || !!synth.pending;
+            return true;
+        }
+
+        return { speak, isBusy };
+    })();
+
+    /** 英文朗读进行中时不播配对提示音，避免与 Web Audio 冲突导致无声 */
+    function playGameSfx(playFn) {
+        if (!Sfx.isEnabled() || EnglishSpeech.isBusy()) return;
+        Promise.resolve(Sfx.unlock()).then(playFn);
+    }
+
+    function toast(msg, isErr) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = "toast show" + (isErr ? " err" : "");
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove("show"), 3200);
+    }
+
+    function isEliminatedStatus(val) {
+        if (val === true || val === 1 || val === "1") return true;
+        const s = String(val ?? "").trim();
+        if (!s) return false;
+        if (/^(0|false|no|n|否|未消除|未完成)$/i.test(s)) return false;
+        return /^(已消除|消除|是|对|完成|done|yes|true|√|✓|y|ok|x)$/i.test(s);
+    }
+
+    function parseConfigBool(val) {
+        if (val === true || val === 1 || val === "1") return true;
+        const s = String(val ?? "").trim();
+        if (!s) return false;
+        if (/^(0|false|no|n|否|关闭|关|off)$/i.test(s)) return false;
+        return /^(是|对|yes|true|√|✓|y|ok|开启|开|on)$/i.test(s);
+    }
+
+    function isEliminateConfirmConfigKey(key) {
+        return String(key || "").trim() === CONFIG_KEY_ELIMINATE_CONFIRM;
+    }
+
+    function findStatusColIndex(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idx = h.findIndex(k => /消除状态/i.test(k));
+        if (idx >= 0) return idx;
+        idx = h.findIndex(k => /eliminated|done\s*status/i.test(k));
+        if (idx >= 0) return idx;
+        return h.findIndex(k => /消除|状态|eliminated|done/i.test(k) && !/未消除|未完成|错误|确认/i.test(k));
+    }
+
+    const ERROR_COUNT_HEADER = "错误次数";
+    const DAILY_STATS_SHEET = "每日统计";
+    const DAILY_STATS_LEGACY_SHEET = "复习次数";
+    const DAILY_STATS_HEADER = ["日期", "复习次数", "当日步数", "当日耗时"];
+    const DAILY_DATE_HEADER = "日期";
+    const DAILY_REVIEW_HEADER = "复习次数";
+    const DAILY_STEPS_HEADER = "当日步数";
+    const DAILY_TIME_HEADER = "当日耗时";
+    const CONFIG_SHEET = "配置";
+    const WORD_LIST_SHEET = "单词列表";
+    const WORD_RECORD_SHEET = "单词统计";
+    const WORD_RECORD_EN_HEADER = "英文";
+    const WORD_RECORD_COUNT_HEADER = "次数";
+    const CONFIG_KEY_DAILY = "每日单词数";
+    const CONFIG_KEY_MASTER = "掌握总分";
+    const CONFIG_KEY_REVIEW = "每日复习次数";
+    const CONFIG_KEY_WEEK_DAYS = "生成周天数";
+    const CONFIG_KEY_ELIMINATE_CONFIRM = "消除确认开启";
+    const DATE_SHEET_HEADER = ["英文", "中文", "消除状态", "错误次数"];
+    const CONFIG_META_EN_KEYS = new Set([
+        "配置项",
+        CONFIG_KEY_DAILY,
+        CONFIG_KEY_MASTER,
+        CONFIG_KEY_REVIEW,
+        CONFIG_KEY_WEEK_DAYS,
+        CONFIG_KEY_ELIMINATE_CONFIRM
+    ]);
+
+    function isMetaConfigPair(en, zh) {
+        const e = String(en || "").trim();
+        if (!e || !CONFIG_META_EN_KEYS.has(e)) return false;
+        const z = String(zh || "").trim();
+        return !z || /^(是|否|true|false|\d+)$/i.test(z);
+    }
+
+    let gameConfig = { dailyWords: 10, masterScore: 3, reviewMaxPerDay: 3, weekDays: 5, eliminateConfirm: false };
+    const wordRecords = {};
+
+    function isReviewCountSheet(name) {
+        const n = String(name || "").trim();
+        return n === DAILY_STATS_SHEET || n === DAILY_STATS_LEGACY_SHEET;
+    }
+
+    function resolveDailyStatsSheetName() {
+        if (!gWorkbook) return DAILY_STATS_SHEET;
+        if (gWorkbook.Sheets[DAILY_STATS_SHEET]) return DAILY_STATS_SHEET;
+        if (gWorkbook.Sheets[DAILY_STATS_LEGACY_SHEET]) return DAILY_STATS_LEGACY_SHEET;
+        return DAILY_STATS_SHEET;
+    }
+
+    function migrateDailyStatsSheetIfNeeded() {
+        if (!gWorkbook) return;
+        if (gWorkbook.Sheets[DAILY_STATS_SHEET] || !gWorkbook.Sheets[DAILY_STATS_LEGACY_SHEET]) return;
+        gWorkbook.Sheets[DAILY_STATS_SHEET] = gWorkbook.Sheets[DAILY_STATS_LEGACY_SHEET];
+        delete gWorkbook.Sheets[DAILY_STATS_LEGACY_SHEET];
+        const i = gWorkbook.SheetNames.indexOf(DAILY_STATS_LEGACY_SHEET);
+        if (i >= 0) gWorkbook.SheetNames[i] = DAILY_STATS_SHEET;
+    }
+
+    function parseDailyStatsColumnIndices(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idxDate = h.findIndex(k => /^日期$|date/i.test(k));
+        let idxReview = h.findIndex(k => /复习.*次数/i.test(k));
+        if (idxReview < 0) idxReview = h.findIndex(k => /^次数$/i.test(k));
+        let idxSteps = h.findIndex(k => /(?:当日|每日)步数/i.test(k));
+        if (idxSteps < 0) idxSteps = h.findIndex(k => /^步数$/i.test(k));
+        let idxTime = h.findIndex(k => /(?:当日|每日)耗时/i.test(k));
+        if (idxTime < 0) idxTime = h.findIndex(k => /^耗时$/i.test(k));
+        if (idxDate < 0) idxDate = 0;
+        if (idxReview < 0) idxReview = 1;
+        return { idxDate, idxReview, idxSteps, idxTime };
+    }
+
+    function normalizeDailyStatsRows(rows) {
+        if (!rows || !rows.length) return [DAILY_STATS_HEADER.slice()];
+        const cols = parseDailyStatsColumnIndices(rows[0].map(a => String(a ?? "").trim()));
+        const out = [DAILY_STATS_HEADER.slice()];
+        for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            const dateKey = String(r[cols.idxDate] ?? "").trim();
+            if (!dateKey) continue;
+            const review = parseInt(String(r[cols.idxReview] ?? "").trim(), 10) || 0;
+            const steps =
+                cols.idxSteps >= 0 ? parseInt(String(r[cols.idxSteps] ?? "").trim(), 10) || 0 : 0;
+            const timeSec =
+                cols.idxTime >= 0 ? parseInt(String(r[cols.idxTime] ?? "").trim(), 10) || 0 : 0;
+            out.push([dateKey, review, steps, timeSec]);
+        }
+        return out;
+    }
+
+    function ensureDailyStatsHeaderRow(rows) {
+        const header = (rows[0] || []).map(a => String(a ?? "").trim());
+        const cols = parseDailyStatsColumnIndices(header);
+        rows[0] = rows[0] || [];
+        rows[0][cols.idxDate] = DAILY_DATE_HEADER;
+        rows[0][cols.idxReview] = DAILY_REVIEW_HEADER;
+        if (cols.idxSteps < 0) {
+            cols.idxSteps = Math.max(2, rows[0].length);
+            rows[0][cols.idxSteps] = DAILY_STEPS_HEADER;
+        } else {
+            rows[0][cols.idxSteps] = DAILY_STEPS_HEADER;
+        }
+        if (cols.idxTime < 0) {
+            cols.idxTime = Math.max(cols.idxSteps + 1, rows[0].length);
+            rows[0][cols.idxTime] = DAILY_TIME_HEADER;
+        } else {
+            rows[0][cols.idxTime] = DAILY_TIME_HEADER;
+        }
+        return cols;
+    }
+
+    function isConfigSheet(name) {
+        return String(name || "").trim() === CONFIG_SHEET;
+    }
+
+    function isWordRecordSheet(name) {
+        return String(name || "").trim() === WORD_RECORD_SHEET;
+    }
+
+    function isWordListSheet(name) {
+        return String(name || "").trim() === WORD_LIST_SHEET;
+    }
+
+    function isSystemSheet(name) {
+        return (
+            isReviewCountSheet(name) ||
+            isConfigSheet(name) ||
+            isWordRecordSheet(name) ||
+            isWordListSheet(name)
+        );
+    }
+
+    function getReviewMaxPerDay() {
+        return Math.max(1, gameConfig.reviewMaxPerDay || 3);
+    }
+
+    /** 配置 1–5：生成周一至周 N 的日期 Sheet */
+    function getWeekDaysCount() {
+        const n = parseInt(gameConfig.weekDays, 10);
+        if (!Number.isFinite(n)) return 5;
+        return Math.min(5, Math.max(1, n));
+    }
+
+    function isDateSheetName(name) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(String(name || "").trim());
+    }
+
+    function wordKey(en) {
+        return String(en || "").trim().toLowerCase();
+    }
+
+    function findWordCountColIndex(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idx = h.findIndex(k => /次数/i.test(k));
+        if (idx >= 0) return idx;
+        idx = h.findIndex(k => /总数|total|score/i.test(k));
+        if (idx >= 0) return idx;
+        return h.length >= 2 ? 1 : -1;
+    }
+
+    function getWordTotal(pair) {
+        if (!pair) return 0;
+        const k = wordKey(pair.en);
+        return wordRecords[k] != null ? wordRecords[k] : 0;
+    }
+
+    function setWordTotal(pair, total) {
+        if (!pair) return;
+        const n = parseInt(total, 10);
+        wordRecords[wordKey(pair.en)] = Number.isFinite(n) ? n : 0;
+        pair.wordTotal = wordRecords[wordKey(pair.en)];
+    }
+
+    function isWeekDaysConfigKey(key) {
+        const k = String(key || "").trim();
+        return k === CONFIG_KEY_WEEK_DAYS || k === "生成周天数" || /^week\s*days?$/i.test(k);
+    }
+
+    function parseWeekDaysValue(raw) {
+        const s = String(raw ?? "").trim();
+        if (/^[1-5]$/.test(s)) return parseInt(s, 10);
+        return null;
+    }
+
+    function loadGameConfig() {
+        const defaults = { dailyWords: 10, masterScore: 3, reviewMaxPerDay: 3, weekDays: 5, eliminateConfirm: false };
+        if (!gWorkbook || !gWorkbook.Sheets[CONFIG_SHEET]) {
+            gameConfig = defaults;
+            return gameConfig;
+        }
+        const rows = XLSX.utils.sheet_to_json(gWorkbook.Sheets[CONFIG_SHEET], { header: 1, defval: "" });
+        const cfg = { ...defaults };
+        rows.forEach((row, i) => {
+            if (i === 0 && row.length >= 2) {
+                const h0 = String(row[0] ?? "").trim();
+                const h1 = String(row[1] ?? "").trim();
+                if (/配置|项目|key/i.test(h0) && /值|value/i.test(h1)) return;
+            }
+            const key = String(row[0] ?? "").trim();
+            if (isWeekDaysConfigKey(key)) {
+                const wd = parseWeekDaysValue(row[1]);
+                if (wd != null) cfg.weekDays = wd;
+                return;
+            }
+            if (isEliminateConfirmConfigKey(key)) {
+                cfg.eliminateConfirm = parseConfigBool(row[1]);
+                return;
+            }
+            const val = parseInt(String(row[1] ?? "").trim(), 10);
+            if (!Number.isFinite(val)) return;
+            if (/每日.*单词|单词.*数|daily/i.test(key) && val >= 1) cfg.dailyWords = val;
+            if (/掌握|总分|达标|master|正确.*错误|错误.*总数/i.test(key) && val >= 1) cfg.masterScore = val;
+            if (/复习.*次数|review.*times|review.*max/i.test(key) && val >= 1) cfg.reviewMaxPerDay = val;
+        });
+        gameConfig = cfg;
+        return gameConfig;
+    }
+
+    function loadWordRecords() {
+        Object.keys(wordRecords).forEach(k => delete wordRecords[k]);
+        if (!gWorkbook || !gWorkbook.Sheets[WORD_RECORD_SHEET]) return;
+        const rows = XLSX.utils.sheet_to_json(gWorkbook.Sheets[WORD_RECORD_SHEET], { header: 1, defval: "" });
+        if (rows.length < 2) return;
+        const header = rows[0].map(a => String(a ?? "").trim());
+        let idxEn = header.findIndex(k => /英文|en/i.test(k));
+        const idxCount = findWordCountColIndex(header);
+        if (idxEn < 0) idxEn = 0;
+        for (let i = 1; i < rows.length; i++) {
+            const en = String(rows[i][idxEn] ?? "").trim();
+            if (!en) continue;
+            const n = idxCount >= 0 ? parseInt(String(rows[i][idxCount] ?? "").trim(), 10) : 0;
+            wordRecords[wordKey(en)] = Number.isFinite(n) ? n : 0;
+        }
+    }
+
+    function syncPairsWordTotals(list) {
+        (list || []).forEach(p => {
+            p.wordTotal = getWordTotal(p);
+        });
+    }
+
+    function ensureConfigSheet() {
+        if (!gWorkbook) return;
+        if (gWorkbook.Sheets[CONFIG_SHEET]) return;
+        const sheet = XLSX.utils.aoa_to_sheet([
+            ["配置项", "值"],
+            [CONFIG_KEY_DAILY, gameConfig.dailyWords],
+            [CONFIG_KEY_MASTER, gameConfig.masterScore],
+            [CONFIG_KEY_REVIEW, gameConfig.reviewMaxPerDay],
+            [CONFIG_KEY_WEEK_DAYS, gameConfig.weekDays]
+        ]);
+        XLSX.utils.book_append_sheet(gWorkbook, sheet, CONFIG_SHEET);
+    }
+
+    function ensureWordRecordSheet() {
+        if (!gWorkbook) return;
+        if (gWorkbook.Sheets[WORD_RECORD_SHEET]) return;
+        const sheet = XLSX.utils.aoa_to_sheet([
+            [WORD_RECORD_EN_HEADER, WORD_RECORD_COUNT_HEADER]
+        ]);
+        XLSX.utils.book_append_sheet(gWorkbook, sheet, WORD_RECORD_SHEET);
+    }
+
+    function isWordMastered(pair) {
+        return getWordTotal(pair) >= gameConfig.masterScore;
+    }
+
+    /** 单词列表中尚未掌握（单词统计 ≥ 配置掌握总分则跳过） */
+    function getUnmasteredFromWordList() {
+        syncPairsWordTotals(wordListPairs);
+        return wordListPairs.filter(p => !isWordMastered(p));
+    }
+
+    /** 日期 Sheet 中已记录单词（按英文键） */
+    function buildDateProgressMap(sheetName) {
+        const map = new Map();
+        (gameData[sheetName] || []).forEach(p => {
+            if (!p || !p.en) return;
+            map.set(wordKey(p.en), p);
+        });
+        return map;
+    }
+
+    /**
+     * 当日任务批次：日期 Sheet 里已消除的词一律计入（含现已掌握的）；
+     * 未满 dailyWords 时再从单词列表按序补足未掌握词。出题仍跳过已掌握。
+     */
+    function getDailySlice(sheetName) {
+        const daily = Math.max(1, gameConfig.dailyWords || 10);
+        const progress = buildDateProgressMap(sheetName);
+        const batch = [];
+        const inBatch = new Set();
+        syncPairsWordTotals(wordListPairs);
+
+        (gameData[sheetName] || []).forEach(rec => {
+            if (!rec || !rec.en || !rec.done) return;
+            const k = wordKey(rec.en);
+            if (inBatch.has(k)) return;
+            const w = wordListPairs.find(p => wordKey(p.en) === k);
+            if (!w) return;
+            batch.push({
+                en: w.en,
+                zh: w.zh,
+                done: true,
+                errors: rec.errors || 0,
+                rowNum: rec.rowNum
+            });
+            inBatch.add(k);
+        });
+
+        for (let i = 0; i < wordListPairs.length && batch.length < daily; i++) {
+            const w = wordListPairs[i];
+            const k = wordKey(w.en);
+            if (inBatch.has(k)) continue;
+            if (isWordMastered(w)) continue;
+            const rec = progress.get(k);
+            batch.push({
+                en: w.en,
+                zh: w.zh,
+                done: rec ? !!rec.done : false,
+                errors: rec ? (rec.errors || 0) : 0,
+                rowNum: rec ? rec.rowNum : null
+            });
+            inBatch.add(k);
+        }
+        return batch;
+    }
+
+    function selectDailyBatchPairs(sheetName) {
+        return getDailySlice(sheetName).filter(p => !p.done);
+    }
+
+    function isDailyQuotaDone(sheetName) {
+        const batch = getDailySlice(sheetName);
+        if (!batch.length) return !getUnmasteredFromWordList().length;
+        return batch.every(p => p.done);
+    }
+
+    function isSheetFullyMastered() {
+        if (!wordListPairs.length) return false;
+        syncPairsWordTotals(wordListPairs);
+        return wordListPairs.every(p => isWordMastered(p));
+    }
+
+    function hasMoreUnmasteredInWordList() {
+        syncPairsWordTotals(wordListPairs);
+        return wordListPairs.some(p => !isWordMastered(p));
+    }
+
+    function getWeekDateNames(refDate) {
+        const d = refDate instanceof Date ? new Date(refDate.getTime()) : new Date();
+        const dow = d.getDay();
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + mondayOffset);
+        const days = getWeekDaysCount();
+        const names = [];
+        for (let i = 0; i < days; i++) {
+            const day = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+            names.push(formatSheetDate(day));
+        }
+        return names;
+    }
+
+    /** 本周首次打开：按配置生成周一至周 N 的空日期 Sheet（仅表头，消除后才写入行） */
+    function ensureWeekDateSheets(refDate) {
+        if (!gWorkbook) return false;
+        let created = false;
+        getWeekDateNames(refDate).forEach(name => {
+            if (gWorkbook.Sheets[name]) {
+                if (!gameData[name]) gameData[name] = [];
+                return;
+            }
+            XLSX.utils.book_append_sheet(
+                gWorkbook,
+                XLSX.utils.aoa_to_sheet([DATE_SHEET_HEADER.slice()]),
+                name
+            );
+            gameData[name] = [];
+            created = true;
+        });
+        if (created) gWorkbook = workbookToClean(gWorkbook);
+        return created;
+    }
+
+    function parsePairsFromSheetRows(rows, withRowNum) {
+        if (!rows || rows.length < 2) return [];
+        const header = rows[0].map(a => String(a ?? "").trim());
+        let idxEN = header.findIndex(k => /en|英文|english/i.test(k));
+        let idxZH = header.findIndex(k => /zh|中文|chinese/i.test(k));
+        const idxStatus = findStatusColIndex(header);
+        const idxErrors = findErrorColIndex(header);
+        if (idxEN === -1 && idxZH === -1) {
+            idxEN = 0;
+            idxZH = 1;
+        } else {
+            if (idxEN === -1) idxEN = idxZH === 0 ? 1 : 0;
+            if (idxZH === -1) idxZH = idxEN === 0 ? 1 : 0;
+        }
+        return rows.slice(1)
+            .map((r, i) => {
+                if (!r || r[idxEN] == null || r[idxZH] == null) return null;
+                const en = String(r[idxEN]).trim();
+                const zh = String(r[idxZH]).trim();
+                if (!en || !zh || isMetaConfigPair(en, zh)) return null;
+                const done = idxStatus >= 0 && isEliminatedStatus(r[idxStatus]);
+                const errors = idxErrors >= 0 ? parseErrorCount(r[idxErrors]) : 0;
+                const pair = { en, zh, done, errors };
+                if (withRowNum) pair.rowNum = i + 2;
+                return pair;
+            })
+            .filter(Boolean);
+    }
+
+    function findEnRowIndex(rows, en, header) {
+        let idxEN = header.findIndex(k => /en|英文|english/i.test(k));
+        if (idxEN < 0) idxEN = 0;
+        const key = wordKey(en);
+        for (let i = 1; i < rows.length; i++) {
+            if (wordKey(String(rows[i][idxEN] ?? "").trim()) === key) return i;
+        }
+        return -1;
+    }
+
+    function upsertDateSheetMemory(sheetName, pair) {
+        if (!gameData[sheetName]) gameData[sheetName] = [];
+        const key = wordKey(pair.en);
+        const idx = gameData[sheetName].findIndex(p => wordKey(p.en) === key);
+        const row = {
+            en: pair.en,
+            zh: pair.zh,
+            done: !!pair.done,
+            errors: pair.errors || 0,
+            rowNum: pair.rowNum
+        };
+        if (idx >= 0) gameData[sheetName][idx] = row;
+        else gameData[sheetName].push(row);
+    }
+
+    /** 写入日期 Sheet：配对正确写「已消除」；配对错误只累加「错误次数」、不标消除 */
+    function writePairProgressToWorkbook(sheetName, pair, options) {
+        if (!gWorkbook || !pair || !sheetName) return;
+        const eliminated = !!(options && options.eliminated);
+        let ws = gWorkbook.Sheets[sheetName];
+        if (!ws) {
+            ensureWeekDateSheets(new Date());
+            ws = gWorkbook.Sheets[sheetName];
+        }
+        if (!ws) return;
+        let rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        if (!rows.length) rows.push(DATE_SHEET_HEADER.slice());
+        const header = rows[0].map(a => String(a ?? "").trim());
+        let idxEN = header.findIndex(k => /en|英文|english/i.test(k));
+        let idxZH = header.findIndex(k => /zh|中文|chinese/i.test(k));
+        let idxStatus = findStatusColIndex(header);
+        let idxErrors = findErrorColIndex(header);
+        if (idxEN < 0) idxEN = 0;
+        if (idxZH < 0) idxZH = 1;
+        if (idxStatus < 0) {
+            idxStatus = header.length;
+            rows[0][idxStatus] = "消除状态";
+        }
+        if (idxErrors < 0) {
+            idxErrors = header.length;
+            rows[0][idxErrors] = ERROR_COUNT_HEADER;
+        }
+        let rowIdx = pair.rowNum ? pair.rowNum - 1 : findEnRowIndex(rows, pair.en, rows[0]);
+        if (rowIdx < 1) {
+            const newRow = [];
+            newRow[idxEN] = pair.en;
+            newRow[idxZH] = pair.zh;
+            rows.push(newRow);
+            rowIdx = rows.length - 1;
+            pair.rowNum = rowIdx + 1;
+        }
+        rows[rowIdx][idxEN] = pair.en;
+        rows[rowIdx][idxZH] = pair.zh;
+        if (eliminated) {
+            rows[rowIdx][idxStatus] = ELIMINATED_MARK;
+            pair.done = true;
+        } else {
+            const curStatus = String(rows[rowIdx][idxStatus] ?? "").trim();
+            if (!isEliminatedStatus(curStatus)) {
+                rows[rowIdx][idxStatus] = curStatus;
+            }
+            pair.done = false;
+        }
+        rows[rowIdx][idxErrors] = pair.errors || 0;
+        gWorkbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(rows);
+        upsertDateSheetMemory(sheetName, pair);
+    }
+
+    function writeEliminatedToWorkbook(sheetName, pair) {
+        writePairProgressToWorkbook(sheetName, pair, { eliminated: true });
+    }
+
+    function applyEliminatedInMemory(sheetName, pair) {
+        writeEliminatedToWorkbook(sheetName, pair);
+    }
+
+    function applyPairProgressInMemory(sheetName, pair, eliminated) {
+        writePairProgressToWorkbook(sheetName, pair, { eliminated: !!eliminated });
+    }
+
+    async function persistPairProgress(sheetName, pair, eliminated) {
+        if (!gWorkbook || !pair || !sheetName) return;
+        writePairProgressToWorkbook(sheetName, pair, { eliminated: !!eliminated });
+        gWorkbook = workbookToClean(gWorkbook);
+        await saveWorkbookFile();
+    }
+
+    async function persistWordRecordValue(pair, value) {
+        if (!gWorkbook || !pair) return;
+        ensureWordRecordSheet();
+        const next = parseInt(value, 10) || 0;
+        setWordTotal(pair, next);
+        const rows = XLSX.utils.sheet_to_json(gWorkbook.Sheets[WORD_RECORD_SHEET], { header: 1, defval: "" });
+        const header = rows.length ? rows[0].map(a => String(a ?? "").trim()) : [];
+        let idxEn = header.findIndex(k => /英文|en/i.test(k));
+        const idxCount = findWordCountColIndex(header);
+        if (idxEn < 0) idxEn = 0;
+        const byEn = new Map();
+        for (let i = 1; i < rows.length; i++) {
+            const en = String(rows[i][idxEn] ?? "").trim();
+            if (!en) continue;
+            const n = idxCount >= 0 ? parseInt(String(rows[i][idxCount] ?? "").trim(), 10) : 0;
+            byEn.set(wordKey(en), { en, count: Number.isFinite(n) ? n : 0 });
+        }
+        byEn.set(wordKey(pair.en), { en: pair.en, count: next });
+        const out = [[WORD_RECORD_EN_HEADER, WORD_RECORD_COUNT_HEADER]];
+        byEn.forEach(item => out.push([item.en, item.count]));
+        gWorkbook.Sheets[WORD_RECORD_SHEET] = XLSX.utils.aoa_to_sheet(out);
+        gWorkbook = workbookToClean(gWorkbook);
+        await saveWorkbookFile();
+    }
+
+    function adjustWordRecord(pair, delta) {
+        if (!pair) return;
+        const next = getWordTotal(pair) + delta;
+        setWordTotal(pair, next);
+        queueSave(() => persistWordRecordValue(pair, next));
+    }
+
+    function findErrorColIndex(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idx = h.findIndex(k => /错误次数/i.test(k));
+        if (idx >= 0) return idx;
+        idx = h.findIndex(k => /^(错误|答错|wrong)$/i.test(k));
+        if (idx >= 0) return idx;
+        return h.findIndex(k => /error\s*count|mistakes/i.test(k));
+    }
+
+    function parseErrorCount(val) {
+        const n = parseInt(String(val ?? "").trim(), 10);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+    }
+
+    /** 配对错误：以本次先点选的那一侧英文所在行为准 */
+    function getWrongMatchPair(first, second) {
+        const idx = first.type === "en" ? first.pairIdx : second.pairIdx;
+        return curPairs[idx] || null;
+    }
+
+    function incrementPairErrorCount(pair) {
+        if (!pair) return;
+        pair.errors = (pair.errors || 0) + 1;
+    }
+
+    /** 从日期 Sheet 重新加载该日已写入的消除记录 */
+    function reloadDateSheetProgress(sheetName) {
+        if (!gWorkbook || !gWorkbook.Sheets[sheetName]) {
+            gameData[sheetName] = [];
+            return;
+        }
+        const rows = XLSX.utils.sheet_to_json(gWorkbook.Sheets[sheetName], { header: 1, defval: "" });
+        gameData[sheetName] = parsePairsFromSheetRows(rows, true);
+    }
+
+    /** 合并词库与内存中的当日进度（保存延迟时以内存为准） */
+    function mergeDateSheetProgress(sheetName) {
+        const memory = gameData[sheetName] || [];
+        let fromFile = [];
+        if (gWorkbook && gWorkbook.Sheets[sheetName]) {
+            const rows = XLSX.utils.sheet_to_json(gWorkbook.Sheets[sheetName], { header: 1, defval: "" });
+            fromFile = parsePairsFromSheetRows(rows, true);
+        }
+        const byKey = new Map();
+        fromFile.forEach(p => byKey.set(wordKey(p.en), p));
+        memory.forEach(p => {
+            if (!p || !p.en) return;
+            const k = wordKey(p.en);
+            const f = byKey.get(k);
+            if (!f) {
+                byKey.set(k, p);
+                return;
+            }
+            byKey.set(k, {
+                en: p.en,
+                zh: p.zh || f.zh,
+                done: !!(f.done || p.done),
+                errors: Math.max(f.errors || 0, p.errors || 0),
+                rowNum: f.rowNum || p.rowNum
+            });
+        });
+        gameData[sheetName] = Array.from(byKey.values());
+    }
+
+    function syncSheetDoneFlags(sheetName) {
+        mergeDateSheetProgress(sheetName);
+    }
+
+    function getLiveActiveCount(sheetName) {
+        if (sheetName === currentSheet && curPairs && curPairs.length && !replayMode) {
+            return curPairs.filter(p => !p.done).length;
+        }
+        return selectDailyBatchPairs(sheetName).length;
+    }
+
+    function sheetHasActive(name) {
+        return selectDailyBatchPairs(name).length > 0;
+    }
+
+    function getActivePairs(sheetName) {
+        syncSheetDoneFlags(sheetName);
+        if (isDailyQuotaDone(sheetName)) return [];
+        return selectDailyBatchPairs(sheetName);
+    }
+
+    function getSheetPairStats(sheetName) {
+        syncSheetDoneFlags(sheetName);
+        const batch = getDailySlice(sheetName);
+        const batchDone = batch.filter(p => p.done).length;
+        const batchTotal = batch.length;
+        const left = getLiveActiveCount(sheetName);
+        syncPairsWordTotals(wordListPairs);
+        const mastered = wordListPairs.filter(p => isWordMastered(p)).length;
+        const dailyQuota = batchTotal;
+        return {
+            total: batchTotal,
+            sheetTotal: wordListPairs.length,
+            done: batchDone,
+            left,
+            active: left,
+            sheetDone: batchDone,
+            dailyQuota,
+            dailyComplete: isDailyQuotaDone(sheetName),
+            mastered,
+            daily: gameConfig.dailyWords
+        };
+    }
+
+    /** 当前无可玩单词（当日每日配额已练完） */
+    function isSheetAllDoneInMemory(sheetName) {
+        if (!sheetName || !wordListPairs.length) return false;
+        return getActivePairs(sheetName).length === 0 && getDailySlice(sheetName).length > 0;
+    }
+
+    function workbookToClean(wb) {
+        const out = XLSX.utils.book_new();
+        wb.SheetNames.forEach(name => {
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: "" });
+            XLSX.utils.book_append_sheet(out, XLSX.utils.aoa_to_sheet(rows), name);
+        });
+        return out;
+    }
+
+    function writeWorkbookBuffer(wb, filename) {
+        const opts = { type: "array", bookSST: false, cellStyles: false };
+        const isXls = /\.xls$/i.test(filename || "") && !/\.xlsx$/i.test(filename || "");
+        if (!isXls) {
+            return { buf: XLSX.write(wb, { ...opts, bookType: "xlsx" }), filename };
+        }
+        try {
+            return { buf: XLSX.write(wb, { ...opts, bookType: "xls" }), filename };
+        } catch (err) {
+            console.warn("[write] xls failed, fallback xlsx", err);
+            const xlsxName = filename.replace(/\.xls$/i, ".xlsx");
+            return {
+                buf: XLSX.write(wb, { ...opts, bookType: "xlsx" }),
+                filename: xlsxName,
+                fallback: true
+            };
+        }
+    }
+
+    function parseWorkbook(arrayBuffer, filename) {
+        const isXls = /\.xls$/i.test(filename || "") && !/\.xlsx$/i.test(filename || "");
+        const opts = { type: "array", cellStyles: false, cellHTML: false, cellNF: false };
+        if (isXls) opts.codepage = 936;
+        const workbook = workbookToClean(XLSX.read(arrayBuffer, opts));
+        const dict = {};
+        let wordList = [];
+        if (workbook.Sheets[WORD_LIST_SHEET]) {
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[WORD_LIST_SHEET], { header: 1, defval: "" });
+            wordList = parsePairsFromSheetRows(rows, false);
+        }
+        workbook.SheetNames.forEach(sheet => {
+            if (isSystemSheet(sheet) || !isDateSheetName(sheet)) return;
+            const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheet], { header: 1, defval: "" });
+            const pairs = parsePairsFromSheetRows(rows, true);
+            dict[sheet] = pairs;
+        });
+        return { dict, workbook, wordList };
+    }
+
+    function queueSave(task) {
+        saveQueue = saveQueue.then(task).catch(err => {
+            console.error("[save]", err);
+            toast("保存消除状态失败：" + (err.message || err), true);
+        });
+        return saveQueue;
+    }
+
+    /** 当日步数/耗时后台写入：失败不弹 toast，避免打扰用户 */
+    function queueSaveSilent(task) {
+        saveQueue = saveQueue.then(task).catch(err => {
+            console.warn("[save activity]", err);
+        });
+        return saveQueue;
+    }
+
+    function notifySaveQueued(message) {
+        if (!saveQueuedToastShown) {
+            saveQueuedToastShown = true;
+            toast(message || "词库正被 Excel 打开，正在后台自动重试保存…", false);
+        }
+    }
+
+    function startBackgroundSaveLoop(getPayload) {
+        if (backgroundSaveTask) return;
+        backgroundSaveTask = (async () => {
+            while (true) {
+                await sleep(SAVE_RETRY_MS);
+                if (!gWorkbook) break;
+                try {
+                    const written = getPayload();
+                    const { res, text, data } = await postSaveWords(written);
+                    if (res.status === 202 || data.queued) continue;
+                    if (!res.ok) {
+                        if (isSaveLockMessage(text)) continue;
+                        console.error("[save] 后台重试失败:", text);
+                        break;
+                    }
+                    saveQueuedToastShown = false;
+                    if (written.fallback && written.filename !== gWordsFilename) {
+                        gWordsFilename = written.filename;
+                    }
+                    toast("词库已成功保存到 Gitee ✅", false);
+                    break;
+                } catch (e) {
+                    if (isSaveLockMessage(e && e.message)) continue;
+                    console.error("[save] 后台重试异常:", e);
+                    break;
+                }
+            }
+            backgroundSaveTask = null;
+        })();
+    }
+
+    async function postSaveWords(written) {
+        try {
+            return await GiteeData.saveWorkbook(
+                GITEE_DATA_DIR,
+                written.filename,
+                written.buf,
+                "对对碰保存词库: " + written.filename
+            );
+        } catch (e) {
+            const msg = (e && e.message) || String(e);
+            return {
+                res: { ok: false, status: 500 },
+                text: msg,
+                data: { ok: false, message: msg }
+            };
+        }
+    }
+
+    async function saveWorkbookFile() {
+        if (!gWorkbook) throw new Error("词库未加载");
+        const written = writeWorkbookBuffer(gWorkbook, gWordsFilename);
+        const { res, text, data } = await postSaveWords(written);
+
+        if (res.status === 202 || data.queued) {
+            notifySaveQueued(data.message);
+            startBackgroundSaveLoop(() => writeWorkbookBuffer(gWorkbook, gWordsFilename));
+            return;
+        }
+        if (!res.ok) {
+            if (isSaveLockMessage(text)) {
+                notifySaveQueued();
+                startBackgroundSaveLoop(() => writeWorkbookBuffer(gWorkbook, gWordsFilename));
+                return;
+            }
+            throw new Error(text || "保存到 Gitee 失败");
+        }
+        saveQueuedToastShown = false;
+        if (written.fallback && written.filename !== gWordsFilename) {
+            gWordsFilename = written.filename;
+            toast("已保存为 " + written.filename + "（原 xls 无法直接回写，请以后用该文件）");
+        }
+    }
+
+    async function persistEliminated(sheetName, pair) {
+        await persistPairProgress(sheetName, pair, true);
+    }
+
+    /** 清空当日每日单词在日期 Sheet 中的记录（再玩一次） */
+    async function clearSheetEliminated(sheetName) {
+        if (!gWorkbook || !sheetName) throw new Error("词库或日期无效");
+        const batchKeys = new Set(getDailySlice(sheetName).map(p => wordKey(p.en)));
+        const ws = gWorkbook.Sheets[sheetName];
+        if (ws) {
+            let rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+            if (rows.length) {
+                const header = rows[0].map(a => String(a ?? "").trim());
+                let idxEN = header.findIndex(k => /en|英文|english/i.test(k));
+                if (idxEN < 0) idxEN = 0;
+                const kept = [rows[0]];
+                for (let i = 1; i < rows.length; i++) {
+                    const en = String(rows[i][idxEN] ?? "").trim();
+                    if (!en || !batchKeys.has(wordKey(en))) kept.push(rows[i]);
+                }
+                if (kept.length < 2) {
+                    gWorkbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet([DATE_SHEET_HEADER.slice()]);
+                } else {
+                    gWorkbook.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(kept);
+                }
+                gWorkbook = workbookToClean(gWorkbook);
+            }
+        }
+        gameData[sheetName] = (gameData[sheetName] || []).filter(p => !batchKeys.has(wordKey(p.en)));
+        await saveWorkbookFile();
+        return batchKeys.size;
+    }
+
+    function ensureReviewCountSheet() {
+        if (!gWorkbook) return;
+        migrateDailyStatsSheetIfNeeded();
+        if (!gWorkbook.Sheets[DAILY_STATS_SHEET]) {
+            const sheet = XLSX.utils.aoa_to_sheet([DAILY_STATS_HEADER.slice()]);
+            XLSX.utils.book_append_sheet(gWorkbook, sheet, DAILY_STATS_SHEET);
+            return;
+        }
+        const ws = gWorkbook.Sheets[DAILY_STATS_SHEET];
+        let rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        if (!rows.length) rows = [DAILY_STATS_HEADER.slice()];
+        const header = rows[0].map(a => String(a ?? "").trim());
+        const needsNormalize =
+            header.length < 4 ||
+            !header.some(k => /(?:当日|每日)步数/.test(k)) ||
+            !header.some(k => /(?:当日|每日)耗时/.test(k)) ||
+            header.some(k => /每日步数|每日耗时/.test(k));
+        if (needsNormalize) {
+            rows = normalizeDailyStatsRows(rows);
+            gWorkbook.Sheets[DAILY_STATS_SHEET] = XLSX.utils.aoa_to_sheet(rows);
+        }
+    }
+
+    function getReviewCountRows() {
+        ensureReviewCountSheet();
+        const ws = gWorkbook.Sheets[resolveDailyStatsSheetName()];
+        if (!ws) return [DAILY_STATS_HEADER.slice()];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        if (!rows.length) return [DAILY_STATS_HEADER.slice()];
+        return rows;
+    }
+
+    function getReviewCount(dateKey) {
+        if (!gWorkbook || !dateKey) return 0;
+        const rows = getReviewCountRows();
+        const cols = parseDailyStatsColumnIndices(rows[0].map(a => String(a ?? "").trim()));
+        for (let i = 1; i < rows.length; i++) {
+            if (String(rows[i][cols.idxDate] ?? "").trim() === dateKey) {
+                return parseInt(String(rows[i][cols.idxReview] ?? "").trim(), 10) || 0;
+            }
+        }
+        return 0;
+    }
+
+    async function persistReviewCount(dateKey, count) {
+        if (!gWorkbook || !dateKey) return;
+        ensureReviewCountSheet();
+        let rows = getReviewCountRows();
+        const cols = ensureDailyStatsHeaderRow(rows);
+        const n = Math.max(0, parseInt(count, 10) || 0);
+        let found = false;
+        for (let i = 1; i < rows.length; i++) {
+            if (String(rows[i][cols.idxDate] ?? "").trim() === dateKey) {
+                rows[i][cols.idxReview] = n;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            const row = [dateKey, n, 0, 0];
+            rows.push(row);
+        }
+        gWorkbook.Sheets[DAILY_STATS_SHEET] = XLSX.utils.aoa_to_sheet(rows);
+        gWorkbook = workbookToClean(gWorkbook);
+        await saveWorkbookFile();
+    }
+
+    async function addDailyActivity(dateKey, moves, seconds) {
+        if (!gWorkbook || !dateKey) return;
+        const addMoves = Math.max(0, parseInt(moves, 10) || 0);
+        const addSec = Math.max(0, parseInt(seconds, 10) || 0);
+        if (!addMoves && !addSec) return;
+        ensureReviewCountSheet();
+        let rows = getReviewCountRows();
+        const cols = ensureDailyStatsHeaderRow(rows);
+        let found = false;
+        for (let i = 1; i < rows.length; i++) {
+            if (String(rows[i][cols.idxDate] ?? "").trim() !== dateKey) continue;
+            const prevSteps =
+                cols.idxSteps >= 0 ? parseInt(String(rows[i][cols.idxSteps] ?? "").trim(), 10) || 0 : 0;
+            const prevTime =
+                cols.idxTime >= 0 ? parseInt(String(rows[i][cols.idxTime] ?? "").trim(), 10) || 0 : 0;
+            if (cols.idxSteps >= 0) rows[i][cols.idxSteps] = prevSteps + addMoves;
+            if (cols.idxTime >= 0) rows[i][cols.idxTime] = prevTime + addSec;
+            found = true;
+            break;
+        }
+        if (!found) {
+            const review = getReviewCount(dateKey);
+            rows.push([dateKey, review, addMoves, addSec]);
+        }
+        gWorkbook.Sheets[DAILY_STATS_SHEET] = XLSX.utils.aoa_to_sheet(rows);
+        gWorkbook = workbookToClean(gWorkbook);
+        await saveWorkbookFile();
+    }
+
+    function resetActivityPersistBaseline() {
+        activityPersistedMoves = 0;
+        activityPersistedTime = 0;
+    }
+
+    function flushDailyActivityDelta(sheetName, options) {
+        const silent = options && options.silent;
+        if (!sheetName || !gWorkbook) return;
+        const deltaMoves = Math.max(0, moveCount - activityPersistedMoves);
+        const deltaSec = Math.max(0, timer - activityPersistedTime);
+        if (!deltaMoves && !deltaSec) return;
+        activityPersistedMoves += deltaMoves;
+        activityPersistedTime += deltaSec;
+        const enqueue = silent ? queueSaveSilent : queueSave;
+        enqueue(async () => {
+            try {
+                await addDailyActivity(sheetName, deltaMoves, deltaSec);
+            } catch (err) {
+                activityPersistedMoves -= deltaMoves;
+                activityPersistedTime -= deltaSec;
+                throw err;
+            }
+        });
+    }
+
+    function recordSessionActivity(sheetName) {
+        flushDailyActivityDelta(sheetName, { silent: true });
+    }
+
+    function startDailyActivityAutoFlush() {
+        stopDailyActivityAutoFlush();
+        if (!currentSheet || !gWorkbook) return;
+        dailyActivityFlushInt = setInterval(() => {
+            if (!currentSheet || !gWorkbook) return;
+            flushDailyActivityDelta(currentSheet, { silent: true });
+        }, DAILY_ACTIVITY_FLUSH_MS);
+    }
+
+    function stopDailyActivityAutoFlush() {
+        if (dailyActivityFlushInt) {
+            clearInterval(dailyActivityFlushInt);
+            dailyActivityFlushInt = null;
+        }
+    }
+
+    async function resetReviewCount(dateKey) {
+        await persistReviewCount(dateKey, 0);
+    }
+
+    function updateReviewBtnUi() {
+        const btn = document.getElementById("reviewBtn");
+        if (!btn) return;
+        if (!currentSheet || !wordListPairs.length) {
+            btn.title = "查看当日英文与中文对照";
+            return;
+        }
+        const maxReview = getReviewMaxPerDay();
+        const used = getReviewCount(currentSheet);
+        const left = Math.max(0, maxReview - used);
+        btn.title =
+            "「" + currentSheet + "」复习对照表（今日还可 " + left + " / " + maxReview + " 次）";
+    }
+
+    /** 复习列表：仅当前牌面上仍展示的单词（已消除的不含） */
+    function getReviewPairsFromBoard() {
+        const tiles = document.querySelectorAll("#gameBoard .tile:not(.removing)");
+        if (!tiles.length || !curPairs.length) return [];
+        const indices = new Set();
+        tiles.forEach(tile => {
+            const idx = Number(tile.dataset.pairIdx);
+            if (Number.isFinite(idx)) indices.add(idx);
+        });
+        return [...indices]
+            .sort((a, b) => a - b)
+            .map(idx => curPairs[idx])
+            .filter(p => p && p.en && p.zh)
+            .map(p => ({ en: p.en, zh: p.zh }));
+    }
+
+    function renderReviewList(pairs) {
+        const list = document.getElementById("reviewList");
+        list.innerHTML = "";
+        pairs.forEach(p => {
+            const row = document.createElement("div");
+            row.className = "review-row";
+            const en = document.createElement("span");
+            en.className = "review-en";
+            en.textContent = p.en;
+            const zh = document.createElement("span");
+            zh.className = "review-zh";
+            zh.textContent = p.zh;
+            row.appendChild(en);
+            row.appendChild(zh);
+            list.appendChild(row);
+        });
+    }
+
+    let reviewModalScrollY = 0;
+
+    function lockBodyForReviewModal() {
+        reviewModalScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+        document.body.classList.add("review-modal-open");
+        document.body.style.top = "-" + reviewModalScrollY + "px";
+    }
+
+    function unlockBodyForReviewModal() {
+        document.body.classList.remove("review-modal-open");
+        document.body.style.top = "";
+        window.scrollTo(0, reviewModalScrollY);
+    }
+
+    function hideReviewModal() {
+        const modal = document.getElementById("reviewModal");
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+        unlockBodyForReviewModal();
+        const list = document.getElementById("reviewList");
+        if (list) list.scrollTop = 0;
+    }
+
+    function showReviewModal() {
+        if (!currentSheet) {
+            toast("请先在上方选择日期", true);
+            return;
+        }
+        const pairs = getReviewPairsFromBoard();
+        if (!pairs.length) {
+            toast("当前牌面上没有单词可复习", true);
+            return;
+        }
+        const maxReview = getReviewMaxPerDay();
+        const used = getReviewCount(currentSheet);
+        if (used >= maxReview) {
+            toast(
+                "「" + currentSheet + "」复习次数已用完（" + maxReview + "/" + maxReview + "）",
+                true
+            );
+            return;
+        }
+        const nextUsed = used + 1;
+        const left = maxReview - nextUsed;
+        document.getElementById("reviewModalMeta").textContent =
+            currentSheet +
+            " · 共 " + pairs.length + " 组 · 本次为第 " + nextUsed + " 次复习（还剩 " + left + " 次）";
+        renderReviewList(pairs);
+        const modal = document.getElementById("reviewModal");
+        const list = document.getElementById("reviewList");
+        if (list) list.scrollTop = 0;
+        lockBodyForReviewModal();
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+        queueSave(() => persistReviewCount(currentSheet, nextUsed));
+        updateReviewBtnUi();
+        Sfx.tap();
+    }
+
+    function isSheetAllDone(sheetName) {
+        return isDailyQuotaDone(sheetName);
+    }
+
+    function showResetConfirmModal() {
+        if (!currentSheet) {
+            toast("请先在上方选择日期", true);
+            return;
+        }
+        if (!isSheetAllDone(currentSheet)) {
+            toast("完成当日每日单词后，才能使用「再玩一次」", true);
+            return;
+        }
+        const stats = getSheetPairStats(currentSheet);
+        const textEl = document.getElementById("resetModalText");
+        textEl.textContent =
+            "将清空「" + currentSheet + "」当日每日 " + stats.dailyQuota + " 个单词的消除记录，并重新开始配对。";
+        const modal = document.getElementById("resetModal");
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+        document.getElementById("resetConfirmBtn").disabled = false;
+        document.getElementById("resetConfirmBtn").textContent = "确定清空并重玩";
+    }
+
+    function hideResetConfirmModal() {
+        const modal = document.getElementById("resetModal");
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    async function confirmResetAndReplay() {
+        const sheet = currentSheet;
+        if (!sheet || !isSheetAllDone(sheet)) {
+            toast("当前选择的日期尚未全部消除，暂不能重玩", true);
+            hideResetConfirmModal();
+            return;
+        }
+        const confirmBtn = document.getElementById("resetConfirmBtn");
+        const cancelBtn = document.getElementById("resetCancelBtn");
+        confirmBtn.disabled = true;
+        cancelBtn.disabled = true;
+        confirmBtn.textContent = "正在清空…";
+
+        try {
+            await queueSave(async () => {
+                await clearSheetEliminated(sheet);
+                await resetReviewCount(sheet);
+            });
+            hideResetConfirmModal();
+            stopCelebration();
+            const over = document.getElementById("gameOverMsg");
+            over.style.display = "none";
+            over.className = "";
+            replayMode = false;
+            wrongCount = 0;
+            refreshDateOption(sheet);
+            curPairs = getActivePairs(sheet);
+            updateReviewBtnUi();
+            toast("已清空「" + sheet + "」消除记录，复习次数已重置，重新开始吧！");
+            startGame();
+        } catch (err) {
+            toast("清空失败：" + (err.message || err), true);
+        } finally {
+            confirmBtn.disabled = false;
+            cancelBtn.disabled = false;
+            confirmBtn.textContent = "确定清空并重玩";
+        }
+    }
+
+    function formatSheetDate(d) {
+        const yyyy = d.getFullYear();
+        const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+        const dd = d.getDate().toString().padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function getTodaySheetName() {
+        return formatSheetDate(new Date());
+    }
+
+    function isTodaySheet(sheetName) {
+        return sheetName === getTodaySheetName();
+    }
+
+    function dayLabelForSheet(sheetName) {
+        return isTodaySheet(sheetName || currentSheet) ? "今日" : "该日";
+    }
+
+    /** 当日/该日无待配对时，按真实消除与掌握状态生成提示（避免误报「已全部消除」） */
+    function getEmptyBoardMessage() {
+        if (!currentSheet) return "请在上方选择有题目的日期";
+        const label = dayLabelForSheet(currentSheet);
+        const stats = getSheetPairStats(currentSheet);
+        if (isSheetAllDone(currentSheet)) {
+            return label + "每日 " + stats.dailyQuota + " 个单词已全部消除 🎉";
+        }
+        if (isSheetFullyMastered()) {
+            return label + "全部单词已掌握（≥" + gameConfig.masterScore + " 分，共 " + stats.sheetTotal + " 个）";
+        }
+        if (stats.left > 0) {
+            return label + "当前无可练单词（本批还剩 " + stats.left + " 组未配对）";
+        }
+        if (stats.dailyQuota > 0 && stats.sheetDone < stats.dailyQuota) {
+            return label + "今日任务 " + stats.sheetDone + "/" + stats.dailyQuota + " 组已消除，暂无本批题目";
+        }
+        return label + "暂无题目";
+    }
+
+    function formatDateOptionLabel(sheetName, left, total) {
+        const progress = "（剩 " + left + "/" + total + "）";
+        if (isTodaySheet(sheetName)) {
+            return "今天 · " + sheetName + progress;
+        }
+        return sheetName + progress;
+    }
+
+    function updateResetBtn() {
+        const show = currentSheet && isSheetAllDoneInMemory(currentSheet);
+        document.getElementById("resetBtn").style.display = show ? "inline-block" : "none";
+        updateReviewBtnUi();
+    }
+
+    /** 有今日 Sheet 则始终选今日（含已全部消除）；无今日时才切换到其它日期 */
+    function pickDefaultSheet(dict) {
+        const today = getTodaySheetName();
+        if (dict && Object.prototype.hasOwnProperty.call(dict, today)) {
+            return { sheet: today, isToday: true };
+        }
+
+        const cursor = new Date();
+        for (let i = 0; i < 366; i++) {
+            cursor.setDate(cursor.getDate() - 1);
+            const name = formatSheetDate(cursor);
+            if (dict[name] !== undefined && sheetHasActive(name)) return { sheet: name, isToday: false };
+        }
+
+        const sheets = Object.keys(dict);
+        const dated = sheets.filter(s => /^\d{4}-\d{2}-\d{2}$/.test(s)).sort();
+        if (dated.length) {
+            const beforeToday = dated.filter(s => s < today && sheetHasActive(s));
+            if (beforeToday.length) return { sheet: beforeToday[beforeToday.length - 1], isToday: false };
+            const anyActive = dated.filter(s => sheetHasActive(s));
+            if (anyActive.length) return { sheet: anyActive[anyActive.length - 1], isToday: false };
+        }
+        const any = sheets.find(s => sheetHasActive(s));
+        if (any) return { sheet: any, isToday: false };
+        if (sheets.length) return { sheet: sheets[0], isToday: false };
+        return null;
+    }
+
+    function applySheetSelection(sheetName, fromDateSwitch) {
+        const prevSheet = currentSheet;
+        if (prevSheet && prevSheet !== sheetName) {
+            flushDailyActivityDelta(prevSheet, { silent: true });
+            stopDailyActivityAutoFlush();
+        }
+        currentSheet = sheetName;
+        document.getElementById("dateSelector").value = sheetName;
+        replayMode = false;
+        syncSheetDoneFlags(sheetName);
+        curPairs = getActivePairs(sheetName);
+        startGame(fromDateSwitch);
+    }
+
+    function startSheet(sheetName, isToday) {
+        applySheetSelection(sheetName, false);
+        if (!isToday) {
+            toast("未找到今日「" + getTodaySheetName() + "」，已加载：" + sheetName);
+        }
+    }
+
+    function showPickWordsBtn(show) {
+        document.getElementById("pickWordsBtn").style.display = show ? "inline-block" : "none";
+    }
+
+    function applyGradeUi() {
+        if (wordsConfig.gradeLabel) {
+            setHeroTitle("英文中文对对碰");
+            document.title = "对对碰 · " + wordsConfig.gradeLabel;
+        }
+        const sub = document.getElementById("heroSub");
+        if (sub) {
+            sub.textContent = "";
+            sub.style.display = "none";
+        }
+    }
+
+    function wordsFileHint() {
+        return WORDS_CANDIDATES.join(" / ");
+    }
+
+    async function applyParsedWords(parsed, filename) {
+        gWorkbook = parsed.workbook;
+        ensureReviewCountSheet();
+        ensureConfigSheet();
+        ensureWordRecordSheet();
+        loadGameConfig();
+        loadWordRecords();
+        gWordsFilename = filename;
+        applyGradeUi();
+        wordListPairs = parsed.wordList || [];
+        if (!wordListPairs.length) {
+            return { ok: false, reason: "empty" };
+        }
+        syncPairsWordTotals(wordListPairs);
+        const dict = parsed.dict || {};
+        const weekCreated = ensureWeekDateSheets(new Date());
+        if (weekCreated) {
+            try {
+                await saveWorkbookFile();
+            } catch (err) {
+                console.warn("[week sheets]", err);
+            }
+        }
+        if (!applyGameData(dict)) {
+            return { ok: false, reason: "empty" };
+        }
+        const picked = pickDefaultSheet(gameData);
+        if (!picked) {
+            return { ok: false, reason: "empty" };
+        }
+        syncSheetDoneFlags(picked.sheet);
+        startSheet(picked.sheet, picked.isToday);
+        if (isSheetAllDone(picked.sheet)) {
+            const n = getDailySlice(picked.sheet).length;
+            toast(dayLabelForSheet(picked.sheet) + "每日 " + n + " 个单词已全部消除", false);
+        }
+        hideLoadArea();
+        return { ok: true };
+    }
+
+    async function ingestWordsBuffer(buf, filename) {
+        if (buf.byteLength < 512) {
+            return { ok: false, reason: "corrupt" };
+        }
+        let parsed;
+        try {
+            parsed = parseWorkbook(buf, filename);
+        } catch (err) {
+            console.warn("[load] parse failed:", filename, err);
+            return { ok: false, reason: "corrupt" };
+        }
+        return applyParsedWords(parsed, filename);
+    }
+
+    async function tryLoadLocalWords() {
+        let fetchedAny = false;
+        let parsedAny = false;
+        for (const file of WORDS_CANDIDATES) {
+            let buf;
+            try {
+                buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, file));
+            } catch (e) {
+                console.warn("[load] Gitee fetch failed:", file, e);
+                continue;
+            }
+            fetchedAny = true;
+            const result = await ingestWordsBuffer(buf, file);
+            if (result.ok) return true;
+            if (result.reason === "corrupt") parsedAny = true;
+            if (result.reason === "empty") parsedAny = true;
+        }
+        if (!fetchedAny) return { ok: false, reason: "missing" };
+        if (!parsedAny) return { ok: false, reason: "corrupt" };
+        return { ok: false, reason: "empty" };
+    }
+
+    async function loadWordsFromFile(file) {
+        if (!file) return false;
+        const loading = document.getElementById("loadingMsg");
+        loading.style.display = "block";
+        loading.textContent = "正在读取 " + file.name + "…";
+        document.getElementById("loadError").style.display = "none";
+        try {
+            await waitForXlsx(10000);
+            if (typeof XLSX === "undefined") {
+                throw new Error("Excel 解析库加载失败");
+            }
+            const result = await ingestWordsBuffer(await file.arrayBuffer(), file.name);
+            if (result.ok) {
+                toast("词库已加载：" + file.name);
+                showPickWordsBtn(false);
+                return true;
+            }
+            if (result.reason === "corrupt") {
+                throw new Error("文件已损坏或不是有效的 Excel");
+            }
+            throw new Error("文件里没有有效单词：需有「单词列表」Sheet，表头含「英文」「中文」且至少一行");
+        } catch (err) {
+            showLoadError((err && err.message) || String(err));
+            toast("词库加载失败：" + ((err && err.message) || err), true);
+            return false;
+        } finally {
+            if (!gameData || !Object.keys(gameData).length) {
+                loading.style.display = "none";
+            }
+        }
+    }
+
+    async function fetchWordsDiag() {
+        try {
+            const path = GiteeData.joinPath(GITEE_DATA_DIR, gWordsFilename);
+            const meta = await GiteeData.getFileMeta(path);
+            if (!meta) {
+                return { ok: true, root: "gitee:" + GiteeData.CONFIG.REPOSITORY, files: [{ name: gWordsFilename, exists: false }] };
+            }
+            return {
+                ok: true,
+                root: "gitee:" + GiteeData.CONFIG.REPOSITORY + "/" + GITEE_DATA_DIR,
+                files: [{ name: meta.name || gWordsFilename, exists: true, size: meta.size, sha: meta.sha }]
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function waitForXlsx(ms) {
+        const deadline = Date.now() + (ms || 10000);
+        while (typeof XLSX === "undefined" && Date.now() < deadline) {
+            await new Promise(r => setTimeout(r, 80));
+        }
+    }
+
+    function showLoadError(msg) {
+        const errEl = document.getElementById("loadError");
+        errEl.textContent = msg;
+        errEl.style.display = "block";
+        document.getElementById("retryBtn").style.display = "inline-block";
+        document.getElementById("loadArea").classList.remove("done");
+    }
+
+    function hideLoadArea() {
+        document.getElementById("loadArea").classList.add("done");
+        document.getElementById("loadError").style.display = "none";
+        document.getElementById("retryBtn").style.display = "none";
+        document.getElementById("loadingMsg").style.display = "none";
+    }
+
+    function collectDateSheetNames(dict) {
+        const names = new Set(getWeekDateNames(new Date()));
+        Object.keys(dict || {}).forEach(k => {
+            if (isDateSheetName(k)) names.add(k);
+        });
+        if (gWorkbook) {
+            gWorkbook.SheetNames.forEach(k => {
+                if (isDateSheetName(k)) names.add(k);
+            });
+        }
+        return [...names].sort();
+    }
+
+    function applyGameData(dict) {
+        if (!wordListPairs.length) {
+            toast("请先在「单词列表」Sheet 中填写英文与中文（至少一行）", true);
+            return false;
+        }
+        const merged = {};
+        collectDateSheetNames(dict).forEach(k => {
+            merged[k] = (dict && dict[k]) ? dict[k].slice() : [];
+        });
+        gameData = merged;
+        const sel = document.getElementById("dateSelector");
+        sel.innerHTML = '<option value="">选择日期</option>';
+        Object.keys(merged).forEach(n => {
+            const st = getSheetPairStats(n);
+            const opt = document.createElement("option");
+            opt.value = n;
+            opt.textContent = formatDateOptionLabel(n, st.left, st.total);
+            sel.appendChild(opt);
+        });
+        document.getElementById("toolbar").style.display = "flex";
+        document.getElementById("statsBar").style.display = "flex";
+        updateResetBtn();
+        return true;
+    }
+
+    async function tryAutoLoad() {
+        const loading = document.getElementById("loadingMsg");
+        document.getElementById("loadError").style.display = "none";
+        document.getElementById("retryBtn").style.display = "none";
+        showPickWordsBtn(false);
+        document.getElementById("loadArea").classList.remove("done");
+        loading.style.display = "block";
+        if (wordsConfig.missingGrade) {
+            showPickWordsBtn(false);
+            throw new Error(
+                "请从入口选择学生进入（index.html），或使用 ?grade=学生key。学生列表在 students.js 中配置。"
+            );
+        }
+        loading.textContent = "正在从 Gitee 读取 " + gWordsFilename + "…";
+        try {
+            await waitForXlsx(10000);
+            if (typeof XLSX === "undefined") {
+                throw new Error("Excel 解析库加载失败，请检查网络是否可访问 CDN");
+            }
+            if (typeof GiteeData === "undefined") {
+                throw new Error("Gitee 数据模块加载失败，请确认 ../gitee-data.js 可访问");
+            }
+            const loaded = await tryLoadLocalWords();
+            if (loaded === true) return true;
+            const diag = await fetchWordsDiag();
+            let extra = "";
+            if (diag && diag.files) {
+                const parts = diag.files.map(f => f.exists ? f.name + "(" + f.size + "B)" : f.name + "(无)");
+                extra = " Gitee 词库：" + parts.join("，") + "。";
+            } else {
+                extra = " 请检查 gitee-data.js 中的仓库/Token，以及 LearningData/" + GITEE_DATA_DIR + " 目录是否已上传。";
+            }
+            if (loaded && loaded.reason === "corrupt") {
+                throw new Error("词库已损坏或格式不对（文件过小）。" + extra + " 可点「选择词库文件」手动加载。");
+            }
+            if (loaded && loaded.reason === "empty") {
+                throw new Error(
+                    "词库能打开但无有效题目：需有「单词列表」Sheet（英文/中文），并在「配置」中设置每日单词数。" + extra
+                );
+            }
+            showPickWordsBtn(true);
+            throw new Error("未找到 " + wordsFileHint() + "。请将词库上传到 Gitee LearningData/" + GITEE_DATA_DIR + "。" + extra);
+        } catch (err) {
+            const msg = (err && err.message) || String(err);
+            showLoadError(msg);
+            toast("词库加载失败：" + msg, true);
+            console.error("[tryAutoLoad]", err);
+            if (location.protocol === "file:" || /选择 words/.test(msg)) showPickWordsBtn(true);
+            return false;
+        } finally {
+            if (!gameData || !Object.keys(gameData).length) {
+                loading.style.display = "none";
+            }
+        }
+    }
+
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function settleTileEnter(el) {
+        if (el) el.classList.remove("tile-enter");
+    }
+
+    function labelNeedsTwoLines(label) {
+        const width = label.clientWidth;
+        if (!width || !label.textContent) return false;
+        const ref = getComputedStyle(label);
+        const probe = document.createElement("div");
+        probe.style.cssText =
+            "position:fixed;left:-9999px;top:0;visibility:hidden;pointer-events:none;width:" + width + "px;" +
+            "font-size:" + ref.fontSize + ";font-weight:" + ref.fontWeight + ";line-height:" + ref.lineHeight + ";" +
+            "font-family:" + ref.fontFamily + ";word-break:break-word;";
+        probe.textContent = label.textContent;
+        document.body.appendChild(probe);
+        const linePx = parseFloat(getComputedStyle(probe).lineHeight) || 20;
+        const need = probe.offsetHeight > linePx * 1.15;
+        probe.remove();
+        return need;
+    }
+
+    function syncTileUniformHeight() {
+        const tiles = document.querySelectorAll("#enList .tile, #zhList .tile");
+        if (!tiles.length) return;
+        let needTwo = false;
+        tiles.forEach(t => {
+            const label = t.querySelector(".tile-label");
+            if (label && labelNeedsTwoLines(label)) needTwo = true;
+        });
+        tiles.forEach(t => t.classList.toggle("tile-lines-2", needTwo));
+    }
+
+    function createTile(card, delay) {
+        const el = document.createElement("div");
+        el.className = "tile tile-enter";
+        el.dataset.type = card.type;
+        el.dataset.pairIdx = card.pairIdx;
+        const label = document.createElement("span");
+        label.className = "tile-label";
+        label.textContent = card.text;
+        el.appendChild(label);
+        el.style.animationDelay = delay + "s";
+        el.addEventListener("animationend", (e) => {
+            if (e.animationName === "tileIn") settleTileEnter(el);
+        });
+        el.addEventListener("click", onTileClick);
+        return el;
+    }
+
+    function updateMatchedStat() {
+        let done, total;
+        if (currentSheet && wordListPairs.length) {
+            const stats = getSheetPairStats(currentSheet);
+            done = stats.done;
+            total = stats.total;
+        } else {
+            total = curPairs ? curPairs.length : 0;
+            done = matchedCount;
+        }
+        document.getElementById("matchedCount").textContent = done;
+        document.getElementById("totalPairs").textContent = total;
+    }
+
+    function initErrorLimit() {
+        errorLimit = Math.max(1, curPairs ? curPairs.length : 0);
+        wrongCount = 0;
+        updateErrorStat();
+    }
+
+    function updateErrorStat() {
+        const wcEl = document.getElementById("wrongCount");
+        const limEl = document.getElementById("errorLimit");
+        const pill = document.getElementById("errorStatPill");
+        if (wcEl) wcEl.textContent = wrongCount;
+        if (limEl) limEl.textContent = errorLimit;
+        if (!pill) return;
+        pill.classList.remove("warn", "danger");
+        if (wrongCount >= errorLimit) pill.classList.add("danger");
+        else if (errorLimit > 0 && wrongCount >= Math.max(1, errorLimit - 2)) pill.classList.add("warn");
+    }
+
+    async function handleErrorLimitExceeded() {
+        if (!currentSheet) return;
+        lockBoard = true;
+        clearSelection();
+        if (timerInt) clearInterval(timerInt);
+        stopDailyActivityAutoFlush();
+        const sheet = currentSheet;
+        const today = getTodaySheetName();
+        const clearToday = isTodaySheet(sheet);
+        toast(
+            clearToday
+                ? "错误次数已达上限（" + errorLimit + " 次）！今日题目将清空，重新开始"
+                : "错误次数已达上限！「" + sheet + "」将清空消除记录并重来",
+            true
+        );
+        try {
+            recordSessionActivity(sheet);
+            await queueSave(() => clearSheetEliminated(sheet));
+            stopCelebration();
+            const over = document.getElementById("gameOverMsg");
+            over.style.display = "none";
+            over.className = "";
+            replayMode = false;
+            wrongCount = 0;
+            curPairs = getActivePairs(sheet);
+            refreshDateOption(sheet);
+            document.getElementById("dateSelector").value = sheet;
+            startGame();
+            toast(clearToday ? "今日已清空并重玩，请认真配对哦" : "已清空并重玩，请认真配对哦");
+        } catch (err) {
+            toast("清空失败：" + (err.message || err), true);
+            lockBoard = false;
+        }
+    }
+
+    function registerWrongMatch() {
+        wrongCount++;
+        updateErrorStat();
+        if (wrongCount >= errorLimit) {
+            setTimeout(() => handleErrorLimitExceeded(), 480);
+            return true;
+        }
+        return false;
+    }
+
+    function splitEnZhPicks(first, second) {
+        return first.type === "en"
+            ? { en: first, zh: second }
+            : { en: second, zh: first };
+    }
+
+    function clearSelection() {
+        document.querySelectorAll("#gameBoard .tile.selected").forEach(el => {
+            el.classList.remove("selected");
+        });
+        selectedTile = null;
+        pairAwaitingConfirm = null;
+    }
+
+    /** 取消确认后仍高亮的一对：再点时只保留一列选中，避免同列多张同时高亮 */
+    function normalizePairAwaitingOnClick(tile, pairIdx, type) {
+        if (!pairAwaitingConfirm) return false;
+        const { en, zh } = splitEnZhPicks(pairAwaitingConfirm.first, pairAwaitingConfirm.second);
+        if (tile === en.el) {
+            en.el.classList.remove("selected");
+            pairAwaitingConfirm = null;
+            selectedTile = zh.el.isConnected ? { el: zh.el, pairIdx: zh.pairIdx, type: "zh" } : null;
+            return true;
+        }
+        if (tile === zh.el) {
+            zh.el.classList.remove("selected");
+            pairAwaitingConfirm = null;
+            selectedTile = en.el.isConnected ? { el: en.el, pairIdx: en.pairIdx, type: "en" } : null;
+            return true;
+        }
+        en.el.classList.remove("selected");
+        zh.el.classList.remove("selected");
+        pairAwaitingConfirm = null;
+        selectedTile = null;
+        return false;
+    }
+
+    function refreshDateOption(sheetName) {
+        const sel = document.getElementById("dateSelector");
+        const opt = Array.from(sel.options).find(o => o.value === sheetName);
+        if (!opt || !gameData[sheetName]) return;
+        const st = getSheetPairStats(sheetName);
+        opt.textContent = formatDateOptionLabel(sheetName, st.left, st.total);
+    }
+
+    function startGame(fromDateSwitch) {
+        if (fromDateSwitch) stopCelebration();
+        const sheetStats = currentSheet ? getSheetPairStats(currentSheet) : { total: 0, done: 0, left: 0 };
+        matchedCount = sheetStats.done;
+
+        if (!replayMode && (!curPairs || !curPairs.length)) {
+            hideLoadArea();
+            replayMode = false;
+            stopDailyActivityAutoFlush();
+            if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+            moveCount = 0;
+            timer = 0;
+            resetActivityPersistBaseline();
+            selectedTile = null;
+            lockBoard = false;
+            document.getElementById("moveCount").textContent = "0";
+            document.getElementById("timer").textContent = "0";
+            wrongCount = 0;
+            errorLimit = 0;
+            updateErrorStat();
+            updateMatchedStat();
+            if (timerInt) clearInterval(timerInt);
+            const emptyMsg = getEmptyBoardMessage();
+            document.getElementById("gameBoard").innerHTML =
+                '<p class="match-hint">' + emptyMsg + "</p>";
+            const over = document.getElementById("gameOverMsg");
+            if (currentSheet && (isSheetAllDone(currentSheet) || isSheetFullyMastered())) {
+                showAllDoneQuiet({ extraText: emptyMsg });
+            } else {
+                over.style.display = "none";
+                over.className = "";
+                stopCelebration();
+                updateResetBtn();
+            }
+            return;
+        }
+        hideLoadArea();
+        stopDailyActivityAutoFlush();
+        if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+        moveCount = 0;
+        timer = 0;
+        resetActivityPersistBaseline();
+        selectedTile = null;
+        lockBoard = false;
+        document.getElementById("moveCount").textContent = "0";
+        document.getElementById("timer").textContent = "0";
+        initErrorLimit();
+        updateMatchedStat();
+        const over = document.getElementById("gameOverMsg");
+        over.style.display = "none";
+        over.className = "";
+        stopCelebration();
+
+        const enCards = curPairs.map((pair, idx) => ({ type: "en", text: pair.en, pairIdx: idx }));
+        const zhCards = curPairs.map((pair, idx) => ({ type: "zh", text: pair.zh, pairIdx: idx }));
+        shuffle(enCards);
+        shuffle(zhCards);
+
+        const board = document.getElementById("gameBoard");
+        const n = curPairs.length;
+        board.innerHTML =
+            '<div class="match-board">' +
+            '<div class="match-col">' +
+            '<div class="match-col-head"><p class="match-col-title">英文</p><span class="match-col-count" id="enColCount">' + n + '</span></div>' +
+            '<div class="tile-scroll"><div class="tile-list" id="enList"></div></div></div>' +
+            '<div class="match-col">' +
+            '<div class="match-col-head"><p class="match-col-title">中文</p><span class="match-col-count" id="zhColCount">' + n + '</span></div>' +
+            '<div class="tile-scroll"><div class="tile-list" id="zhList"></div></div></div>' +
+            '</div>';
+        const enList = document.getElementById("enList");
+        const zhList = document.getElementById("zhList");
+        enCards.forEach((card, i) => enList.appendChild(createTile(card, i * 0.02)));
+        zhCards.forEach((card, i) => zhList.appendChild(createTile(card, i * 0.02)));
+        requestAnimationFrame(() => requestAnimationFrame(syncTileUniformHeight));
+
+        if (timerInt) clearInterval(timerInt);
+        timerInt = setInterval(() => {
+            timer++;
+            document.getElementById("timer").textContent = timer;
+        }, 1000);
+        startDailyActivityAutoFlush();
+        updateResetBtn();
+    }
+
+    function updateColCounts() {
+        const enLeft = document.querySelectorAll("#enList .tile").length;
+        const zhLeft = document.querySelectorAll("#zhList .tile").length;
+        const enEl = document.getElementById("enColCount");
+        const zhEl = document.getElementById("zhColCount");
+        if (enEl) enEl.textContent = enLeft;
+        if (zhEl) zhEl.textContent = zhLeft;
+    }
+
+    function removeMatchedTiles(el1, el2) {
+        const tiles = [el1, el2];
+        tiles.forEach(el => {
+            el.classList.remove("selected", "tile-enter");
+            el.classList.add("removing");
+        });
+        setTimeout(() => {
+            tiles.forEach(el => {
+                if (el.isConnected) el.remove();
+            });
+            updateColCounts();
+            if (replayMode) {
+                const left = document.querySelectorAll("#enList .tile, #zhList .tile").length;
+                if (left === 0) {
+                    stopDailyActivityAutoFlush();
+                    if (currentSheet) recordSessionActivity(currentSheet);
+                    replayMode = false;
+                    if (timerInt) clearInterval(timerInt);
+                    toast("本局练完啦！词库里的消除记录已保留");
+                    updateResetBtn();
+                }
+                return;
+            }
+            const left = document.querySelectorAll("#enList .tile, #zhList .tile").length;
+            if (left === 0 && currentSheet) {
+                const sheet = currentSheet;
+                stopDailyActivityAutoFlush();
+                recordSessionActivity(sheet);
+                refreshDateOption(sheet);
+                updateMatchedStat();
+                updateResetBtn();
+                if (isDailyQuotaDone(sheet)) {
+                    const n = getDailySlice(sheet).length;
+                    celebrateFullComplete({
+                        moves: moveCount,
+                        timer: timer,
+                        extraText: dayLabelForSheet(sheet) + "每日 " + n + " 个单词已全部消除 🎉"
+                    });
+                } else {
+                    toast(dayLabelForSheet(sheet) + "当前批次已练完，点击「再玩一次」可重新练习");
+                }
+            }
+        }, 400);
+    }
+
+    function applyCorrectMatch(first, second) {
+        playGameSfx(() => Sfx.match());
+        first.el.classList.remove("selected");
+        second.el.classList.remove("selected");
+        removeMatchedTiles(first.el, second.el);
+        const matchedPair = curPairs[first.pairIdx];
+        adjustWordRecord(matchedPair, 1);
+        matchedCount++;
+        applyEliminatedInMemory(currentSheet, matchedPair);
+        updateMatchedStat();
+        queueSave(() => persistEliminated(currentSheet, matchedPair));
+        refreshDateOption(currentSheet);
+        selectedTile = null;
+        lockBoard = false;
+    }
+
+    function applyWrongMatch(first, second) {
+        playGameSfx(() => Sfx.wrong());
+        const wrongPair = getWrongMatchPair(first, second);
+        if (wrongPair) {
+            adjustWordRecord(wrongPair, -1);
+            incrementPairErrorCount(wrongPair);
+            applyPairProgressInMemory(currentSheet, wrongPair, false);
+            queueSave(() => persistPairProgress(currentSheet, wrongPair, false));
+        }
+        const enPick = first.type === "en" ? first : second;
+        const otherPick = first.type === "en" ? second : first;
+        first.el.classList.add("shake");
+        second.el.classList.add("shake");
+        const limitHit = registerWrongMatch();
+        setTimeout(() => {
+            first.el.classList.remove("shake");
+            second.el.classList.remove("shake");
+            otherPick.el.classList.remove("selected");
+            enPick.el.classList.add("selected");
+            selectedTile = { el: enPick.el, pairIdx: enPick.pairIdx, type: "en" };
+            if (!limitHit) lockBoard = false;
+        }, 450);
+    }
+
+    function showEliminateConfirmModal(first, second, ok) {
+        const enPick = first.type === "en" ? first : second;
+        const zhPick = first.type === "zh" ? first : second;
+        const en = enPick.el.textContent.trim();
+        const zh = zhPick.el.textContent.trim();
+        document.getElementById("eliminateConfirmTitle").textContent = ok ? "确认消除？" : "确认配对？";
+        document.getElementById("eliminateConfirmText").textContent =
+            (ok ? "确定要消除这一对吗？ " : "确认本次配对？ ") + en + " — " + zh;
+        document.getElementById("eliminateConfirmBtn").textContent = ok ? "确认消除" : "确认配对";
+        pendingMatchConfirm = { first, second, ok: !!ok };
+        const modal = document.getElementById("eliminateConfirmModal");
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+    }
+
+    function hideEliminateConfirmModal() {
+        const modal = document.getElementById("eliminateConfirmModal");
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+        pendingMatchConfirm = null;
+    }
+
+    function cancelEliminateConfirm() {
+        if (!pendingMatchConfirm) {
+            hideEliminateConfirmModal();
+            return;
+        }
+        const { first, second } = pendingMatchConfirm;
+        pairAwaitingConfirm = { first, second };
+        const { en } = splitEnZhPicks(first, second);
+        selectedTile = { el: en.el, pairIdx: en.pairIdx, type: "en" };
+        lockBoard = false;
+        hideEliminateConfirmModal();
+    }
+
+    function confirmEliminateMatch() {
+        if (!pendingMatchConfirm) return;
+        const { first, second, ok } = pendingMatchConfirm;
+        pairAwaitingConfirm = null;
+        hideEliminateConfirmModal();
+        moveCount++;
+        document.getElementById("moveCount").textContent = moveCount;
+        if (ok) applyCorrectMatch(first, second);
+        else applyWrongMatch(first, second);
+    }
+
+    function onTileClick(e) {
+        const tile = e.currentTarget;
+        if (lockBoard || tile.classList.contains("removing") || !tile.isConnected) return;
+        if (document.getElementById("eliminateConfirmModal").classList.contains("show")) return;
+
+        const pairIdx = Number(tile.dataset.pairIdx);
+        const type = tile.dataset.type;
+
+        if (normalizePairAwaitingOnClick(tile, pairIdx, type)) return;
+
+        if (selectedTile && selectedTile.el === tile) {
+            tile.classList.remove("selected");
+            selectedTile = null;
+            return;
+        }
+
+        if (type === "en" && Sfx.isEnabled()) EnglishSpeech.speak(tile);
+
+        if (!selectedTile) {
+            selectedTile = { el: tile, pairIdx, type };
+            settleTileEnter(tile);
+            tile.classList.add("selected");
+            playGameSfx(() => Sfx.select());
+            return;
+        }
+
+        if (selectedTile.type === type) {
+            document.querySelectorAll('#gameBoard .tile[data-type="' + type + '"].selected').forEach(el => {
+                if (el !== tile) el.classList.remove("selected");
+            });
+            const prev = selectedTile.el;
+            selectedTile = { el: tile, pairIdx, type };
+            settleTileEnter(tile);
+            tile.classList.add("selected");
+            if (prev !== tile) prev.classList.remove("selected");
+            playGameSfx(() => Sfx.switchTile());
+            return;
+        }
+
+        document.querySelectorAll('#gameBoard .tile[data-type="' + type + '"].selected').forEach(el => {
+            el.classList.remove("selected");
+        });
+        const first = selectedTile;
+        const second = { el: tile, pairIdx, type };
+        settleTileEnter(tile);
+        tile.classList.add("selected");
+        lockBoard = true;
+        pairAwaitingConfirm = null;
+
+        const ok = first.pairIdx === second.pairIdx;
+
+        if (gameConfig.eliminateConfirm) {
+            showEliminateConfirmModal(first, second, ok);
+            return;
+        }
+
+        moveCount++;
+        document.getElementById("moveCount").textContent = moveCount;
+
+        if (ok) {
+            applyCorrectMatch(first, second);
+        } else {
+            applyWrongMatch(first, second);
+        }
+    }
+
+    const SURPRISE_SCENES = [
+        { id: "hero", label: "今日小英雄勋章！" },
+        { id: "parade", label: "小伙伴来祝贺啦！" },
+        { id: "balloons", label: "气球飞向天空！" },
+        { id: "rainbow", label: "彩虹惊喜降临！" },
+        { id: "stars", label: "星星为你闪耀！" },
+        { id: "rocket", label: "火箭冲冲冲！" }
+    ];
+    const SCENE_FX = {
+        hero: { duration: 5200, confetti: 72, rocketGap: 880 },
+        parade: { duration: 5800, confetti: 128, rocketGap: 480 },
+        balloons: { duration: 5000, confetti: 52, rocketGap: 1300 },
+        rainbow: {
+            duration: 5600,
+            confetti: 108,
+            rocketGap: 640,
+            palette: ["#ff8fab", "#ffbc6e", "#ffe66d", "#7dcea0", "#7eb8ff", "#b28dff"]
+        },
+        stars: { duration: 6200, confetti: 88, rocketGap: 1050 },
+        rocket: { duration: 7200, confetti: 58, rocketGap: 160 }
+    };
+    let lastSurpriseSceneId = null;
+    let fxRocketGap = 400;
+    const WIN_TITLES = [
+        "🎊 全部消灭！你是配对小能手！",
+        "🌟 太厉害了！今日任务完成！",
+        "🏆 满分通关！超级棒！",
+        "🎉 耶！今天的单词都搞定啦！"
+    ];
+    const FX_COLORS = ["#8eb8c9", "#a8c9a0", "#d4b896", "#9eb5d4", "#b5c9b0", "#c9d4de"];
+
+    let fxAnimId = null;
+    let fxEndAt = 0;
+    let fxParticles = [];
+    let fxRockets = [];
+    let confettiPieces = [];
+    let fxLastRocket = 0;
+    let surpriseHideTimer = null;
+    /** 仅在本局刚消完最后一对时为 true；切换日期时为 false */
+    let celebrationAllowed = false;
+
+    function resizeFxCanvas() {
+        const c = document.getElementById("fxCanvas");
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        return c;
+    }
+
+    function stopCelebration() {
+        celebrationAllowed = false;
+        if (fxAnimId) cancelAnimationFrame(fxAnimId);
+        fxAnimId = null;
+        fxEndAt = 0;
+        fxParticles = [];
+        fxRockets = [];
+        confettiPieces = [];
+        if (surpriseHideTimer) {
+            clearTimeout(surpriseHideTimer);
+            surpriseHideTimer = null;
+        }
+        const c = document.getElementById("fxCanvas");
+        if (c && c.getContext) c.getContext("2d").clearRect(0, 0, c.width, c.height);
+        const layer = document.getElementById("celebrationLayer");
+        if (layer) layer.classList.add("off");
+        const scene = document.getElementById("surpriseScene");
+        if (scene) {
+            scene.innerHTML = "";
+            scene.className = "surprise-scene";
+        }
+    }
+
+    function showWinMessage(opts, quiet) {
+        const over = document.getElementById("gameOverMsg");
+        let text;
+        if (quiet) {
+            text = opts.extraText || dayLabelForSheet(currentSheet) + "单词已全部消除 🎉";
+        } else {
+            const title = WIN_TITLES[Math.floor(Math.random() * WIN_TITLES.length)];
+            text = title;
+            if (opts.moves != null) text += " 步数 " + opts.moves + " · 用时 " + opts.timer + " 秒";
+            if (opts.extraText) text += (opts.moves != null ? " · " : " ") + opts.extraText;
+        }
+        over.className = quiet ? "show-done-quiet" : "show-win";
+        over.style.display = "block";
+        over.textContent = text;
+    }
+
+    function fxBurst(x, y, color) {
+        const n = 36 + Math.floor(Math.random() * 24);
+        for (let i = 0; i < n; i++) {
+            const a = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+            const sp = 2 + Math.random() * 5;
+            fxParticles.push({
+                x, y,
+                vx: Math.cos(a) * sp,
+                vy: Math.sin(a) * sp,
+                life: 1,
+                decay: 0.01 + Math.random() * 0.012,
+                color,
+                size: 2 + Math.random() * 3,
+                gravity: 0.05
+            });
+        }
+    }
+
+    function pickSurpriseScene() {
+        const pool = lastSurpriseSceneId
+            ? SURPRISE_SCENES.filter(s => s.id !== lastSurpriseSceneId)
+            : SURPRISE_SCENES;
+        const list = pool.length ? pool : SURPRISE_SCENES;
+        const scene = list[Math.floor(Math.random() * list.length)];
+        lastSurpriseSceneId = scene.id;
+        return scene;
+    }
+
+    function launchCelebrationFx(durationMs, sceneId) {
+        if (!celebrationAllowed) return;
+        const fxOpts = SCENE_FX[sceneId] || {};
+        const palette = fxOpts.palette || FX_COLORS;
+        const confettiN = fxOpts.confetti != null ? fxOpts.confetti : 90;
+        fxRocketGap = fxOpts.rocketGap != null ? fxOpts.rocketGap : 400;
+        const canvas = resizeFxCanvas();
+        const ctx = canvas.getContext("2d");
+        fxEndAt = Date.now() + durationMs;
+        fxLastRocket = 0;
+        confettiPieces = Array.from({ length: confettiN }, () => ({
+            x: Math.random() * canvas.width,
+            y: -20 - Math.random() * canvas.height,
+            r: 4 + Math.random() * 7,
+            vx: (Math.random() - 0.5) * 3,
+            vy: 2 + Math.random() * 4,
+            rot: Math.random() * 360,
+            vr: (Math.random() - 0.5) * 10,
+            color: palette[Math.floor(Math.random() * palette.length)]
+        }));
+
+        function loop() {
+            if (!celebrationAllowed || Date.now() > fxEndAt) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                fxAnimId = null;
+                confettiPieces = [];
+                fxParticles = [];
+                fxRockets = [];
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Date.now() - fxLastRocket > fxRocketGap * (0.55 + Math.random() * 0.65)) {
+                fxLastRocket = Date.now();
+                fxRockets.push({
+                    x: canvas.width * (0.12 + Math.random() * 0.76),
+                    y: canvas.height,
+                    ty: canvas.height * (0.12 + Math.random() * 0.38),
+                    vy: -9 - Math.random() * 4,
+                    color: palette[Math.floor(Math.random() * palette.length)]
+                });
+            }
+
+            fxRockets = fxRockets.filter(r => {
+                r.y += r.vy;
+                r.vy += 0.2;
+                ctx.beginPath();
+                ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = r.color;
+                ctx.fill();
+                if (r.vy >= -1 || r.y <= r.ty) {
+                    fxBurst(r.x, r.y, r.color);
+                    fxBurst(r.x + (Math.random() - 0.5) * 40, r.y, FX_COLORS[Math.floor(Math.random() * FX_COLORS.length)]);
+                    return false;
+                }
+                return true;
+            });
+
+            fxParticles = fxParticles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.life -= p.decay;
+                if (p.life <= 0) return false;
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                return true;
+            });
+
+            confettiPieces.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rot += p.vr;
+                if (p.y > canvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                ctx.save();
+                ctx.globalAlpha = 0.88;
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rot * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+                ctx.restore();
+            });
+
+            fxAnimId = requestAnimationFrame(loop);
+        }
+        if (fxAnimId) cancelAnimationFrame(fxAnimId);
+        loop();
+    }
+
+    function playSurpriseScene(scene) {
+        if (!celebrationAllowed) return;
+        const box = document.getElementById("surpriseScene");
+        box.innerHTML = "";
+        box.className = "surprise-scene active";
+        const cheers = ["太棒啦！", "你真厉害！", "继续加油！", "小小学霸！"];
+
+        if (scene.id === "hero") {
+            box.innerHTML =
+                '<div class="surprise-hero"><div class="badge">🏅</div><h2>' + scene.label + '</h2>' +
+                '<p>' + cheers[Math.floor(Math.random() * cheers.length)] + '</p></div>' +
+                '<div class="scene-label">✨ ' + scene.label + '</div>';
+        } else if (scene.id === "parade") {
+            ["🎉", "🌟", "🎈", "🦸", "👏", "🎊", "💫", "🥳"].forEach((e, i) => {
+                const span = document.createElement("span");
+                span.className = "emoji-parade";
+                span.textContent = e;
+                span.style.top = (12 + i * 9) + "%";
+                span.style.animationDelay = (i * 0.3) + "s";
+                span.style.animationDuration = (3.2 + i * 0.15) + "s";
+                box.appendChild(span);
+            });
+            const lbl = document.createElement("div");
+            lbl.className = "scene-label";
+            lbl.textContent = "🎪 " + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === "balloons") {
+            const colors = ["#ff8a80", "#ffd180", "#80cbc4", "#ce93d8", "#90caf9", "#a5d6a7"];
+            for (let i = 0; i < 16; i++) {
+                const b = document.createElement("div");
+                b.className = "balloon";
+                b.style.left = (4 + Math.random() * 92) + "%";
+                b.style.background = colors[i % colors.length];
+                b.style.animationDelay = (Math.random() * 1.5) + "s";
+                b.style.setProperty("--drift", ((Math.random() - 0.5) * 100) + "px");
+                box.appendChild(b);
+            }
+            const lbl = document.createElement("div");
+            lbl.className = "scene-label";
+            lbl.style.position = "absolute";
+            lbl.style.bottom = "18%";
+            lbl.textContent = "🎈 " + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === "rainbow") {
+            box.innerHTML =
+                '<div class="rainbow-arc"></div><div class="scene-label">🌈 ' + scene.label + '</div>';
+            ensureRainbowIcon(box.querySelector(".rainbow-arc"));
+        } else if (scene.id === "stars") {
+            for (let i = 0; i < 24; i++) {
+                const s = document.createElement("span");
+                s.className = "sky-star";
+                s.textContent = ["⭐", "✨", "💫"][i % 3];
+                s.style.left = (Math.random() * 100) + "%";
+                s.style.top = (Math.random() * 100) + "%";
+                s.style.animationDelay = (Math.random() * 2) + "s";
+                s.style.fontSize = (0.9 + Math.random() * 1.8) + "rem";
+                box.appendChild(s);
+            }
+            const lbl = document.createElement("div");
+            lbl.className = "scene-label";
+            lbl.textContent = "✨ " + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === "rocket") {
+            box.innerHTML =
+                '<div class="rocket-msg">🚀</div>' +
+                '<h2 style="margin:10px 0 4px;font-size:clamp(1.3rem,5vw,1.8rem);color:#fff;text-shadow:0 2px 10px rgba(0,0,0,0.2)">' + scene.label + '</h2>' +
+                '<div class="scene-label">🚀 ' + cheers[Math.floor(Math.random() * cheers.length)] + '</div>';
+        }
+
+        if (surpriseHideTimer) clearTimeout(surpriseHideTimer);
+        const hideMs = (SCENE_FX[scene.id] && SCENE_FX[scene.id].duration) || 5200;
+        surpriseHideTimer = setTimeout(() => {
+            surpriseHideTimer = null;
+            box.classList.remove("active");
+            box.innerHTML = "";
+        }, hideMs);
+    }
+
+    /** 手动切换日期且该日已全部消除：只显示文案，不播烟花/音效/惊喜场景 */
+    function showAllDoneQuiet(opts) {
+        opts = opts || {};
+        stopCelebration();
+        stopDailyActivityAutoFlush();
+        if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+        if (timerInt) clearInterval(timerInt);
+        const scene = document.getElementById("surpriseScene");
+        if (scene) {
+            scene.classList.remove("active");
+            scene.innerHTML = "";
+        }
+        showWinMessage(opts, true);
+        updateResetBtn();
+    }
+
+    /** 本局刚完成最后一对时：文案 + 烟花 + 音效 */
+    function celebrateFullComplete(opts) {
+        opts = opts || {};
+        stopCelebration();
+        celebrationAllowed = true;
+        const layer = document.getElementById("celebrationLayer");
+        if (layer) layer.classList.remove("off");
+        if (timerInt) clearInterval(timerInt);
+        const scene = pickSurpriseScene();
+        const fxOpts = SCENE_FX[scene.id] || {};
+        const duration = fxOpts.duration || 5500;
+        if (!opts.extraText) {
+            opts.extraText = "✨ " + scene.label;
+        }
+        showWinMessage(opts, false);
+        updateResetBtn();
+        Sfx.win();
+        launchCelebrationFx(duration, scene.id);
+        playSurpriseScene(scene);
+    }
+
+    function initBubbles() {
+        const box = document.getElementById("bubbles");
+        const stars = ["✨", "⭐", "💫"];
+        for (let i = 0; i < 12; i++) {
+            const b = document.createElement("div");
+            b.className = "bubble";
+            const size = 16 + Math.random() * 40;
+            b.style.width = b.style.height = size + "px";
+            b.style.left = Math.random() * 100 + "%";
+            b.style.animationDuration = 10 + Math.random() * 14 + "s";
+            b.style.animationDelay = Math.random() * 10 + "s";
+            box.appendChild(b);
+        }
+        for (let i = 0; i < 10; i++) {
+            const s = document.createElement("span");
+            s.className = "sky-star";
+            s.textContent = stars[i % 3];
+            s.style.left = Math.random() * 100 + "%";
+            s.style.top = Math.random() * 100 + "%";
+            s.style.animationDelay = Math.random() * 3 + "s";
+            s.style.fontSize = (0.7 + Math.random() * 0.8) + "rem";
+            box.appendChild(s);
+        }
+    }
+
+    document.getElementById("dateSelector").addEventListener("change", function () {
+        const val = this.value;
+        if (!val) {
+            if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+            stopDailyActivityAutoFlush();
+            currentSheet = "";
+            stopCelebration();
+            document.getElementById("gameBoard").innerHTML = "";
+            document.getElementById("gameOverMsg").style.display = "none";
+            return;
+        }
+        applySheetSelection(val, true);
+    });
+
+    document.getElementById("reviewBtn").addEventListener("click", showReviewModal);
+    document.getElementById("reviewCloseBtn").addEventListener("click", hideReviewModal);
+    document.getElementById("reviewModal").addEventListener("click", (e) => {
+        if (e.target.id === "reviewModal") hideReviewModal();
+    });
+    (function () {
+        const reviewModal = document.getElementById("reviewModal");
+        const reviewList = document.getElementById("reviewList");
+        reviewModal.addEventListener(
+            "wheel",
+            (e) => {
+                if (!reviewModal.classList.contains("show")) return;
+                if (reviewList.contains(e.target)) return;
+                e.preventDefault();
+            },
+            { passive: false }
+        );
+        reviewModal.addEventListener(
+            "touchmove",
+            (e) => {
+                if (!reviewModal.classList.contains("show")) return;
+                if (reviewList.contains(e.target)) return;
+                e.preventDefault();
+            },
+            { passive: false }
+        );
+        reviewList.addEventListener(
+            "wheel",
+            (e) => {
+                if (!reviewModal.classList.contains("show")) return;
+                const atTop = reviewList.scrollTop <= 0;
+                const atBottom =
+                    reviewList.scrollTop + reviewList.clientHeight >= reviewList.scrollHeight - 1;
+                if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) e.preventDefault();
+            },
+            { passive: false }
+        );
+    })();
+    document.getElementById("resetBtn").addEventListener("click", showResetConfirmModal);
+    document.getElementById("resetCancelBtn").addEventListener("click", hideResetConfirmModal);
+    document.getElementById("resetConfirmBtn").addEventListener("click", confirmResetAndReplay);
+    document.getElementById("resetModal").addEventListener("click", (e) => {
+        if (e.target.id === "resetModal") hideResetConfirmModal();
+    });
+    document.getElementById("eliminateCancelBtn").addEventListener("click", cancelEliminateConfirm);
+    document.getElementById("eliminateConfirmBtn").addEventListener("click", confirmEliminateMatch);
+    document.getElementById("eliminateConfirmModal").addEventListener("click", (e) => {
+        if (e.target.id === "eliminateConfirmModal") cancelEliminateConfirm();
+    });
+    document.getElementById("retryBtn").addEventListener("click", tryAutoLoad);
+    document.getElementById("pickWordsBtn").addEventListener("click", () => {
+        document.getElementById("pickWordsInput").click();
+    });
+    document.getElementById("pickWordsInput").addEventListener("change", function () {
+        if (this.files[0]) loadWordsFromFile(this.files[0]);
+        this.value = "";
+    });
+
+    document.getElementById("soundToggleBtn").addEventListener("click", () => {
+        Sfx.unlock();
+        Sfx.setEnabled(!Sfx.isEnabled());
+        if (Sfx.isEnabled()) Sfx.tap();
+    });
+    updateSoundToggleUi();
+    document.body.addEventListener("pointerdown", () => Sfx.unlock(), { once: true, passive: true });
+
+    setHeroTitle("英文中文对对碰");
+    applyGradeUi();
+    initBubbles();
+    window.addEventListener("resize", () => resizeFxCanvas());
+
+    window.addEventListener("load", () => tryAutoLoad());
+    window.addEventListener("pagehide", () => {
+        if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+        stopDailyActivityAutoFlush();
+    });
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden" && currentSheet) {
+            flushDailyActivityDelta(currentSheet, { silent: true });
+        }
+    });
+    </script>
+</body>
+</html>

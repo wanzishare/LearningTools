@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习进度</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+         :root {
+            --text: #4a3568;
+            --muted: #6b5b8a;
+            --panel: #fffef9;
+            --border: #e8d4f8;
+            --mm: #ff9a5c;
+            --mm-bg: #fff9e6;
+            --bb: #3ecda0;
+            --bb-bg: #ecfff6;
+            --done: #5dd9a8;
+            --partial: #ffb347;
+            --none: #d4c4e8;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            background: linear-gradient(160deg, #b8e6ff 0%, #e8d4ff 42%, #ffe8d4 100%);
+            background-attachment: fixed;
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px 16px 40px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        header h1 {
+            margin: 0 0 6px;
+            font-size: clamp(1.4rem, 4vw, 1.85rem);
+            color: #6b4a9a;
+        }
+        header p {
+            margin: 0;
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .btn {
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 0.95rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ff7eb3, #ffb86c);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(255, 126, 179, 0.35);
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-ghost {
+            background: #fff;
+            color: #e85d9a;
+            border: 2px solid #f0d8ff;
+            box-shadow: none;
+        }
+        .meta {
+            font-size: 0.88rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .week-select-group {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .week-select-label {
+            font-weight: 800;
+            color: #8757c8;
+            font-size: 1rem;
+        }
+        .week-select {
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 2px solid #e4daf8;
+            background: #faf6ff;
+            color: #6b4a9a;
+            padding: 4px 12px;
+            transition: border 0.15s;
+        }
+        .week-select:focus {
+            border-color: #e8b788;
+            outline: none;
+        }
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        @media (max-width: 520px) {
+            .summary { grid-template-columns: 1fr; }
+        }
+        .summary-card {
+            position: relative;
+            background: var(--panel);
+            border: 3px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            padding-top: 44px;
+            text-align: center;
+            box-shadow: 0 10px 28px rgba(140, 100, 200, 0.12);
+        }
+        .summary-word-detail {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.82rem;
+            padding: 6px 12px;
+            z-index: 1;
+        }
+        .summary-card.mm { border-color: #ffd699; background: var(--mm-bg); }
+        .summary-card.bb { border-color: #a8e8d0; background: var(--bb-bg); }
+        .summary-card h2 {
+            margin: 0 0 8px;
+            font-size: 1.2rem;
+        }
+        .summary-card.mm h2 { color: #d97706; }
+        .summary-card.bb h2 { color: #059669; }
+        .big-num {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+        .summary-card.mm .big-num { color: #ea580c; }
+        .summary-card.bb .big-num { color: #059669; }
+        .summary-sub {
+            font-size: 0.9rem;
+            color: var(--muted);
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        @media (max-width: 720px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+        .student-panel {
+            background: var(--panel);
+            border: 3px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(140, 100, 200, 0.14);
+        }
+        .student-panel.mm { border-color: #ffd699; }
+        .student-panel.bb { border-color: #a8e8d0; }
+        .panel-head {
+            padding: 14px 16px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .student-panel.mm .panel-head {
+            background: linear-gradient(135deg, #ffb347, #ff9a5c);
+        }
+        .student-panel.bb .panel-head {
+            background: linear-gradient(135deg, #5dd9a8, #3ecda0);
+        }
+        .panel-head .badge {
+            font-size: 0.82rem;
+            background: rgba(0,0,0,0.15);
+            padding: 4px 10px;
+            border-radius: 999px;
+        }
+        .panel-body { padding: 12px 14px 16px; }
+        .err-box {
+            color: #b84a6a;
+            background: #fff0f5;
+            border: 2px solid #ffc8dd;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .day-list { display: flex; flex-direction: column; gap: 10px; }
+        .day-row {
+            background: #fff;
+            border: 2px solid #f0e8ff;
+            border-radius: 14px;
+            padding: 10px 12px;
+        }
+        .day-row.today {
+            border-color: #ffc857;
+            box-shadow: 0 0 0 2px rgba(255, 200, 87, 0.35);
+        }
+        .day-row.all-done {
+            border-color: #a8e8d0;
+            background: #f8fffc;
+        }
+        .day-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .day-date {
+            font-weight: 800;
+            font-size: 0.98rem;
+        }
+        .day-date .tag-today {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 0.72rem;
+            background: #fff3cd;
+            color: #b45309;
+            padding: 2px 8px;
+            border-radius: 999px;
+            vertical-align: middle;
+        }
+        .status-pill {
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            white-space: nowrap;
+        }
+        .status-pill.done { background: #d1fae5; color: #047857; }
+        .status-pill.partial { background: #ffedd5; color: #c2410c; }
+        .status-pill.none { background: #f3f4f6; color: #6b7280; }
+        .progress-track {
+            height: 10px;
+            background: #f0e8ff;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+        .student-panel.mm .progress-fill {
+            background: linear-gradient(90deg, #ffb347, #ff9a5c);
+        }
+        .student-panel.bb .progress-fill {
+            background: linear-gradient(90deg, #5dd9a8, #3ecda0);
+        }
+        .day-meta {
+            margin-top: 6px;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .day-activity {
+            color: #5b4a8a;
+        }
+        .day-errors {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #c2410c;
+            line-height: 1.45;
+        }
+        .day-errors .err-word {
+            display: inline-block;
+            margin: 2px 6px 2px 0;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: #fff1f0;
+            border: 1px solid #fecaca;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: rgba(120, 80, 180, 0.35);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            width: min(640px, 100%);
+            max-height: min(85vh, 720px);
+            background: #fff;
+            border-radius: 18px;
+            padding: 18px 16px 14px;
+            border: 3px solid var(--border);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-box h3 { margin: 0 0 8px; font-size: 1.2rem; color: #6b4a9a; }
+        .modal-meta {
+            margin: 0 0 10px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 700;
+        }
+        .word-detail-table-wrap {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+            border: 2px solid #f0e8ff;
+            border-radius: 12px;
+        }
+        .word-detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .word-detail-table th,
+        .word-detail-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #f0e8ff;
+        }
+        .word-detail-table th {
+            background: #faf6ff;
+            font-weight: 800;
+            color: #6b4a9a;
+            position: sticky;
+            top: 0;
+        }
+        .word-detail-table tr.mastered td { background: #f0fdf4; }
+        .word-detail-table tr.low td { background: #fff5f5; }
+        .word-detail-table .col-en { color: #b45309; font-weight: 800; }
+        .word-detail-table .col-count { font-variant-numeric: tabular-nums; font-weight: 900; }
+        .modal-actions { margin-top: 12px; text-align: right; }
+        .loading-all {
+            text-align: center;
+            padding: 40px 20px;
+            font-weight: 800;
+            color: #6b4a9a;
+        }
+        .foot-note {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-weight: 600;
+            line-height: 1.6;
+        }
+        .foot-note a { color: #e85d9a; font-weight: 800; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1>📊 学习进度</h1>
+        </header>
+
+        <div class="toolbar">
+            <button type="button" class="btn" id="refreshBtn">🔄 立即刷新</button>
+            <a href="index.html" class="btn btn-ghost" style="text-decoration:none;display:inline-block;">返回入口</a>
+            <span class="meta" id="lastUpdate">正在加载…</span>
+        </div>
+
+        <div id="loadingAll" class="loading-all">正在从 Gitee 读取各学生词库…</div>
+
+        <!-- 周选择器：用下拉方式 -->
+        <div class="week-select-group" id="weekSelectGroup" style="display:none;"></div>
+
+        <div id="mainContent" style="display:none;">
+            <div class="summary" id="summaryRow"></div>
+            <div class="grid" id="studentGrid"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="wordDetailModal" aria-hidden="true">
+        <div class="modal-box" role="dialog" aria-labelledby="wordDetailTitle">
+            <h3 id="wordDetailTitle">单词明细</h3>
+            <p class="modal-meta" id="wordDetailMeta"></p>
+            <div class="word-detail-table-wrap">
+                <table class="word-detail-table">
+                    <thead>
+                        <tr>
+                            <th>英文</th>
+                            <th>次数</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wordDetailBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn" id="wordDetailCloseBtn">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../gitee-data.js"></script>
+    <script src="students.js"></script>
+    <script>
+    const GITEE_DATA_DIR = "EnglishChineseMatchingGame";
+    const STUDENTS = (window.StudentRoster && StudentRoster.list()) || [];
+
+    function injectStudentThemeCss() {
+        const style = document.createElement("style");
+        style.textContent = STUDENTS.map(function (st) {
+            const k = st.key;
+            return (
+                ".summary-card." + k + " { border-color: " + st.color + "; background: " + st.bg + "; }" +
+                ".summary-card." + k + " h2 { color: " + st.color + "; }" +
+                ".summary-card." + k + " .big-num { color: " + st.color + "; }" +
+                ".student-panel." + k + " { border-color: " + st.color + "; }" +
+                ".student-panel." + k + " .panel-head { background: " + st.bg + "; color: " + st.color + "; }" +
+                ".student-panel." + k + " .progress-fill { background: " + st.color + "; }"
+            );
+        }).join("\n");
+        document.head.appendChild(style);
+    }
+
+    function buildStudentPanels() {
+        const grid = document.getElementById("studentGrid");
+        if (!grid) return;
+        grid.innerHTML = STUDENTS.map(function (st) {
+            return (
+                '<section class="student-panel ' + st.key + '" id="panel-' + st.key + '">' +
+                '<div class="panel-head">' +
+                '<span>' + (st.icon ? st.icon + " " : "") + st.label + "</span>" +
+                '<span class="badge" id="badge-' + st.key + '">—</span>' +
+                "</div>" +
+                '<div class="panel-body" id="body-' + st.key + '"></div>' +
+                "</section>"
+            );
+        }).join("");
+    }
+
+    injectStudentThemeCss();
+    buildStudentPanels();
+
+    let refreshTimer = null;
+    let weekDataCache = {}; // 缓存每个学生的切割后的周数据
+    let unifiedWeekList = []; // 合并后的周列表（贝贝+满满共用）
+    let curWeekIdx = 0;       // 当前选中周在 unifiedWeekList 中的下标
+    let lastFingerprint = ""; // 上次渲染时的数据指纹，用于静默刷新比对
+    let lastResultsArr = [];
+
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    function getTodaySheetName() {
+        const d = new Date();
+        return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+    }
+
+    function isEliminatedStatus(val) {
+        const s = String(val ?? "").trim();
+        if (!s) return false;
+        return /^(已消除|消除|是|对|完成|done|yes|true|1|√|✓|y|ok)$/i.test(s);
+    }
+
+    function findStatusColIndex(header) {
+        return header.findIndex(k => /消除|状态|eliminated|done|完成/i.test(k) && !/错误/i.test(k));
+    }
+
+    function findErrorColIndex(header) {
+        let idx = header.findIndex(k => /错误次数/i.test(k));
+        if (idx >= 0) return idx;
+        idx = header.findIndex(k => /^(错误|答错|wrong)$/i.test(k));
+        if (idx >= 0) return idx;
+        return header.findIndex(k => /error\s*count|mistakes/i.test(k));
+    }
+
+    function parseErrorCount(val) {
+        const n = parseInt(String(val ?? "").trim(), 10);
+        return Number.isFinite(n) && n > 0 ? n : 0;
+    }
+
+    const WORD_STATS_SHEET = "单词统计";
+    const WORD_LIST_SHEET = "单词列表";
+    const CONFIG_SHEET = "配置";
+    const DAILY_STATS_SHEET = "每日统计";
+    const DAILY_STATS_LEGACY_SHEET = "复习次数";
+    const DATE_SHEET_HEADER = ["英文", "中文", "消除状态", "错误次数"];
+    const DEFAULT_DAILY_WORDS = 10;
+    const DEFAULT_MASTER_SCORE = 3;
+    const DEFAULT_WEEK_DAYS = 5;
+    const WEEKDAY_LABELS = ["一", "二", "三", "四", "五"];
+
+    function isWordStatsSheet(name) {
+        return String(name || "").trim() === WORD_STATS_SHEET;
+    }
+
+    function isWordListSheet(name) {
+        return String(name || "").trim() === WORD_LIST_SHEET;
+    }
+
+    function isConfigSheet(name) {
+        return String(name || "").trim() === CONFIG_SHEET;
+    }
+
+    function isDailyStatsSheet(name) {
+        const n = String(name || "").trim();
+        return n === DAILY_STATS_SHEET || n === DAILY_STATS_LEGACY_SHEET;
+    }
+
+    function isSystemSheet(name) {
+        const n = String(name || "").trim();
+        return isDailyStatsSheet(n) || isConfigSheet(n) || isWordStatsSheet(n) || isWordListSheet(n);
+    }
+
+    function normalizeStatsDateKey(val) {
+        if (val == null || val === "") return "";
+        if (val instanceof Date && !isNaN(val.getTime())) {
+            return formatYYYYMMDD(val);
+        }
+        if (typeof val === "number" && val > 20000) {
+            const dc = XLSX.SSF && XLSX.SSF.parse_date_code(val);
+            if (dc) {
+                return dc.y + "-" + pad2(dc.m) + "-" + pad2(dc.d);
+            }
+        }
+        const s = String(val).trim();
+        const m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (m) {
+            return m[1] + "-" + pad2(parseInt(m[2], 10)) + "-" + pad2(parseInt(m[3], 10));
+        }
+        const d = new Date(s.replace(/-/g, "/"));
+        if (!isNaN(d.getTime())) return formatYYYYMMDD(d);
+        return s;
+    }
+
+    function parseDailyStatsColumnIndices(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idxDate = h.findIndex(k => /^日期$|date/i.test(k));
+        let idxReview = h.findIndex(k => /复习.*次数/i.test(k));
+        if (idxReview < 0) idxReview = h.findIndex(k => /^次数$/i.test(k));
+        let idxSteps = h.findIndex(k => /(?:当日|每日)步数/i.test(k));
+        if (idxSteps < 0) idxSteps = h.findIndex(k => /^步数$/i.test(k));
+        let idxTime = h.findIndex(k => /(?:当日|每日)耗时/i.test(k));
+        if (idxTime < 0) idxTime = h.findIndex(k => /^耗时$/i.test(k));
+        if (idxDate < 0) idxDate = 0;
+        if (idxReview < 0) idxReview = 1;
+        if (idxSteps < 0 && h.length >= 3) idxSteps = 2;
+        if (idxTime < 0 && h.length >= 4) idxTime = 3;
+        return { idxDate, idxReview, idxSteps, idxTime };
+    }
+
+    function parseDailyStatsMap(wb) {
+        const map = {};
+        if (!wb) return map;
+        const sheetName = wb.SheetNames.find(isDailyStatsSheet);
+        if (!sheetName) return map;
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: "" });
+        if (!rows || rows.length < 2) return map;
+        const cols = parseDailyStatsColumnIndices(rows[0].map(a => String(a ?? "").trim()));
+        for (let i = 1; i < rows.length; i++) {
+            const r = rows[i];
+            const dateKey = normalizeStatsDateKey(r[cols.idxDate]);
+            if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) continue;
+            const steps =
+                cols.idxSteps >= 0 ? parseInt(String(r[cols.idxSteps] ?? "").trim(), 10) || 0 : 0;
+            const timeSec =
+                cols.idxTime >= 0 ? parseInt(String(r[cols.idxTime] ?? "").trim(), 10) || 0 : 0;
+            const review =
+                cols.idxReview >= 0 ? parseInt(String(r[cols.idxReview] ?? "").trim(), 10) || 0 : 0;
+            map[dateKey] = { steps, timeSec, review };
+        }
+        return map;
+    }
+
+    function formatDurationSeconds(sec) {
+        const n = Math.max(0, parseInt(sec, 10) || 0);
+        if (!n) return "";
+        if (n < 60) return n + " 秒";
+        const m = Math.floor(n / 60);
+        const s = n % 60;
+        return s ? m + " 分 " + s + " 秒" : m + " 分钟";
+    }
+
+    function dayActivityLine(dailyStats, name) {
+        const st = dailyStats && dailyStats[name];
+        if (!st) return "";
+        const parts = [];
+        if (st.steps > 0) parts.push("👣 当日步数 " + st.steps);
+        if (st.timeSec > 0) parts.push("⏱ 当日耗时 " + formatDurationSeconds(st.timeSec));
+        if (!parts.length) return "";
+        return '<div class="day-meta day-activity">' + parts.join(" · ") + "</div>";
+    }
+
+    function isWeekDaysConfigKey(key) {
+        const k = String(key || "").trim();
+        return k === "生成周天数" || /^week\s*days?$/i.test(k);
+    }
+
+    /** 仅接受 1–5 的整数；避免 parseInt("1-5")===1 把「周一到周五」误读成 1 天 */
+    function parseWeekDaysValue(raw) {
+        const s = String(raw ?? "").trim();
+        if (/^[1-5]$/.test(s)) return parseInt(s, 10);
+        return null;
+    }
+
+    function parseGameConfig(wb) {
+        const cfg = {
+            dailyWords: DEFAULT_DAILY_WORDS,
+            masterScore: DEFAULT_MASTER_SCORE,
+            weekDays: DEFAULT_WEEK_DAYS
+        };
+        if (!wb || !wb.Sheets[CONFIG_SHEET]) return cfg;
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[CONFIG_SHEET], { header: 1, defval: "" });
+        rows.forEach((row, i) => {
+            if (i === 0 && row.length >= 2) {
+                const h0 = String(row[0] ?? "").trim();
+                const h1 = String(row[1] ?? "").trim();
+                if (/配置|项目|key/i.test(h0) && /值|value/i.test(h1)) return;
+            }
+            const key = String(row[0] ?? "").trim();
+            if (isWeekDaysConfigKey(key)) {
+                const wd = parseWeekDaysValue(row[1]);
+                if (wd != null) cfg.weekDays = wd;
+                return;
+            }
+            const val = parseInt(String(row[1] ?? "").trim(), 10);
+            if (!Number.isFinite(val)) return;
+            if (/每日.*单词|单词.*数|daily/i.test(key) && val >= 1) cfg.dailyWords = val;
+            if (/掌握|总分|达标|master|正确.*错误|错误.*总数/i.test(key) && val >= 1) cfg.masterScore = val;
+        });
+        return cfg;
+    }
+
+    function weekDaysLabel(n) {
+        const days = Math.min(5, Math.max(1, parseInt(n, 10) || DEFAULT_WEEK_DAYS));
+        if (days === 1) return "周一";
+        return "周一～周" + WEEKDAY_LABELS[days - 1];
+    }
+
+    function getWeekDaysCount(weekDays) {
+        const n = parseInt(weekDays, 10);
+        if (!Number.isFinite(n)) return DEFAULT_WEEK_DAYS;
+        return Math.min(5, Math.max(1, n));
+    }
+
+    function getWeekDateNames(refDate, weekDays) {
+        const d = refDate instanceof Date ? new Date(refDate.getTime()) : new Date();
+        const dow = d.getDay();
+        const mondayOffset = dow === 0 ? -6 : 1 - dow;
+        const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + mondayOffset);
+        const days = getWeekDaysCount(weekDays);
+        const names = [];
+        for (let i = 0; i < days; i++) {
+            const day = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+            names.push(formatYYYYMMDD(day));
+        }
+        return names;
+    }
+
+    function workbookToClean(wb) {
+        const out = XLSX.utils.book_new();
+        wb.SheetNames.forEach(name => {
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[name], { header: 1, defval: "" });
+            XLSX.utils.book_append_sheet(out, XLSX.utils.aoa_to_sheet(rows), name);
+        });
+        return out;
+    }
+
+    function writeWorkbookBuffer(wb, filename) {
+        const opts = { type: "array", bookSST: false, cellStyles: false };
+        const isXls = /\.xls$/i.test(filename || "") && !/\.xlsx$/i.test(filename || "");
+        if (!isXls) {
+            return { buf: XLSX.write(wb, { ...opts, bookType: "xlsx" }), filename };
+        }
+        try {
+            return { buf: XLSX.write(wb, { ...opts, bookType: "xls" }), filename };
+        } catch (err) {
+            console.warn("[parent write] xls failed, fallback xlsx", err);
+            const xlsxName = filename.replace(/\.xls$/i, ".xlsx");
+            return {
+                buf: XLSX.write(wb, { ...opts, bookType: "xlsx" }),
+                filename: xlsxName,
+                fallback: true
+            };
+        }
+    }
+
+    function isSaveLockMessage(text) {
+        const s = String(text || "").toLowerCase();
+        if (/busy|locked|sharing|正在使用|被占用|cannot access|another process|ebusy|eperm|resource busy|进程无法访问/.test(s)) {
+            return true;
+        }
+        return /save failed/i.test(s) && /busy|eperm|access|sharing|占用|正在使用|locked/.test(s);
+    }
+
+    async function saveWorkbookToServer(wb, filename) {
+        const written = writeWorkbookBuffer(wb, filename);
+        try {
+            const { data } = await GiteeData.saveWorkbook(
+                GITEE_DATA_DIR,
+                written.filename,
+                written.buf,
+                "家长端保存词库: " + written.filename
+            );
+            return { ok: true, filename: written.filename, fallback: written.fallback, ...data };
+        } catch (e) {
+            const text = (e && e.message) || String(e);
+            if (isSaveLockMessage(text)) {
+                console.warn("[parent] 保存冲突，本周日期表未写入 Gitee");
+                return { ok: false, locked: true, filename: written.filename };
+            }
+            throw new Error(text || "保存词库失败");
+        }
+    }
+
+    /** 与游戏端一致：为当周周一至周 N 创建空日期 Sheet */
+    function ensureWeekDateSheets(wb, weekDays) {
+        if (!wb) return { created: false, names: [] };
+        const added = [];
+        getWeekDateNames(new Date(), weekDays).forEach(name => {
+            if (wb.Sheets[name]) return;
+            XLSX.utils.book_append_sheet(
+                wb,
+                XLSX.utils.aoa_to_sheet([DATE_SHEET_HEADER.slice()]),
+                name
+            );
+            added.push(name);
+        });
+        return { created: added.length > 0, names: added };
+    }
+
+    function parseDateSheetsFromWorkbook(wb) {
+        const sheets = {};
+        if (!wb) return sheets;
+        wb.SheetNames.forEach(sheet => {
+            if (isSystemSheet(sheet) || !isDateSheetName(sheet)) return;
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheet], { header: 1, defval: "" });
+            if (!rows.length) return;
+            sheets[sheet] = parsePairsFromSheetRows(rows);
+        });
+        return sheets;
+    }
+
+    function wordKey(en) {
+        return String(en || "").trim().toLowerCase();
+    }
+
+    function buildWordCountMap(wordStats) {
+        const m = new Map();
+        (wordStats || []).forEach(w => m.set(wordKey(w.en), w.count));
+        return m;
+    }
+
+    function getPairWordCount(pair, wordStats) {
+        return buildWordCountMap(wordStats).get(wordKey(pair.en)) ?? 0;
+    }
+
+    function isPairMastered(pair, wordStats, masterScore) {
+        return getPairWordCount(pair, wordStats) >= (masterScore || DEFAULT_MASTER_SCORE);
+    }
+
+    function isDateSheetName(name) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(String(name || "").trim());
+    }
+
+    function findWordCountColIndex(header) {
+        const h = header.map(a => String(a ?? "").trim());
+        let idx = h.findIndex(k => /次数/i.test(k));
+        if (idx >= 0) return idx;
+        idx = h.findIndex(k => /总数|total|score/i.test(k));
+        if (idx >= 0) return idx;
+        return h.length >= 2 ? 1 : -1;
+    }
+
+    function parseWordStatsSheet(rows) {
+        const list = [];
+        if (!rows || rows.length < 2) return list;
+        const header = rows[0].map(a => String(a ?? "").trim());
+        let idxEn = header.findIndex(k => /英文|en/i.test(k));
+        const idxCount = findWordCountColIndex(header);
+        if (idxEn < 0) idxEn = 0;
+        for (let i = 1; i < rows.length; i++) {
+            const en = String(rows[i][idxEn] ?? "").trim();
+            if (!en) continue;
+            const n = idxCount >= 0 ? parseInt(String(rows[i][idxCount] ?? "").trim(), 10) : 0;
+            list.push({ en, count: Number.isFinite(n) ? n : 0 });
+        }
+        list.sort((a, b) => a.count - b.count || a.en.localeCompare(b.en, "en"));
+        return list;
+    }
+
+    function parsePairsFromSheetRows(rows) {
+        if (!rows || rows.length < 2) return [];
+        const header = rows[0].map(a => String(a ?? "").trim());
+        let idxEN = header.findIndex(k => /en|英文|english/i.test(k));
+        let idxZH = header.findIndex(k => /zh|中文|chinese/i.test(k));
+        const idxStatus = findStatusColIndex(header);
+        const idxErrors = findErrorColIndex(header);
+        if (idxEN === -1 && idxZH === -1) {
+            idxEN = 0;
+            idxZH = 1;
+        } else {
+            if (idxEN === -1) idxEN = idxZH === 0 ? 1 : 0;
+            if (idxZH === -1) idxZH = idxEN === 0 ? 1 : 0;
+        }
+        return rows.slice(1)
+            .map(r => {
+                if (!r || r[idxEN] == null || r[idxZH] == null) return null;
+                const en = String(r[idxEN]).trim();
+                const zh = String(r[idxZH]).trim();
+                if (!en || !zh) return null;
+                const done = idxStatus >= 0 && isEliminatedStatus(r[idxStatus]);
+                const errors = idxErrors >= 0 ? parseErrorCount(r[idxErrors]) : 0;
+                return { en, zh, done, errors };
+            })
+            .filter(Boolean);
+    }
+
+    function parseWordListSheet(wb) {
+        if (!wb || !wb.Sheets[WORD_LIST_SHEET]) return [];
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[WORD_LIST_SHEET], { header: 1, defval: "" });
+        return parsePairsFromSheetRows(rows);
+    }
+
+    async function prepareWorkbookFromBuffer(buf, filename) {
+        const isXls = /\.xls$/i.test(filename || "") && !/\.xlsx$/i.test(filename || "");
+        const opts = { type: "array", cellStyles: false, cellHTML: false, cellNF: false };
+        if (isXls) opts.codepage = 936;
+        let wb = workbookToClean(XLSX.read(buf, opts));
+        let wordStats = [];
+        const statsSheet = wb.SheetNames.find(isWordStatsSheet);
+        if (statsSheet) {
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[statsSheet], { header: 1 });
+            wordStats = parseWordStatsSheet(rows);
+        }
+        const wordList = parseWordListSheet(wb);
+        const gameConfig = parseGameConfig(wb);
+        let weekSheetsCreated = false;
+        let saveLocked = false;
+        let outFilename = filename;
+
+        let createdSheetNames = [];
+        if (wordList.length) {
+            const ensureResult = ensureWeekDateSheets(wb, gameConfig.weekDays);
+            weekSheetsCreated = ensureResult.created;
+            createdSheetNames = ensureResult.names;
+            if (weekSheetsCreated) {
+                wb = workbookToClean(wb);
+                try {
+                    const saved = await saveWorkbookToServer(wb, filename);
+                    if (saved.filename) outFilename = saved.filename;
+                    if (saved.locked) saveLocked = true;
+                } catch (err) {
+                    console.warn("[parent] 生成本周日期表后保存失败", err);
+                }
+            }
+        }
+
+        const sheets = parseDateSheetsFromWorkbook(wb);
+        const dailyStats = parseDailyStatsMap(wb);
+        getWeekDateNames(new Date(), gameConfig.weekDays).forEach(name => {
+            if (!sheets[name]) sheets[name] = [];
+        });
+
+        return {
+            sheets,
+            dailyStats,
+            wordList,
+            wordStats,
+            dailyWords: gameConfig.dailyWords,
+            masterScore: gameConfig.masterScore,
+            weekDays: gameConfig.weekDays,
+            weekSheetsCreated,
+            createdSheetNames,
+            saveLocked,
+            filename: outFilename
+        };
+    }
+
+    /** 与游戏端一致：日期 Sheet 已消除计入完成（含现已掌握），再补足每日配额 */
+    function getDailySliceForDay(wordList, datePairs, dailyWords, wordStats, masterScore) {
+        const list = wordList || [];
+        const daily = Math.max(1, dailyWords || DEFAULT_DAILY_WORDS);
+        const progress = new Map();
+        (datePairs || []).forEach(p => {
+            if (p && p.en) progress.set(wordKey(p.en), p);
+        });
+        const batch = [];
+        const inBatch = new Set();
+
+        (datePairs || []).forEach(rec => {
+            if (!rec || !rec.en || !rec.done) return;
+            const k = wordKey(rec.en);
+            if (inBatch.has(k)) return;
+            const w = list.find(p => wordKey(p.en) === k);
+            if (!w) return;
+            batch.push({
+                en: w.en,
+                zh: w.zh,
+                done: true,
+                errors: rec.errors || 0
+            });
+            inBatch.add(k);
+        });
+
+        for (let i = 0; i < list.length && batch.length < daily; i++) {
+            const w = list[i];
+            const k = wordKey(w.en);
+            if (inBatch.has(k)) continue;
+            if (isPairMastered(w, wordStats, masterScore)) continue;
+            const rec = progress.get(k);
+            batch.push({
+                en: w.en,
+                zh: w.zh,
+                done: rec ? !!rec.done : false,
+                errors: rec ? (rec.errors || 0) : 0
+            });
+            inBatch.add(k);
+        }
+        return batch;
+    }
+
+    function sortSheetNames(names) {
+        return names.slice().sort((a, b) => {
+            const da = /^\d{4}-\d{2}-\d{2}$/.test(a) ? a : "";
+            const db = /^\d{4}-\d{2}-\d{2}$/.test(b) ? b : "";
+            if (da && db) return db.localeCompare(da);
+            if (da) return -1;
+            if (db) return 1;
+            return b.localeCompare(a);
+        });
+    }
+
+    /** 每日总量 = 当日批次词数；完成数含日期 Sheet 已消除（不因现已掌握而扣减） */
+    function sheetStats(datePairs, dailyWords, wordStats, masterScore, wordList) {
+        const list = wordList || [];
+        if (!list.length) {
+            return { total: 0, done: 0, left: 0, pct: 0, sheetTotal: 0, listTotal: 0, mastered: 0 };
+        }
+        const batch = getDailySliceForDay(list, datePairs, dailyWords, wordStats, masterScore);
+        const total = batch.length;
+        const done = batch.filter(p => p.done).length;
+        const listTotal = list.length;
+        const mastered = list.filter(p => isPairMastered(p, wordStats, masterScore)).length;
+        const pct = total ? Math.min(100, Math.round((done / total) * 100)) : 0;
+        const left = total ? Math.max(0, total - done) : 0;
+        return { total, done, left, pct, sheetTotal: (datePairs || []).length, listTotal, mastered };
+    }
+
+    function sheetErrorStats(datePairs, dailyWords, wordStats, masterScore, wordList) {
+        const batch = getDailySliceForDay(wordList, datePairs, dailyWords, wordStats, masterScore);
+        const words = batch
+            .map(p => ({ en: p.en, zh: p.zh, errors: p.errors || 0 }))
+            .filter(p => p.errors > 0)
+            .sort((a, b) => b.errors - a.errors || a.en.localeCompare(b.en, "en"));
+        const total = words.reduce((sum, p) => sum + p.errors, 0);
+        return { total, words };
+    }
+
+    function renderDayErrorsHtml(errSt) {
+        if (!errSt.total || !errSt.words || !errSt.words.length) return "";
+        const items = errSt.words
+            .map(w =>
+                '<span class="err-word">' +
+                escapeHtml(w.en) + " ×" + w.errors +
+                "</span>"
+            )
+            .join("");
+        return '<div class="day-errors">❌ ' + items + "</div>";
+    }
+
+    function showWordDetailModal(result) {
+        const modal = document.getElementById("wordDetailModal");
+        const body = document.getElementById("wordDetailBody");
+        const title = document.getElementById("wordDetailTitle");
+        const meta = document.getElementById("wordDetailMeta");
+        const list = (result && result.wordStats) || [];
+        title.textContent = (result && result.label ? result.label : "") + " · 单词明细";
+        if (!list.length) {
+            meta.textContent = "词库中暂无「单词统计」工作表，或表内无数据（表头：英文、次数）";
+            body.innerHTML = '<tr><td colspan="2" style="text-align:center;color:#6b5b8a;">暂无记录</td></tr>';
+        } else {
+            const ms = (result && result.masterScore) || DEFAULT_MASTER_SCORE;
+            const mastered = list.filter(w => w.count >= ms).length;
+            meta.textContent =
+                "全部单词 · 共 " + list.length + " 个 · 已掌握（≥" + ms + "）" + mastered +
+                " 个 · 配对正确 +1 / 错误 -1 · 已掌握不再出题";
+            body.innerHTML = list.map(w => {
+                const cls = w.count >= ms ? "mastered" : w.count < 0 ? "low" : "";
+                const sign = w.count > 0 ? "+" : "";
+                return (
+                    "<tr class=\"" + cls + "\">" +
+                    "<td class=\"col-en\">" + escapeHtml(w.en) + "</td>" +
+                    "<td class=\"col-count\">" + sign + w.count + "</td>" +
+                    "</tr>"
+                );
+            }).join("");
+        }
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+    }
+
+    function hideWordDetailModal() {
+        const modal = document.getElementById("wordDetailModal");
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+    }
+
+    // 新增：统计某一周的数据
+    function weekStats(sheets, weekDates, dailyWords, wordStats, masterScore, wordList) {
+        let total = 0, done = 0, allDone = true;
+        let dayCount = 0, daysAllDone = 0;
+        for (let i = 0; i < weekDates.length; i++) {
+            let name = weekDates[i];
+            let s = sheetStats(sheets[name] || [], dailyWords, wordStats, masterScore, wordList);
+            if (!s.total) continue;
+            total += s.total;
+            done += s.done;
+            dayCount++;
+            if (s.done >= s.total) daysAllDone++;
+            if (s.done < s.total) allDone = false;
+        }
+        return {
+            total,
+            done,
+            left: total - done,
+            pct: total ? Math.round((done / total) * 100) : 0,
+            dayCount,
+            daysAllDone,
+            allDone
+        };
+    }
+
+    function overallStats(sheets, dailyWords, wordStats, masterScore, wordList) {
+        let total = 0, done = 0, daysAllDone = 0, dayCount = 0;
+        Object.keys(sheets).forEach(name => {
+            const s = sheetStats(sheets[name], dailyWords, wordStats, masterScore, wordList);
+            if (!s.total) return;
+            total += s.total;
+            done += s.done;
+            dayCount++;
+            if (s.done >= s.total) daysAllDone++;
+        });
+        return {
+            total,
+            done,
+            left: total - done,
+            pct: total ? Math.round((done / total) * 100) : 0,
+            dayCount,
+            daysAllDone
+        };
+    }
+
+    function statusInfo(stats) {
+        if (stats.total === 0) return { cls: "none", text: "无题目" };
+        if (stats.done >= stats.total) return { cls: "done", text: "每日已完成" };
+        if (stats.done > 0) return { cls: "partial", text: "进行中 " + stats.pct + "%" };
+        return { cls: "none", text: "未开始" };
+    }
+
+    function dayMetaLine(st) {
+        let line = "当日任务已消除 " + st.done + " / " + st.total + " 组";
+        if (st.left > 0) line += "，还剩 " + st.left + " 组";
+        return line;
+    }
+
+    function getMondayOfDate(dateStr) {
+        // dateStr: "YYYY-MM-DD"
+        let d = new Date(dateStr.replace(/-/g,"/"));
+        let day = d.getDay();
+        // JS: 0=Sunday
+        let diff = d.getDate() - ((day + 6) % 7);
+        let monday = new Date(d);
+        monday.setDate(diff);
+        return monday;
+    }
+
+    function formatYYYYMMDD(d) {
+        return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+    }
+
+    function splitWeekRanges(dateKeys) {
+        // 输入所有日期sheet名数组: ["2024-05-01", ...]
+        // 输出周数组: [{first: "2024-05-13", last:"2024-05-19", list:["2024-05-13",...]}, ...]
+        let arr = sortSheetNames(dateKeys).reverse(); // 从老到新
+        if (arr.length === 0) return [];
+        let ranges = [];
+        let curStart = null, curEnd = null, curWeekList = [];
+        for (let i = 0; i < arr.length; ++i) {
+            let dtStr = arr[i];
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dtStr)) continue;
+            let mon = getMondayOfDate(dtStr);
+            let sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            let keyMon = formatYYYYMMDD(mon);
+            let keySun = formatYYYYMMDD(sun);
+            if (!curStart || keyMon !== curStart) {
+                // 新一周
+                if (curWeekList.length > 0) {
+                    ranges.push({first: curStart, last: curEnd, list: curWeekList});
+                }
+                curStart = keyMon;
+                curEnd = keySun;
+                curWeekList = [dtStr];
+            } else {
+                curWeekList.push(dtStr);
+            }
+        }
+        if (curWeekList.length > 0) {
+            ranges.push({first: curStart, last: curEnd, list: curWeekList});
+        }
+        // 按新到老排序
+        return ranges.reverse();
+    }
+
+    async function fetchWorkbook(candidates) {
+        for (const file of candidates) {
+            try {
+                const buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, file));
+                if (buf.byteLength < 512) continue;
+                const parsed = await prepareWorkbookFromBuffer(buf, file);
+                return {
+                    ok: true,
+                    filename: parsed.filename,
+                    sheets: parsed.sheets,
+                    dailyStats: parsed.dailyStats,
+                    wordList: parsed.wordList,
+                    wordStats: parsed.wordStats,
+                    dailyWords: parsed.dailyWords,
+                    masterScore: parsed.masterScore,
+                    weekDays: parsed.weekDays,
+                    weekSheetsCreated: parsed.weekSheetsCreated,
+                    createdSheetNames: parsed.createdSheetNames || [],
+                    saveLocked: parsed.saveLocked
+                };
+            } catch (e) {
+                console.warn("[parent] Gitee fetch", file, e);
+            }
+        }
+        return { ok: false, error: "未找到 " + candidates.join(" / ") + "（Gitee: " + GITEE_DATA_DIR + "）" };
+    }
+
+    function buildUnifiedWeekList() {
+        const map = new Map();
+        STUDENTS.forEach(st => {
+            (weekDataCache[st.key] || []).forEach(w => {
+                const key = w.first + "~" + w.last;
+                if (!map.has(key)) map.set(key, { first: w.first, last: w.last });
+            });
+        });
+        return Array.from(map.values()).sort((a, b) => b.first.localeCompare(a.first));
+    }
+
+    function getStudentWeekIndex(stuKey, unifiedIdx) {
+        const u = unifiedWeekList[unifiedIdx];
+        if (!u) return 0;
+        const weekArr = weekDataCache[stuKey] || [];
+        const idx = weekArr.findIndex(w => w.first === u.first && w.last === u.last);
+        return idx >= 0 ? idx : 0;
+    }
+
+    function dataFingerprint(results) {
+        return results.map(r => {
+            if (!r.ok) return r.key + ":err:" + (r.error || "");
+            const dw = r.dailyWords || DEFAULT_DAILY_WORDS;
+            const ms = r.masterScore || DEFAULT_MASTER_SCORE;
+            const wl = r.wordList || [];
+            const parts = sortSheetNames(Object.keys(r.sheets)).map(name => {
+                const s = sheetStats(r.sheets[name], dw, r.wordStats, ms, wl);
+                return name + ":" + s.done + "/" + s.total;
+            });
+            const ws = (r.wordStats || []).map(w => w.en + ":" + w.count).join(",");
+            const ds = r.dailyStats || {};
+            const act = Object.keys(ds).sort().map(k => {
+                const d = ds[k];
+                return k + ":" + (d.steps || 0) + "s" + (d.timeSec || 0);
+            }).join(",");
+            return r.key + "@dw" + dw + "@ms" + ms + "@wl" + wl.length + "{" + parts.join("|") + "}[" + ws + "](" + act + ")";
+        }).join(";");
+    }
+
+    function renderUnifiedWeekSelect(curIdx) {
+        if (!unifiedWeekList.length) return "";
+        const today = getTodaySheetName();
+        let html = '<label class="week-select-label">选择周：</label>';
+        html += '<select class="week-select" id="weekSelectUnified">';
+        html += unifiedWeekList.map((w, idx) => {
+            const inThisWeek =
+                (today >= w.first && today <= w.last) ||
+                STUDENTS.some(function (st) {
+                    return (weekDataCache[st.key] || []).some(function (x) {
+                        return x.first === w.first && x.list && x.list.includes(today);
+                    });
+                });
+            const range = w.first + "～" + w.last;
+            const label = inThisWeek ? "本周 · " + range : range;
+            return '<option value="' + idx + '"' + (curIdx === idx ? " selected" : "") + ">" + label + "</option>";
+        }).join("");
+        html += "</select>";
+        return html;
+    }
+
+    // 新增：渲染所有周的进度汇总（summary 行，全部按周汇总，只显示选中那一周的数据）
+    function renderWeeklySummary(results) {
+        const html = results.map(r => {
+            if (!r.ok) {
+                return (
+                    '<div class="summary-card ' + r.key + '">' +
+                    '<h2>' + r.label + '</h2>' +
+                    '<div class="big-num">—</div>' +
+                    '<div class="summary-sub">词库未加载</div></div>'
+                );
+            }
+            let weekArr = weekDataCache[r.key] || [];
+            let weekIdx = getStudentWeekIndex(r.key, curWeekIdx);
+            let weekObj = weekArr[weekIdx] || {};
+            const dw = r.dailyWords || DEFAULT_DAILY_WORDS;
+            const ms = r.masterScore || DEFAULT_MASTER_SCORE;
+            const ws = r.wordStats || [];
+            const wl = r.wordList || [];
+            if (!wl.length) {
+                return (
+                    '<div class="summary-card ' + r.key + '">' +
+                    '<h2>' + r.label + '</h2>' +
+                    '<div class="big-num">—</div>' +
+                    '<div class="summary-sub">词库缺少「单词列表」Sheet</div></div>'
+                );
+            }
+            let st = weekStats(r.sheets, weekObj.list || [], dw, ws, ms, wl);
+            let today = getTodaySheetName();
+            let todaySheetStatus = weekObj.list && weekObj.list.includes(today)
+                ? sheetStats(r.sheets[today] || [], dw, ws, ms, wl)
+                : null;
+            let todayLine = "今日无 Sheet";
+            if (todaySheetStatus && todaySheetStatus.total > 0) {
+                todayLine = todaySheetStatus.done >= todaySheetStatus.total
+                    ? "今日每日任务已完成 ✅"
+                    : "今日每日 " + todaySheetStatus.done + "/" + todaySheetStatus.total +
+                        "（" + todaySheetStatus.pct + "%）";
+            } else if (weekObj.list && weekObj.list.includes(today)) {
+                todayLine = "今日暂无待学单词（可能已全部掌握）";
+            }
+            let weekErrTotal = 0;
+            (weekObj.list || []).forEach(name => {
+                weekErrTotal += sheetErrorStats(r.sheets[name] || [], dw, ws, ms, wl).total;
+            });
+            const errLine = weekErrTotal > 0
+                ? '<div class="summary-sub">本周累计错误 ' + weekErrTotal + ' 次</div>'
+                : "";
+            return (
+                '<div class="summary-card ' + r.key + '">' +
+                '<button type="button" class="btn btn-ghost btn-word-detail summary-word-detail" data-stu-key="' + r.key + '" title="查看单词统计表全部单词">📒 单词明细</button>' +
+                '<h2>' + r.label + '</h2>' +
+                '<div class="big-num">' + st.pct + '%</div>' +
+                '<div class="summary-sub">本周每日任务 ' + st.done + '/' + st.total + ' 组 · ' +
+                st.daysAllDone + '/' + st.dayCount + ' 天已完成</div>' +
+                '<div class="summary-sub">每日 ' + dw + ' 个 · 掌握 ≥' + ms + ' 不再出题 · 生成周天数 ' +
+                getWeekDaysCount(r.weekDays) + '（' + weekDaysLabel(r.weekDays) + '）</div>' +
+                '<div class="summary-sub">' + todayLine + '</div>' +
+                errLine +
+                '</div>'
+            );
+        }).join('');
+        document.getElementById("summaryRow").innerHTML = html;
+    }
+
+    function renderDayList(sheets, today, weekArr, weekIndex, dailyWords, wordStats, masterScore, wordList, dailyStats) {
+        if (!weekArr.length) {
+            return '<div class="err-box">词库中没有有效日期 Sheet</div>';
+        }
+        if (!wordList || !wordList.length) {
+            return '<div class="err-box">词库缺少「单词列表」Sheet（英文、中文），无法统计每日进度</div>';
+        }
+        let weekDates = weekArr[weekIndex] ? weekArr[weekIndex].list : [];
+        const dw = dailyWords || DEFAULT_DAILY_WORDS;
+        const ms = masterScore || DEFAULT_MASTER_SCORE;
+        const wst = wordStats || [];
+        const wl = wordList || [];
+        return '<div class="day-list">' + weekDates.map(name => {
+            const pairs = sheets[name] || [];
+            const st = sheetStats(pairs, dw, wst, ms, wl);
+            const errSt = sheetErrorStats(pairs, dw, wst, ms, wl);
+            const info = statusInfo(st);
+            const isToday = name === today;
+            const rowCls = "day-row" + (isToday ? " today" : "") + (info.cls === "done" ? " all-done" : "");
+            return (
+                '<div class="' + rowCls + '">' +
+                '<div class="day-top">' +
+                '<span class="day-date">' + escapeHtml(name) +
+                (isToday ? '<span class="tag-today">今天</span>' : '') + '</span>' +
+                '<span class="status-pill ' + info.cls + '">' + info.text + '</span>' +
+                '</div>' +
+                '<div class="progress-track"><div class="progress-fill" style="width:' + st.pct + '%"></div></div>' +
+                '<div class="day-meta">' + dayMetaLine(st) + renderDayErrorsHtml(errSt) + '</div>' +
+                dayActivityLine(dailyStats, name) +
+                '</div>'
+            );
+        }).join("") + '</div>';
+    }
+
+    function escapeHtml(s) {
+        return String(s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    // 修改renderStudent，仅渲染当前周内容
+    function renderStudent(r, today) {
+        const badge = document.getElementById("badge-" + r.key);
+        const body = document.getElementById("body-" + r.key);
+        if (!badge || !body) return;
+        if (!r.ok) {
+            badge.textContent = "未加载";
+            body.innerHTML = '<div class="err-box">' + escapeHtml(r.error) + '<br>请确认 Gitee LearningData/' + GITEE_DATA_DIR + ' 下已上传对应 xls/xlsx，并检查 gitee-data.js 配置。</div>';
+            return;
+        }
+        let weekArr = weekDataCache[r.key] || [];
+        let weekIdx = getStudentWeekIndex(r.key, curWeekIdx);
+
+        // 渲染本周 day-list
+        const dw = r.dailyWords || DEFAULT_DAILY_WORDS;
+        const ms = r.masterScore || DEFAULT_MASTER_SCORE;
+        const ws = r.wordStats || [];
+        const wl = r.wordList || [];
+        let dayListHtml = renderDayList(r.sheets, today, weekArr, weekIdx, dw, ws, ms, wl, r.dailyStats || {});
+
+        body.innerHTML = dayListHtml;
+
+        // 设置小 badge 总览-当前周
+        const wStats = weekStats(r.sheets, weekArr[weekIdx] ? weekArr[weekIdx].list : [], dw, ws, ms, wl);
+        badge.textContent = wl.length
+            ? wStats.done + "/" + wStats.total + " · " + wStats.pct + "%"
+            : "无词表";
+    }
+
+    function renderAllWeekSelects() {
+        const wrap = document.getElementById("weekSelectGroup");
+        wrap.innerHTML = renderUnifiedWeekSelect(curWeekIdx);
+        wrap.style.display = unifiedWeekList.length ? "flex" : "none";
+    }
+
+    function bindWeekSelectHandlers() {
+        const sel = document.getElementById("weekSelectUnified");
+        if (!sel) return;
+        sel.onchange = function () {
+            curWeekIdx = Number(sel.value);
+            const today = getTodaySheetName();
+            renderWeeklySummary(lastResultsArr);
+            lastResultsArr.forEach(r => renderStudent(r, today));
+        };
+    }
+
+    function pickDefaultWeekIndex() {
+        const today = getTodaySheetName();
+        const idx = unifiedWeekList.findIndex(w => {
+            return STUDENTS.some(st => {
+                const arr = weekDataCache[st.key] || [];
+                const match = arr.find(x => x.first === w.first && x.last === w.last);
+                return match && match.list && match.list.includes(today);
+            });
+        });
+        return idx >= 0 ? idx : 0;
+    }
+
+    async function fetchAllResults() {
+        const results = [];
+        const newWeekCache = {};
+        for (const st of STUDENTS) {
+            const res = await fetchWorkbook(st.files);
+            if (res.ok) {
+                if (!res.wordList || !res.wordList.length) {
+                    res.ok = false;
+                    res.error = "词库缺少「单词列表」Sheet（英文、中文）";
+                } else {
+                    const sheetNames = Object.keys(res.sheets).filter(name => /^\d{4}-\d{2}-\d{2}$/.test(name));
+                    newWeekCache[st.key] = splitWeekRanges(sheetNames);
+                }
+            }
+            results.push({
+                key: st.key,
+                label: st.label,
+                ok: res.ok,
+                sheets: res.ok ? res.sheets : {},
+                dailyStats: res.ok ? (res.dailyStats || {}) : {},
+                wordList: res.ok ? res.wordList : [],
+                wordStats: res.ok ? res.wordStats : [],
+                dailyWords: res.ok ? res.dailyWords : DEFAULT_DAILY_WORDS,
+                masterScore: res.ok ? res.masterScore : DEFAULT_MASTER_SCORE,
+                weekDays: res.ok ? res.weekDays : DEFAULT_WEEK_DAYS,
+                weekSheetsCreated: !!(res.ok && res.weekSheetsCreated),
+                createdSheetNames: res.ok ? (res.createdSheetNames || []) : [],
+                saveLocked: !!(res.ok && res.saveLocked),
+                filename: res.filename,
+                error: res.error
+            });
+        }
+        return { results, newWeekCache };
+    }
+
+    function unifiedWeekListKey() {
+        return unifiedWeekList.map(w => w.first + "~" + w.last).join("|");
+    }
+
+    function applyResults(results, options) {
+        const { resetWeek = false, rebuildSelect = false } = options || {};
+        const today = getTodaySheetName();
+        lastResultsArr = results;
+
+        unifiedWeekList = buildUnifiedWeekList();
+        if (resetWeek) {
+            curWeekIdx = pickDefaultWeekIndex();
+        } else if (curWeekIdx >= unifiedWeekList.length) {
+            curWeekIdx = Math.max(0, unifiedWeekList.length - 1);
+        }
+
+        document.getElementById("loadingAll").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+
+        if (rebuildSelect) {
+            renderAllWeekSelects();
+            bindWeekSelectHandlers();
+        } else {
+            const sel = document.getElementById("weekSelectUnified");
+            if (sel) sel.value = String(curWeekIdx);
+        }
+
+        renderWeeklySummary(results);
+        results.forEach(r => renderStudent(r, today));
+
+        const now = new Date();
+        let updateText =
+            "更新于 " + pad2(now.getHours()) + ":" + pad2(now.getMinutes()) + ":" + pad2(now.getSeconds());
+        const createdLabels = results
+            .filter(r => r.ok && r.weekSheetsCreated)
+            .map(r => {
+                const names = (r.createdSheetNames || []).join("、") || "本周日期表";
+                return r.label + (r.saveLocked ? "（词库占用，未写入：" + names + "）" : "（已生成：" + names + "）");
+            });
+        if (createdLabels.length) updateText += " · " + createdLabels.join("、");
+        document.getElementById("lastUpdate").textContent = updateText;
+    }
+
+    async function loadAll(options) {
+        const silent = options && options.silent;
+        const force = options && options.force;
+        const loading = document.getElementById("loadingAll");
+        const main = document.getElementById("mainContent");
+        const weekSelectGroup = document.getElementById("weekSelectGroup");
+
+        if (typeof GiteeData === "undefined") {
+            loading.style.display = "block";
+            loading.textContent = "Gitee 数据模块加载失败，请确认 ../gitee-data.js 可访问。";
+            main.style.display = "none";
+            weekSelectGroup.style.display = "none";
+            document.getElementById("lastUpdate").textContent = "";
+            return;
+        }
+
+        if (typeof XLSX === "undefined") {
+            loading.textContent = "Excel 解析库加载失败，请检查网络是否可访问 CDN。";
+            return;
+        }
+
+        if (!silent) {
+            loading.style.display = "block";
+            loading.textContent = "正在从 Gitee 读取词库…";
+            main.style.display = "none";
+            weekSelectGroup.style.display = "none";
+        }
+
+        const { results, newWeekCache } = await fetchAllResults();
+        const fp = dataFingerprint(results);
+
+        if (silent && !force && fp === lastFingerprint) {
+            return;
+        }
+
+        const prevWeekListKey = unifiedWeekListKey();
+        lastFingerprint = fp;
+        weekDataCache = newWeekCache;
+        const weekListChanged = buildUnifiedWeekList().map(w => w.first + "~" + w.last).join("|") !== prevWeekListKey;
+
+        const isFirstPaint = main.style.display === "none";
+
+        applyResults(results, {
+            resetWeek: isFirstPaint && !silent,
+            rebuildSelect: isFirstPaint || weekListChanged
+        });
+    }
+
+    function startAutoRefresh() {
+        if (refreshTimer) clearInterval(refreshTimer);
+        refreshTimer = setInterval(function () { loadAll({ silent: true }); }, 60000);
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", function () { loadAll({ force: true }); });
+    document.getElementById("wordDetailCloseBtn").addEventListener("click", hideWordDetailModal);
+    document.getElementById("wordDetailModal").addEventListener("click", function (e) {
+        if (e.target.id === "wordDetailModal") hideWordDetailModal();
+    });
+    document.getElementById("summaryRow").addEventListener("click", function (e) {
+        const btn = e.target.closest(".btn-word-detail");
+        if (!btn) return;
+        const key = btn.getAttribute("data-stu-key");
+        const r = lastResultsArr.find(x => x.key === key);
+        if (r) showWordDetailModal(r);
+    });
+    loadAll();
+    startAutoRefresh();
+    </script>
+</body>
+</html>

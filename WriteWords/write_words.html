@@ -1,0 +1,2154 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>英语单词默写</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #d1f3ff 0%, #b5e2fa 100%);
+            font-family: 'Comic Sans MS', '微软雅黑', cursive, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        #container {
+            position: relative;
+            max-width: 440px;
+            margin: 40px auto;
+            background: #fff7;
+            border-radius: 18px;
+            padding: 32px 16px 24px 16px;
+            box-shadow: 0 8px 40px #a3d0ee55;
+            min-height: 420px;
+        }
+        .load-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 18px;
+            background: linear-gradient(145deg, #fff9fc 0%, #e8f7ff 55%, #fff3d6 100%);
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.35s ease;
+        }
+        .load-screen.hidden { display: none; }
+        .load-screen.hiding {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .load-screen::before {
+            content: '';
+            position: absolute;
+            width: 140%;
+            height: 140%;
+            top: -20%;
+            left: -20%;
+            background: radial-gradient(circle at 30% 30%, #ffe0ec88 0%, transparent 45%),
+                radial-gradient(circle at 70% 60%, #b5e2fa66 0%, transparent 42%);
+            animation: loadGlow 4s ease-in-out infinite alternate;
+        }
+        @keyframes loadGlow {
+            from { transform: translate(0, 0) scale(1); }
+            to { transform: translate(2%, 3%) scale(1.05); }
+        }
+        .load-scene {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 12px 20px 28px;
+        }
+        .load-mascot {
+            font-size: 3.2em;
+            line-height: 1;
+            animation: loadBookFloat 1.6s ease-in-out infinite;
+            filter: drop-shadow(0 6px 12px #ffbee766);
+        }
+        @keyframes loadBookFloat {
+            0%, 100% { transform: translateY(0) rotate(-4deg); }
+            50% { transform: translateY(-14px) rotate(4deg); }
+        }
+        .load-letters {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin: 18px 0 10px;
+        }
+        .load-letters span {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.45em;
+            font-weight: bold;
+            color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 14px #64b5f644;
+            animation: loadLetterBounce 0.9s ease-in-out infinite;
+        }
+        .load-letters span:nth-child(1) { background: linear-gradient(135deg, #ff91ad, #ff6b9d); }
+        .load-letters span:nth-child(2) { background: linear-gradient(135deg, #64b5f6, #42a5f5); animation-delay: 0.15s; }
+        .load-letters span:nth-child(3) { background: linear-gradient(135deg, #24d292, #1ec88a); animation-delay: 0.3s; }
+        @keyframes loadLetterBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            40% { transform: translateY(-16px) scale(1.08); }
+        }
+        .load-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .load-dots span {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #64b5f6;
+            animation: loadDotPulse 1.1s ease-in-out infinite;
+        }
+        .load-dots span:nth-child(2) { animation-delay: 0.18s; background: #ff91ad; }
+        .load-dots span:nth-child(3) { animation-delay: 0.36s; background: #24d292; }
+        @keyframes loadDotPulse {
+            0%, 80%, 100% { transform: scale(0.65); opacity: 0.45; }
+            40% { transform: scale(1.15); opacity: 1; }
+        }
+        .load-msg {
+            margin: 16px 0 0;
+            font-size: 1.05em;
+            color: #5a8fb8;
+        }
+        .load-bar {
+            width: min(220px, 72vw);
+            height: 6px;
+            margin: 14px auto 0;
+            border-radius: 99px;
+            background: #d8ecf8;
+            overflow: hidden;
+        }
+        .load-bar i {
+            display: block;
+            height: 100%;
+            width: 38%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #24d292, #64b5f6, #ff91ad);
+            animation: loadBarSlide 1.4s ease-in-out infinite;
+        }
+        @keyframes loadBarSlide {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(320%); }
+        }
+        .game-main.is-loading { display: none; }
+        h1 {
+            text-align: center;
+            color: #12a0e3;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            letter-spacing: 2.5px;
+            text-shadow: 2px 2px 8px #b5e2fa;
+        }
+        .word-card {
+            border-radius: 18px;
+            margin: 22px auto 18px auto;
+            padding: 26px 10px 18px 10px;
+            background: linear-gradient(135deg, #ffd6e0 0%, #fffbea 100%);
+            color: #54595e;
+            font-size: 1.7em;
+            font-weight: bold;
+            letter-spacing: 2px;
+            box-shadow: 0 3px 16px #ffbee755;
+            transition: background 0.4s;
+            min-height:50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chinese, .step-info {
+            text-align: center;
+            color: #b45c99;
+            font-size: 1.18em;
+            margin-top: 8px;
+        }
+        .date-selector-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 0 12px;
+            flex-wrap: wrap;
+        }
+        .date-selector-bar label {
+            font-size: 1em;
+            color: #5a8fb8;
+            font-weight: bold;
+        }
+        .date-selector-bar select {
+            padding: 6px 12px;
+            border-radius: 10px;
+            border: 2px solid #b5e2fa;
+            font-size: 1em;
+            background: #fff;
+            color: #2d6a9f;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            min-width: 160px;
+        }
+        .date-selector-bar select:focus {
+            border-color: #12a0e3;
+            box-shadow: 0 0 0 3px rgba(18,160,227,.15);
+        }
+        .timer-bar {
+            text-align: center;
+            font-size: 0.92em;
+            color: #7a9bb5;
+            margin-bottom: 6px;
+        }
+        .timer-bar .timer-icon { margin-right: 4px; }
+        .countdown {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #fb8909;
+            margin-top: 14px;
+        }
+        .input-area {
+            text-align: center;
+            margin-top: 12px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 0.66em 0.5em;
+            margin-right: 1em;
+            border: 2px solid #b5e2fa;
+            font-size: 1.2em;
+            border-radius: 7px;
+            box-shadow: 0 1px 5px #ddeaff44;
+            outline: none;
+        }
+        button {
+            background: linear-gradient(90deg, #24d292 0%, #64b5f6 100%);
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            padding: 10px 26px;
+            border-radius: 8px;
+            margin: 6px 5px;
+            font-size: 1.08em;
+            cursor: pointer;
+            box-shadow: 0 1px 8px #a3d0ee44;
+            transition: background 0.3s, transform 0.1s;
+        }
+        button:active {
+            background: linear-gradient(90deg, #48ddad 0%, #03a9f4 100%);
+            transform: scale(0.97);
+        }
+        .skip-btn {
+            background: linear-gradient(90deg, #ff91ad 0%, #ffd24c 100%);
+            color: #a34d02;
+            font-weight: bold;
+        }
+        .correct-anim {
+            animation: pop-bounce 0.8s;
+        }
+        @keyframes pop-bounce {
+            0% { transform: scale(1);}
+            30%{ transform: scale(1.25);}
+            60%{ transform: scale(0.93);}
+            80%{ transform: scale(1.09);}
+            100%{ transform: scale(1);}
+        }
+        .word-card.slots-shake .letter-slots {
+            animation: shake 0.45s;
+        }
+        @keyframes shake {
+            20%, 60% {transform: translateX(4px);}
+            40%, 80% {transform: translateX(-4px);}
+            100% {transform: translateX(0);}
+        }
+        .pick-hint {
+            text-align: center;
+            font-size: 0.92em;
+            color: #b45c99;
+            min-height: 1.25em;
+            margin-top: 8px;
+            line-height: 1.35;
+        }
+        .pick-hint.err {
+            color: #c75b7a;
+            font-weight: normal;
+        }
+        .celebrate {
+            animation: swing 0.8s;
+        }
+        @keyframes swing {
+            15% {transform: rotateZ(30deg);}
+            30% {transform: rotateZ(-25deg);}
+            45% {transform: rotateZ(18deg);}
+            60% {transform: rotateZ(-10deg);}
+            75% {transform: rotateZ(8deg);}
+            100%{transform: rotateZ(0);}
+        }
+        #celebrate-anim {
+            text-align: center;
+            font-size: 1.1em;
+            margin-top: 10px;
+            color: #f7941e;
+        }
+        .complete-panel {
+            margin: 16px auto 0;
+            max-width: 320px;
+            padding: 18px 16px 14px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #fff9fc 0%, #e8f7ff 100%);
+            box-shadow: 0 4px 16px #a3d0ee44;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        .complete-panel--celebrate {
+            animation: completePanelIn 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+        }
+        @keyframes completePanelIn {
+            from { transform: scale(0.85) translateY(12px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .complete-panel .complete-emoji {
+            font-size: 2rem;
+            line-height: 1;
+            display: block;
+            margin-bottom: 8px;
+            animation: completePop 0.6s ease-out both;
+        }
+        .complete-panel--celebrate .complete-emoji {
+            animation: completeEmojiWiggle 1.1s ease-in-out infinite;
+        }
+        @keyframes completePop {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes completeEmojiWiggle {
+            0%, 100% { transform: scale(1) rotate(-6deg); }
+            50% { transform: scale(1.12) rotate(6deg); }
+        }
+        .complete-sparkles {
+            position: absolute;
+            inset: -8px;
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+        .complete-sparkles i {
+            position: absolute;
+            font-style: normal;
+            font-size: 0.85rem;
+            opacity: 0;
+            animation: completeSparkle 2.2s ease-in-out infinite;
+        }
+        .complete-sparkles i:nth-child(1) { left: 8%; top: 12%; animation-delay: 0s; }
+        .complete-sparkles i:nth-child(2) { right: 10%; top: 18%; animation-delay: 0.4s; }
+        .complete-sparkles i:nth-child(3) { left: 14%; bottom: 16%; animation-delay: 0.8s; }
+        .complete-sparkles i:nth-child(4) { right: 12%; bottom: 12%; animation-delay: 1.2s; }
+        @keyframes completeSparkle {
+            0%, 100% { opacity: 0; transform: translateY(6px) scale(0.6); }
+            45% { opacity: 1; transform: translateY(-4px) scale(1); }
+        }
+        .complete-panel .complete-title {
+            margin: 0 0 8px;
+            font-size: 1.08em;
+            font-weight: bold;
+            color: #12a0e3;
+            line-height: 1.35;
+        }
+        .complete-panel .complete-sub {
+            margin: 0 0 12px;
+            font-size: 0.9em;
+            color: #b45c99;
+        }
+        .letter-slots {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            min-height: 48px;
+            align-items: center;
+        }
+        .letter-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.35em;
+            height: 1.55em;
+            padding: 0 0.2em;
+            border-bottom: 3px solid #12a0e3;
+            font-size: 1.15em;
+            color: #333;
+        }
+        .letter-slot.empty {
+            color: #b5c9d8;
+            border-bottom-color: #b5e2fa;
+        }
+        .letter-slot.active {
+            color: #12a0e3;
+            border-bottom-color: #fb8909;
+            border-bottom-width: 4px;
+            animation: slot-pulse 1s ease-in-out infinite;
+        }
+        @keyframes slot-pulse {
+            50% { transform: scaleY(1.08); }
+        }
+        .letter-tiles {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 14px;
+            max-width: 100%;
+        }
+        .letter-tile {
+            min-width: 2.1em;
+            height: 2.1em;
+            padding: 0 0.35em;
+            font-size: 1.25em;
+            font-weight: bold;
+            border: 2px solid #b5e2fa;
+            border-radius: 10px;
+            background: linear-gradient(180deg, #fff 0%, #e8f4ff 100%);
+            color: #2d6a9f;
+            cursor: pointer;
+            box-shadow: 0 2px 6px #a3d0ee44;
+        }
+        .letter-tile:disabled {
+            opacity: 0.35;
+            cursor: default;
+            transform: none;
+        }
+        .pick-actions {
+            margin-top: 12px;
+        }
+        .pick-actions button.secondary {
+            background: linear-gradient(90deg, #b0bec5 0%, #90a4ae 100%);
+            font-size: 0.95em;
+            padding: 8px 18px;
+        }
+        @media (max-width:490px) {
+            #container {padding: 10px 2vw;}
+            input[type="text"]{width: 92%;}
+        }
+        /* 全部完成：随机动画层（参考 EnglishChineseMatchingGame） */
+        .celebration-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9000;
+            overflow: hidden;
+        }
+        .celebration-layer.off {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .celebration-layer:not(.off) {
+            opacity: 1;
+            visibility: visible;
+        }
+        #fxCanvas {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            width: 100%;
+            height: 100%;
+        }
+        .surprise-scene {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .surprise-scene.active {
+            opacity: 1;
+            background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.42) 0%, transparent 68%);
+        }
+        .surprise-hero { text-align: center; animation: heroZoom 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .surprise-hero .badge {
+            font-size: clamp(2rem, 9vw, 2.75rem);
+            line-height: 1;
+            animation: badgeSpin 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes badgeSpin {
+            from { transform: rotate(-8deg) scale(1); }
+            to { transform: rotate(8deg) scale(1.08); }
+        }
+        @keyframes heroZoom {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .surprise-hero h2 {
+            margin: 8px 0 4px;
+            font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+            color: #fff;
+            text-shadow: 0 1px 8px rgba(45, 106, 82, 0.45);
+        }
+        .surprise-hero p {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff9e6;
+        }
+        .emoji-parade {
+            position: absolute;
+            font-size: clamp(1.2rem, 4.5vw, 1.75rem);
+            animation: paradeMove 4s linear forwards;
+        }
+        @keyframes paradeMove {
+            from { transform: translateX(-120vw) rotate(-10deg); }
+            to { transform: translateX(120vw) rotate(10deg); }
+        }
+        .balloon {
+            position: absolute;
+            bottom: -80px;
+            width: 48px;
+            height: 58px;
+            border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+            animation: balloonUp 4.5s ease-in forwards;
+        }
+        .balloon::after {
+            content: "";
+            position: absolute;
+            bottom: -28px;
+            left: 50%;
+            width: 2px;
+            height: 28px;
+            background: rgba(0,0,0,0.15);
+            transform: translateX(-50%);
+        }
+        @keyframes balloonUp {
+            to { transform: translateY(-115vh) translateX(var(--drift, 0)); opacity: 0.9; }
+        }
+        .rainbow-arc { animation: rainbowIn 1s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        @keyframes rainbowIn {
+            from { transform: scale(0) rotate(-30deg); opacity: 0; }
+            to { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .rainbow-arc .rainbow-svg-bands {
+            width: clamp(220px, 76vw, 360px);
+            height: auto;
+            display: block;
+        }
+        .scene-label {
+            margin-top: 12px;
+            padding: 6px 14px;
+            background: rgba(255,255,255,0.96);
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #e85d9a;
+            border: 2px solid #ffc857;
+            animation: labelPop 0.6s 0.4s both;
+        }
+        @keyframes labelPop {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: none; }
+        }
+        .rocket-msg {
+            font-size: clamp(1.4rem, 5vw, 2rem);
+            animation: rocketFly 2.5s ease-in-out infinite;
+        }
+        .surprise-scene .rocket-title {
+            margin: 8px 0 4px;
+            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
+            color: #fff;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+            font-weight: bold;
+        }
+        @keyframes rocketFly {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-24px) rotate(5deg); }
+        }
+        .sky-star {
+            position: absolute;
+            opacity: 0.75;
+            animation: starTwinkle 2.5s ease-in-out infinite;
+        }
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.5; transform: scale(0.9); }
+            50% { opacity: 1; transform: scale(1.15); }
+        }
+    </style>
+</head>
+<body>
+    <div class="celebration-layer off" id="celebrationLayer">
+        <canvas id="fxCanvas"></canvas>
+        <div class="surprise-scene" id="surpriseScene"></div>
+    </div>
+    <div id="container">
+        <div id="load-screen" class="load-screen" aria-live="polite" aria-busy="true">
+            <div class="load-scene">
+                <div class="load-mascot" aria-hidden="true">📚</div>
+                <div class="load-letters" aria-hidden="true">
+                    <span>A</span><span>B</span><span>C</span>
+                </div>
+                <div class="load-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+                <p id="load-msg" class="load-msg">正在准备今日单词…</p>
+                <div class="load-bar" aria-hidden="true"><i></i></div>
+            </div>
+        </div>
+        <div id="game-main" class="game-main is-loading">
+            <h1>🎉 选字母拼单词 📝</h1>
+            <div class="date-selector-bar" id="date-selector-bar" style="display:none;">
+                <label>📅 选择日期：</label>
+                <select id="dateSelector"></select>
+            </div>
+            <div class="timer-bar" id="timer-bar" style="display:none;">
+                <span class="timer-icon">⏱️</span>
+                <span id="session-timer">0</span> 秒
+            </div>
+            <div id="step-info" class="step-info"></div>
+            <div id="celebrate-anim"></div>
+            <div id="word-card" class="word-card"></div>
+            <div id="chinese" class="chinese"></div>
+            <div id="countdown" class="countdown"></div>
+            <div id="input-area" class="input-area"></div>
+            <div id="ctrl-btns" style="text-align:center;">
+                <button id="btn-next" style="display:none;">下一题</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 依赖js-xlsx，直接开放xls文件读取 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="../gitee-data.js"></script>
+    <script src="students.js"></script>
+    <script>
+    const GITEE_DATA_DIR = "WriteWords";
+    const studentResolved = (window.StudentRoster && StudentRoster.resolveFromUrl()) || { files: [], missing: false };    let wordsList = [];
+    let currentIdx = 0;
+    let skippedIdxs = [];
+    let statsSheet = null;
+    let statMap = {};
+    let today = '';
+    let activeSheet = '';
+    let wb = null;
+    let fileName = '';
+    let wordPassedToday = {};
+    let finished = false;
+    const SAVE_RETRY_MS = 5000;
+    let backgroundSaveTask = null;
+    let autoSaveTimer = null;
+    let saveInFlight = false;
+    let saveWanted = false;
+    let workbookDirty = false;
+    let pickState = null;
+    const STAT_HEADERS = ['单词', '默写正确', '默写错误', '默写准确率'];
+    const AUTO_SAVE_MS = 1500;
+    const DAILY_STAT_HEADERS = ['日期', '当日耗时'];
+    let sessionTimer = 0;
+    let sessionTimerInterval = null;
+    let activityPersistedTime = 0;
+    let activityAutoFlushTimer = null;
+
+    /** 本地 Web Audio 音效（不依赖外链，首击后解锁） */
+    const WwSfx = (function () {
+        let ctx = null;
+        let unlocked = false;
+
+        function getCtx() {
+            if (!ctx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (AC) ctx = new AC();
+            }
+            return ctx;
+        }
+
+        function unlock() {
+            const c = getCtx();
+            if (!c) return;
+            unlocked = true;
+            if (c.state === 'suspended') c.resume();
+            try {
+                const buf = c.createBuffer(1, 1, 22050);
+                const src = c.createBufferSource();
+                src.buffer = buf;
+                src.connect(c.destination);
+                src.start(0);
+            } catch (_) {}
+        }
+
+        function tone(freq, duration, type, vol, when) {
+            const c = getCtx();
+            if (!c || !unlocked) return;
+            const t0 = when != null ? when : c.currentTime;
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(vol || 0.12, t0);
+            gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+            osc.connect(gain);
+            gain.connect(c.destination);
+            osc.start(t0);
+            osc.stop(t0 + duration + 0.02);
+        }
+
+        function play(name) {
+            if (!unlocked) unlock();
+            const c = getCtx();
+            if (!c) return;
+            if (c.state === 'suspended') c.resume();
+            const t = c.currentTime;
+            switch (name) {
+                case 'tap':
+                    tone(520, 0.07, 'sine', 0.11, t);
+                    break;
+                case 'letter':
+                    tone(620 + Math.random() * 100, 0.09, 'triangle', 0.1, t);
+                    break;
+                case 'backspace':
+                    tone(360, 0.08, 'sine', 0.1, t);
+                    break;
+                case 'clear':
+                    tone(300, 0.06, 'sine', 0.09, t);
+                    tone(250, 0.09, 'sine', 0.09, t + 0.06);
+                    break;
+                case 'start':
+                    tone(523, 0.1, 'sine', 0.12, t);
+                    tone(659, 0.12, 'sine', 0.12, t + 0.1);
+                    break;
+                case 'tick':
+                    tone(880, 0.05, 'sine', 0.09, t);
+                    break;
+                case 'go':
+                    tone(784, 0.14, 'sine', 0.13, t);
+                    break;
+                case 'correct':
+                    tone(523, 0.14, 'sine', 0.13, t);
+                    tone(659, 0.14, 'sine', 0.13, t + 0.12);
+                    tone(784, 0.18, 'sine', 0.13, t + 0.24);
+                    break;
+                case 'wrong':
+                    tone(200, 0.22, 'triangle', 0.09, t);
+                    tone(160, 0.28, 'sine', 0.08, t + 0.1);
+                    break;
+                case 'skip':
+                    tone(420, 0.1, 'sine', 0.1, t);
+                    tone(330, 0.14, 'sine', 0.1, t + 0.09);
+                    break;
+                case 'complete':
+                    [523, 659, 784, 1047].forEach(function (f, i) {
+                        tone(f, 0.2, 'sine', 0.11, t + i * 0.13);
+                    });
+                    break;
+                default:
+                    tone(500, 0.06, 'sine', 0.1, t);
+            }
+        }
+
+        function bindUnlock() {
+            const once = function () {
+                unlock();
+            };
+            document.addEventListener('pointerdown', once, true);
+            document.addEventListener('keydown', once, true);
+        }
+        bindUnlock();
+
+        return { unlock: unlock, play: play };
+    })();
+
+    function playSfx(name) {
+        try { WwSfx.play(name); } catch (_) {}
+    }
+
+    function getTodaySheetName() {
+        var n = new Date();
+        return n.getFullYear() + '-' +
+            ('0' + (n.getMonth()+1)).slice(-2) + '-' +
+            ('0' + n.getDate()).slice(-2);
+    }
+
+    function formatYYYYMMDD(d) {
+        return d.getFullYear() + '-' +
+            ('0' + (d.getMonth()+1)).slice(-2) + '-' +
+            ('0' + d.getDate()).slice(-2);
+    }
+
+    function getWeekDateNames(refDate) {
+        var d = refDate instanceof Date ? new Date(refDate.getTime()) : new Date();
+        var dow = d.getDay();
+        var mondayOffset = dow === 0 ? -6 : 1 - dow;
+        var monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() + mondayOffset);
+        var names = [];
+        for (var i = 0; i < 5; i++) {
+            var day = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+            names.push(formatYYYYMMDD(day));
+        }
+        return names;
+    }
+
+    function isDateSheetName(name) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(name);
+    }
+
+    function getMondayOfDate(dateStr) {
+        var d = new Date(dateStr + 'T00:00:00');
+        var dow = d.getDay();
+        var off = dow === 0 ? -6 : 1 - dow;
+        var m = new Date(d.getFullYear(), d.getMonth(), d.getDate() + off);
+        return formatYYYYMMDD(m);
+    }
+
+    function collectAllDateSheets() {
+        var names = new Set(getWeekDateNames(new Date()));
+        if (wb) {
+            wb.SheetNames.forEach(function (k) {
+                if (isDateSheetName(k)) names.add(k);
+            });
+        }
+        return Array.from(names).sort();
+    }
+
+    function splitWeekRanges(dateNames) {
+        var weeks = {};
+        dateNames.forEach(function (n) {
+            var mon = getMondayOfDate(n);
+            if (!weeks[mon]) weeks[mon] = [];
+            weeks[mon].push(n);
+        });
+        return Object.keys(weeks).sort().reverse().map(function (mon) {
+            return { monday: mon, dates: weeks[mon].sort() };
+        });
+    }
+
+    function formatDateOptionLabel(name) {
+        var todayStr = getTodaySheetName();
+        var prefix = name === todayStr ? '今天 · ' : '';
+        var sheet = wb ? wb.Sheets[name] : null;
+        var suffix = '';
+        if (sheet) {
+            var list = XLSX.utils.sheet_to_json(sheet);
+            var total = 0, done = 0;
+            for (var i = 0; i < list.length; i++) {
+                var eng = list[i]['英文'] || list[i]['English'] || list[i]['english'] || '';
+                var chi = list[i]['中文'] || list[i]['Chinese'] || list[i]['chinese'] || '';
+                if (!eng || !chi) continue;
+                total++;
+                var passVal = list[i]['通过'] || list[i]['passed'] || '';
+                if (String(passVal).trim() === '是') done++;
+            }
+            if (total > 0) {
+                suffix = done >= total ? '（已完成）' : '（剩 ' + (total - done) + '/' + total + '）';
+            }
+        } else {
+            suffix = '（未创建）';
+        }
+        return prefix + name + suffix;
+    }
+
+    function ensureWeekDateSheets() {
+        if (!wb) return;
+        var names = getWeekDateNames(new Date());
+        var changed = false;
+        names.forEach(function (name) {
+            if (wb.Sheets[name]) return;
+            var fallback = findClosestDateSheet(wb.SheetNames, name);
+            if (fallback) {
+                var srcSheet = wb.Sheets[fallback];
+                var srcAoa = XLSX.utils.sheet_to_json(srcSheet, { header: 1, defval: '' });
+                var header = srcAoa[0] || [];
+                var passCol = colIndexInHeader(header, ['通过', 'passed']);
+                var newAoa = srcAoa.map(function (row, ri) {
+                    if (ri === 0) return row.slice();
+                    var r = row.slice();
+                    if (passCol >= 0 && r.length > passCol) r[passCol] = '';
+                    return r;
+                });
+                wb.Sheets[name] = XLSX.utils.aoa_to_sheet(newAoa);
+            } else {
+                return;
+            }
+            wb.SheetNames.push(name);
+            changed = true;
+        });
+        if (changed) {
+            workbookDirty = true;
+            scheduleAutoSave();
+        }
+    }
+
+    function populateDateSelector() {
+        var sel = document.getElementById('dateSelector');
+        var bar = document.getElementById('date-selector-bar');
+        if (!sel || !bar) return;
+        sel.innerHTML = '';
+        var allDates = collectAllDateSheets();
+        var weeks = splitWeekRanges(allDates);
+        var todayStr = getTodaySheetName();
+        weeks.forEach(function (wk) {
+            var group = document.createElement('optgroup');
+            group.label = '📅 ' + wk.monday + ' 周';
+            wk.dates.forEach(function (name) {
+                var opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = formatDateOptionLabel(name);
+                group.appendChild(opt);
+            });
+            sel.appendChild(group);
+        });
+        if (sel.querySelector('option[value="' + todayStr + '"]')) {
+            sel.value = todayStr;
+        }
+        bar.style.display = '';
+    }
+
+    function startSessionTimer() {
+        stopSessionTimer();
+        var el = document.getElementById('session-timer');
+        var bar = document.getElementById('timer-bar');
+        if (bar) bar.style.display = '';
+        sessionTimerInterval = setInterval(function () {
+            sessionTimer++;
+            if (el) el.textContent = sessionTimer;
+        }, 1000);
+    }
+
+    function stopSessionTimer() {
+        if (sessionTimerInterval) {
+            clearInterval(sessionTimerInterval);
+            sessionTimerInterval = null;
+        }
+    }
+
+    function flushDailyActivityDelta() {
+        var deltaSec = Math.max(0, sessionTimer - activityPersistedTime);
+        if (deltaSec <= 0 || !wb || !activeSheet) return;
+        addDailyActivity(activeSheet, deltaSec);
+        activityPersistedTime = sessionTimer;
+    }
+
+    function addDailyActivity(dateKey, addSec) {
+        if (!wb) return;
+        var sheetName = '每日统计';
+        if (!wb.SheetNames.includes(sheetName)) {
+            wb.SheetNames.push(sheetName);
+            wb.Sheets[sheetName] = XLSX.utils.aoa_to_sheet([DAILY_STAT_HEADERS.slice()]);
+        }
+        var d = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1 });
+        if (!d.length) d.push(DAILY_STAT_HEADERS.slice());
+        var found = false;
+        for (var i = 1; i < d.length; i++) {
+            if (d[i] && String(d[i][0]).trim() === dateKey) {
+                d[i][1] = (parseInt(d[i][1]) || 0) + addSec;
+                found = true;
+                break;
+            }
+        }
+        if (!found) d.push([dateKey, addSec]);
+        wb.Sheets[sheetName] = XLSX.utils.aoa_to_sheet(d);
+        workbookDirty = true;
+        scheduleAutoSave();
+    }
+
+    function startDailyActivityAutoFlush() {
+        stopDailyActivityAutoFlush();
+        activityAutoFlushTimer = setInterval(function () {
+            flushDailyActivityDelta();
+        }, 10000);
+    }
+
+    function stopDailyActivityAutoFlush() {
+        if (activityAutoFlushTimer) {
+            clearInterval(activityAutoFlushTimer);
+            activityAutoFlushTimer = null;
+        }
+    }
+
+    function formatDurationSeconds(sec) {
+        sec = parseInt(sec) || 0;
+        if (sec < 60) return sec + ' 秒';
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        if (m < 60) return m + ' 分 ' + (s > 0 ? s + ' 秒' : '');
+        var h = Math.floor(m / 60);
+        m = m % 60;
+        return h + ' 小时 ' + (m > 0 ? m + ' 分' : '');
+    }
+
+    function alertBox(msg){
+        window.alert(msg);
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function showWordLoadScreen(msg) {
+        const screen = document.getElementById('load-screen');
+        const game = document.getElementById('game-main');
+        const tip = document.getElementById('load-msg');
+        if (tip && msg) tip.textContent = msg;
+        if (screen) {
+            screen.classList.remove('hidden');
+            screen.setAttribute('aria-busy', 'true');
+        }
+        if (game) game.classList.add('is-loading');
+    }
+
+    function hideWordLoadScreen() {
+        const screen = document.getElementById('load-screen');
+        const game = document.getElementById('game-main');
+        if (!screen) {
+            if (game) game.classList.remove('is-loading');
+            return;
+        }
+        screen.classList.add('hiding');
+        screen.setAttribute('aria-busy', 'false');
+        setTimeout(function () {
+            screen.classList.add('hidden');
+            screen.classList.remove('hiding');
+            if (game) game.classList.remove('is-loading');
+        }, 340);
+    }
+
+    // 从 Gitee LearningData/WriteWords 获取当前学生词库候选
+    async function fetchWorkbookCandidates() {
+        if (studentResolved.missing) {
+            return [];
+        }
+        if (studentResolved.files && studentResolved.files.length) {
+            return studentResolved.files.slice();
+        }
+        try {
+            const files = await GiteeData.listWorkbookFiles(GITEE_DATA_DIR);
+            if (files && files.length) return files;
+        } catch (e) { /* 无服务时走默认文件名 */ }
+        return ['words-mm.xls', 'words-mm.xlsx'];
+    }
+
+    async function tryAutoLoadWorkbook() {
+        showWordLoadScreen('正在从 Gitee 加载词库…');
+        document.getElementById('container').style.minHeight = '670px';
+
+        if (typeof GiteeData === 'undefined') {
+            hideWordLoadScreen();
+            document.getElementById('step-info').innerText =
+                'Gitee 数据模块加载失败，请确认 ../gitee-data.js 可访问';
+            return;
+        }
+        if (studentResolved.missing) {
+            hideWordLoadScreen();
+            document.getElementById('step-info').innerText =
+                '请从入口选择学生（index.html），或在 students.js 中配置学生';
+            return;
+        }
+        if (studentResolved.student && studentResolved.student.label) {
+            document.title = '默写 · ' + studentResolved.student.label;
+        }
+
+        today = getTodaySheetName();
+        const candidates = await fetchWorkbookCandidates();
+        let lastErr = '';
+
+        for (const name of candidates) {
+            try {
+                const buf = await GiteeData.fetchFile(GiteeData.joinPath(GITEE_DATA_DIR, name));
+                if (buf.byteLength < 512) {
+                    lastErr = name + ' 文件过小或已损坏';
+                    continue;
+                }
+                const ok = await loadWorkbookBuffer(buf, name);
+                if (ok) return;
+                lastErr = name + ' 中未找到今日 sheet（' + today + '）且无更早日期的有效单词';
+            } catch (e) {
+                lastErr = (e && e.message) || String(e);
+            }
+        }
+
+        hideWordLoadScreen();
+        document.getElementById('step-info').innerText =
+            '未找到可用词库。请将 .xls / .xlsx 上传到 Gitee LearningData/' + GITEE_DATA_DIR;
+        if (lastErr) alertBox('词库加载失败：' + lastErr);
+    }
+
+    function findClosestDateSheet(sheetNames, todayStr) {
+        const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+        let best = null;
+        for (const s of sheetNames) {
+            if (!dateRe.test(s)) continue;
+            if (s > todayStr) continue;
+            if (!best || s > best) best = s;
+        }
+        return best;
+    }
+
+    async function loadWorkbookBuffer(buf, name) {
+        fileName = name;
+        wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+
+        ensureWeekDateSheets();
+
+        var statSheetName = '统计';
+        if (!wb.SheetNames.includes(statSheetName)) {
+            wb.SheetNames.push(statSheetName);
+            wb.Sheets[statSheetName] = XLSX.utils.aoa_to_sheet([STAT_HEADERS.slice()]);
+        }
+        statsSheet = wb.Sheets[statSheetName];
+        parseStatSheet();
+
+        var allDates = collectAllDateSheets();
+        var hasAnyDateSheet = allDates.some(function (n) { return wb.Sheets[n]; });
+        if (!hasAnyDateSheet) return false;
+
+        populateDateSelector();
+
+        var sel = document.getElementById('dateSelector');
+        sel.addEventListener('change', function () {
+            switchToDate(this.value);
+        });
+
+        var startSheet = today;
+        if (!wb.Sheets[today]) {
+            var fallback = findClosestDateSheet(wb.SheetNames, today);
+            startSheet = fallback || allDates.find(function (n) { return wb.Sheets[n]; }) || today;
+        }
+        if (sel.querySelector('option[value="' + startSheet + '"]')) {
+            sel.value = startSheet;
+        }
+
+        hideWordLoadScreen();
+        switchToDate(startSheet);
+        return true;
+    }
+
+    function switchToDate(sheetName) {
+        flushDailyActivityDelta();
+        stopSessionTimer();
+        stopDailyActivityAutoFlush();
+        wwStopCelebration();
+        document.getElementById('celebrate-anim').innerHTML = '';
+        document.getElementById('countdown').innerText = '';
+
+        activeSheet = sheetName;
+        sessionTimer = 0;
+        activityPersistedTime = 0;
+        var el = document.getElementById('session-timer');
+        if (el) el.textContent = '0';
+
+        var targetSheet = wb.Sheets[activeSheet];
+        if (!targetSheet) {
+            wordsList = [];
+            finished = true;
+            document.getElementById('step-info').innerText = '该日期的单词尚未准备好';
+            document.getElementById('word-card').style.display = 'none';
+            document.getElementById('chinese').style.display = 'none';
+            document.getElementById('input-area').innerHTML = '';
+            return;
+        }
+
+        var list = XLSX.utils.sheet_to_json(targetSheet);
+        wordsList = [];
+        for (var i = 0; i < list.length; i++) {
+            var row = list[i];
+            var eng = row['英文'] || row['English'] || row['english'] || '';
+            var chi = row['中文'] || row['Chinese'] || row['chinese'] || '';
+            if (!eng || !chi) continue;
+            var engTrim = eng.trim();
+            var passVal = row['通过'] || row['passed'] || '';
+            var alreadyPassed = String(passVal).trim() === '是';
+            wordsList.push({
+                english: engTrim,
+                chinese: chi.trim(),
+                idx: i,
+                passed: alreadyPassed
+            });
+        }
+
+        currentIdx = 0;
+        skippedIdxs = [];
+        wordPassedToday = {};
+        wordsList.forEach(function (w) {
+            if (w.passed) wordPassedToday[w.english] = true;
+        });
+        finished = false;
+        pickState = null;
+
+        document.getElementById('word-card').style.display = '';
+        document.getElementById('chinese').style.display = '';
+
+        skipPassedWordsAtCurrent();
+        if (wordsList.length === 0 || currentIdx >= wordsList.length) {
+            endShowStats();
+            return;
+        }
+        startSessionTimer();
+        startDailyActivityAutoFlush();
+        showWordPreview();
+    }
+
+    showWordLoadScreen('正在准备今日单词…');
+
+    window.onload = function () {
+        tryAutoLoadWorkbook();
+    };
+    window.addEventListener('resize', function () {
+        if (wwCelebrationAllowed) wwResizeFxCanvas();
+    });
+
+    function colIndexInHeader(headerRow, names) {
+        if (!headerRow) return -1;
+        for (let n = 0; n < names.length; n++) {
+            const want = names[n];
+            for (let i = 0; i < headerRow.length; i++) {
+                if (String(headerRow[i] || '').trim() === want) return i;
+            }
+        }
+        return -1;
+    }
+
+    function parseStatSheet() {
+        const statJson = XLSX.utils.sheet_to_json(statsSheet, { header: 1 });
+        statMap = {};
+        if (!statJson.length) return;
+        const h = statJson[0];
+        const idxWord = colIndexInHeader(h, ['单词']);
+        const idxCorrect = colIndexInHeader(h, ['默写正确', '正确']);
+        const idxError = colIndexInHeader(h, ['默写错误', '错误']);
+        const idxRate = colIndexInHeader(h, ['默写准确率', '准确率']);
+        const iWord = idxWord >= 0 ? idxWord : 0;
+        const iCorrect = idxCorrect >= 0 ? idxCorrect : 1;
+        const iError = idxError >= 0 ? idxError : 2;
+        const iRate = idxRate >= 0 ? idxRate : 3;
+        for (let i = 1; i < statJson.length; i++) {
+            const row = statJson[i];
+            if (!row || !row[iWord]) continue;
+            const word = String(row[iWord]).trim();
+            statMap[word] = {
+                correct: parseInt(row[iCorrect], 10) || 0,
+                error: parseInt(row[iError], 10) || 0,
+                rate: parseInt(row[iRate], 10) || 0
+            };
+        }
+    }
+
+    /** 默写正确 +1，错误 -1，并触发自动写回 xls */
+    function updateStatSheet(word, isRight) {
+        const key = String(word || '').trim();
+        if (!key) return;
+        const stat = statMap[key] || { correct: 0, error: 0, rate: 0 };
+        if (isRight) {
+            stat.correct++;
+            stat.rate++;
+        } else {
+            stat.error++;
+            stat.rate--;
+        }
+        statMap[key] = stat;
+        workbookDirty = true;
+        scheduleAutoSave();
+    }
+
+    function flushStatSheetToWorkbook() {
+        const rows = [STAT_HEADERS.slice()];
+        const seen = {};
+        wordsList.forEach(function (w) { seen[w.english] = true; });
+        Object.keys(statMap).forEach(function (k) { seen[k] = true; });
+        Object.keys(seen).sort().forEach(function (word) {
+            const stat = statMap[word] || { correct: 0, error: 0, rate: 0 };
+            rows.push([word, stat.correct, stat.error, stat.rate]);
+        });
+        const newSheet = XLSX.utils.aoa_to_sheet(rows);
+        wb.Sheets['统计'] = newSheet;
+        statsSheet = newSheet;
+    }
+
+    function prepareWorkbookForSave() {
+        flushDailyActivityDelta();
+        applyPassMarksToWorkbook();
+        flushStatSheetToWorkbook();
+    }
+
+    function scheduleAutoSave() {
+        if (!wb || !fileName || location.protocol === 'file:') return;
+        if (!workbookDirty) return;
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(function () {
+            autoSaveTimer = null;
+            saveWorkbookToServer();
+        }, AUTO_SAVE_MS);
+    }
+
+    function skipPassedWordsAtCurrent() {
+        while (currentIdx < wordsList.length && wordsList[currentIdx].passed) {
+            currentIdx++;
+        }
+    }
+
+    function formatStepProgress() {
+        const total = wordsList.length;
+        let done = 0;
+        wordsList.forEach(function (w) {
+            if (w.passed) done++;
+        });
+        if (done >= total) return '今天一共 ' + total + ' 个单词，已全部完成';
+        return '今天一共 ' + total + ' 个单词，已完成 ' + done + ' 个';
+    }
+
+    // 展示单词预览界面
+    async function showWordPreview(){
+        if (finished) return;
+        document.getElementById('word-card').style.display = '';
+        document.getElementById('chinese').style.display = '';
+        skipPassedWordsAtCurrent();
+        let w = wordsList[currentIdx];
+        if (typeof w === 'undefined') {
+            jumpToNextSet();
+            return;
+        }
+        // 卡通动画/emoji
+        document.getElementById('celebrate-anim').innerHTML = '👀';
+        document.getElementById('word-card').innerText = w.english;
+        document.getElementById('word-card').className = 'word-card';
+        document.getElementById('chinese').innerHTML = '<span style="font-size:1.1em;">' + w.chinese + "</span>";
+        document.getElementById('countdown').innerText = '';
+        document.getElementById('input-area').innerHTML =
+            '<button type="button" onclick="startDictation()" style="font-size:1.15em;">记住了，开始拼字母！</button>';
+        document.getElementById('btn-next').style.display = 'none';
+        document.getElementById('step-info').innerText = formatStepProgress();
+    }
+    // 倒计时3秒后进入默写输入
+    function startDictation(){
+        playSfx('start');
+        document.getElementById('celebrate-anim').innerHTML = '⏳';
+        let k = 3;
+        document.getElementById('input-area').innerHTML = '';
+        document.getElementById('countdown').innerText = '3';
+        playSfx('tick');
+        let timer = setInterval(function(){
+            k--;
+            document.getElementById('countdown').innerText = k>0 ? k : '开始!';
+            if (k > 0) playSfx('tick');
+            if(k<=0){
+                clearInterval(timer);
+                playSfx('go');
+                inputDictation();
+            }
+        }, 840);
+    }
+    function shuffleArr(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // 仅使用本单词里的字母（打乱顺序），供小孩按顺序点选拼写
+    function buildLetterTiles(word) {
+        const tiles = word.split('').map(function (c, i) {
+            return { id: 'w' + i + '-' + c, char: c, used: false };
+        });
+        return shuffleArr(tiles);
+    }
+
+    function initPickState(answer) {
+        pickState = {
+            answer: answer,
+            picked: [],
+            tiles: buildLetterTiles(answer)
+        };
+    }
+
+    function currentPickString() {
+        if (!pickState) return '';
+        return pickState.picked.map(function (p) { return p.char; }).join('');
+    }
+
+    function renderLetterSlots() {
+        if (!pickState) return '';
+        const chars = pickState.answer.split('');
+        const nextIdx = pickState.picked.length;
+        return chars.map(function (ch, i) {
+            const filled = pickState.picked[i];
+            let cls = filled ? 'letter-slot' : 'letter-slot empty';
+            if (!filled && i === nextIdx) cls += ' active';
+            const show = filled ? filled.char : '·';
+            const click = filled
+                ? ' onclick="pickUndoFromSlot(' + i + ')" style="cursor:pointer;" title="点我取消这一格及后面"'
+                : '';
+            return '<span class="' + cls + '"' + click + '>' + show + '</span>';
+        }).join('');
+    }
+
+    function renderPickUI() {
+        const w = wordsList[currentIdx];
+        const answer = w.english.trim();
+        initPickState(answer);
+
+        const wordCard = document.getElementById('word-card');
+        wordCard.className = 'word-card';
+        wordCard.innerHTML = '<div class="letter-slots">' + renderLetterSlots() + '</div>';
+
+        document.getElementById('chinese').innerHTML =
+            '<span style="font-size:1.1em;">' + w.chinese + '</span><br>' +
+            '<span style="font-size:0.95em;color:#7a9bb5;">👇 点击下方<strong>英文字母</strong>，按顺序拼出单词</span>';
+        document.getElementById('countdown').innerText = '';
+
+        let tilesHtml = '';
+        pickState.tiles.forEach(function (t, idx) {
+            tilesHtml += '<button type="button" class="letter-tile" data-tile-idx="' + idx + '"' +
+                (t.used ? ' disabled' : '') + ' onclick="onLetterTileClick(' + idx + ')">' +
+                t.char + '</button>';
+        });
+
+        document.getElementById('input-area').innerHTML =
+            '<div class="letter-tiles" id="letter-tiles">' + tilesHtml + '</div>' +
+            '<div class="pick-actions">' +
+            '<button type="button" class="secondary" onclick="pickBackspace()">退格</button>' +
+            '<button type="button" class="secondary" onclick="pickClear()">清空</button>' +
+            '<button class="skip-btn" onclick="skipWord()">跳过</button>' +
+            '</div>' +
+            '<div id="pick-hint" class="pick-hint"></div>';
+    }
+
+    function setPickHint(text, isError) {
+        const el = document.getElementById('pick-hint');
+        if (!el) return;
+        el.textContent = text || '';
+        el.className = 'pick-hint' + (isError ? ' err' : '');
+    }
+
+    function refreshPickDisplay() {
+        const wordCard = document.getElementById('word-card');
+        wordCard.innerHTML = '<div class="letter-slots">' + renderLetterSlots() + '</div>';
+        const container = document.getElementById('letter-tiles');
+        if (!container || !pickState) return;
+        const buttons = container.querySelectorAll('.letter-tile');
+        pickState.tiles.forEach(function (t, idx) {
+            if (buttons[idx]) buttons[idx].disabled = t.used;
+        });
+    }
+
+    function onLetterTileClick(tileIdx) {
+        if (!pickState) return;
+        const tile = pickState.tiles[tileIdx];
+        if (!tile || tile.used) return;
+        if (pickState.picked.length >= pickState.answer.length) return;
+
+        tile.used = true;
+        pickState.picked.push({ char: tile.char, tileId: tile.id, tileIdx: tileIdx });
+        playSfx('letter');
+        setPickHint('');
+        refreshPickDisplay();
+
+        if (pickState.picked.length === pickState.answer.length) {
+            checkDictation();
+        }
+    }
+
+    function pickBackspace() {
+        if (!pickState || !pickState.picked.length) return;
+        playSfx('backspace');
+        const last = pickState.picked.pop();
+        const tile = pickState.tiles[last.tileIdx];
+        if (tile) tile.used = false;
+        refreshPickDisplay();
+    }
+
+    function pickClear() {
+        if (!pickState) return;
+        playSfx('clear');
+        pickState.picked = [];
+        pickState.tiles.forEach(function (t) { t.used = false; });
+        refreshPickDisplay();
+    }
+
+    function pickUndoFromSlot(slotIdx) {
+        if (!pickState || slotIdx < 0) return;
+        playSfx('backspace');
+        while (pickState.picked.length > slotIdx) {
+            const last = pickState.picked.pop();
+            const tile = pickState.tiles[last.tileIdx];
+            if (tile) tile.used = false;
+        }
+        refreshPickDisplay();
+        setPickHint('');
+    }
+
+    /** 答错时保留前面拼对的字母，只撤回后面不对的部分 */
+    function pickUndoWrongSuffix() {
+        if (!pickState || !pickState.picked.length) return;
+        const ans = pickState.answer.toLowerCase();
+        let keep = 0;
+        for (let i = 0; i < pickState.picked.length; i++) {
+            if (pickState.picked[i].char.toLowerCase() === ans[i]) keep = i + 1;
+            else break;
+        }
+        if (keep === 0) keep = pickState.picked.length - 1;
+        while (pickState.picked.length > keep) {
+            const last = pickState.picked.pop();
+            const tile = pickState.tiles[last.tileIdx];
+            if (tile) tile.used = false;
+        }
+    }
+
+    // 选字母拼写默写
+    function inputDictation() {
+        renderPickUI();
+    }
+
+    function handleDictationResult(isRight) {
+        const w = wordsList[currentIdx];
+        const correct = w.english.trim();
+        const wordCard = document.getElementById('word-card');
+
+        if (isRight) {
+            wordCard.innerHTML = '✔️ 正确！';
+            wordCard.className = 'word-card correct-anim';
+            document.getElementById('celebrate-anim').innerHTML = '<span style="font-size:2em;">🎉👏</span>';
+            playSfx('correct');
+            updateStatSheet(correct, true);
+            w.passed = true;
+            wordPassedToday[correct] = true;
+            workbookDirty = true;
+            pickState = null;
+            setTimeout(function () { jumpToNextWord(); }, 1000);
+        } else {
+            playSfx('wrong');
+            updateStatSheet(correct, false);
+            pickUndoWrongSuffix();
+            refreshPickDisplay();
+            setPickHint('还差一点点，改一改就好啦～', true);
+            wordCard.classList.add('slots-shake');
+            setTimeout(function () {
+                wordCard.classList.remove('slots-shake');
+            }, 480);
+            if (window._pickHintTimer) clearTimeout(window._pickHintTimer);
+            window._pickHintTimer = setTimeout(function () {
+                setPickHint('');
+                window._pickHintTimer = null;
+            }, 2200);
+        }
+    }
+
+    function checkDictation() {
+        if (!pickState) return;
+        const input = currentPickString();
+        const correct = pickState.answer;
+        handleDictationResult(input.toLowerCase() === correct.toLowerCase());
+    }
+    function skipWord(){
+        skippedIdxs.push(currentIdx);
+        playSfx('skip');
+        jumpToNextWord();
+    }
+
+    // 跳到下一个单词（如都完成，则check结束）
+    function jumpToNextWord(){
+        currentIdx++;
+        for(;currentIdx<wordsList.length;currentIdx++){
+            // 没通过且不是已跳过的
+            let w = wordsList[currentIdx];
+            if(!w.passed) break;
+        }
+        if (currentIdx >= wordsList.length) {
+            jumpToNextSet();
+        } else {
+            showWordPreview();
+        }
+    }
+    // 跳到跳过的单词重新默写，或全部结束
+    function jumpToNextSet(){
+        if(skippedIdxs.length>0){
+            // 取出第一个跳过
+            currentIdx = skippedIdxs.shift();
+            showWordPreview();
+        }else{
+            // 全部完成
+            endShowStats();
+        }
+    }
+
+    // —— 全部完成随机动画（参考 EnglishChineseMatchingGame）——
+    const WW_SURPRISE_SCENES = [
+        { id: 'hero', label: '今日小英雄勋章！' },
+        { id: 'parade', label: '小伙伴来祝贺啦！' },
+        { id: 'balloons', label: '气球飞向天空！' },
+        { id: 'rainbow', label: '彩虹惊喜降临！' },
+        { id: 'stars', label: '星星为你闪耀！' },
+        { id: 'rocket', label: '火箭冲冲冲！' }
+    ];
+    const WW_SCENE_FX = {
+        hero: { duration: 5200, confetti: 72, rocketGap: 880 },
+        parade: { duration: 5800, confetti: 128, rocketGap: 480 },
+        balloons: { duration: 5000, confetti: 52, rocketGap: 1300 },
+        rainbow: {
+            duration: 5600, confetti: 108, rocketGap: 640,
+            palette: ['#ff8fab', '#ffbc6e', '#ffe66d', '#7dcea0', '#7eb8ff', '#b28dff']
+        },
+        stars: { duration: 6200, confetti: 88, rocketGap: 1050 },
+        rocket: { duration: 7200, confetti: 58, rocketGap: 160 }
+    };
+    const WW_WIN_TITLES = [
+        '🎊 今天的单词全部搞定啦！',
+        '🌟 太厉害了！今日任务完成！',
+        '🏆 满分通关！超级棒！',
+        '🎉 耶！全部拼写成功！'
+    ];
+    const WW_FX_COLORS = ['#8eb8c9', '#a8c9a0', '#d4b896', '#9eb5d4', '#b5c9b0', '#ff8fab', '#ffe66d'];
+    const WW_RAINBOW_BANDS = [
+        { r: 50, sw: 7, c: '#ff8fab' }, { r: 42, sw: 7, c: '#ffbc6e' },
+        { r: 34, sw: 7, c: '#ffe66d' }, { r: 26, sw: 7, c: '#7dcea0' },
+        { r: 18, sw: 7, c: '#7eb8ff' }, { r: 10, sw: 6, c: '#b28dff' }
+    ];
+    let wwLastSurpriseSceneId = null;
+    let wwCelebrationAllowed = false;
+    let wwFxAnimId = null;
+    let wwFxEndAt = 0;
+    let wwFxParticles = [];
+    let wwFxRockets = [];
+    let wwConfettiPieces = [];
+    let wwFxLastRocket = 0;
+    let wwFxRocketGap = 400;
+    let wwSurpriseHideTimer = null;
+
+    function wwBuildRainbowSvg() {
+        const cx = 60, y = 56;
+        let paths = '';
+        WW_RAINBOW_BANDS.forEach(function (b) {
+            paths += '<path d="M ' + (cx - b.r) + ' ' + y + ' A ' + b.r + ' ' + b.r +
+                ' 0 0 1 ' + (cx + b.r) + ' ' + y + '" fill="none" stroke="' + b.c +
+                '" stroke-width="' + b.sw + '" stroke-linecap="round"/>';
+        });
+        return '<svg class="rainbow-svg rainbow-svg-bands" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">' + paths + '</svg>';
+    }
+
+    function wwPickSurpriseScene() {
+        const pool = wwLastSurpriseSceneId
+            ? WW_SURPRISE_SCENES.filter(function (s) { return s.id !== wwLastSurpriseSceneId; })
+            : WW_SURPRISE_SCENES;
+        const list = pool.length ? pool : WW_SURPRISE_SCENES;
+        const scene = list[Math.floor(Math.random() * list.length)];
+        wwLastSurpriseSceneId = scene.id;
+        return scene;
+    }
+
+    function wwResizeFxCanvas() {
+        const c = document.getElementById('fxCanvas');
+        if (!c) return c;
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+        return c;
+    }
+
+    function wwStopCelebration() {
+        wwCelebrationAllowed = false;
+        if (wwFxAnimId) cancelAnimationFrame(wwFxAnimId);
+        wwFxAnimId = null;
+        wwFxEndAt = 0;
+        wwFxParticles = [];
+        wwFxRockets = [];
+        wwConfettiPieces = [];
+        if (wwSurpriseHideTimer) {
+            clearTimeout(wwSurpriseHideTimer);
+            wwSurpriseHideTimer = null;
+        }
+        const c = document.getElementById('fxCanvas');
+        if (c && c.getContext) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+        const layer = document.getElementById('celebrationLayer');
+        if (layer) layer.classList.add('off');
+        const scene = document.getElementById('surpriseScene');
+        if (scene) {
+            scene.innerHTML = '';
+            scene.className = 'surprise-scene';
+        }
+    }
+
+    function wwFxBurst(x, y, color) {
+        const n = 36 + Math.floor(Math.random() * 24);
+        for (let i = 0; i < n; i++) {
+            const a = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+            const sp = 2 + Math.random() * 5;
+            wwFxParticles.push({
+                x: x, y: y,
+                vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                life: 1, decay: 0.01 + Math.random() * 0.012,
+                color: color, size: 2 + Math.random() * 3, gravity: 0.05
+            });
+        }
+    }
+
+    function wwLaunchCelebrationFx(durationMs, sceneId) {
+        if (!wwCelebrationAllowed) return;
+        const fxOpts = WW_SCENE_FX[sceneId] || {};
+        const palette = fxOpts.palette || WW_FX_COLORS;
+        const confettiN = fxOpts.confetti != null ? fxOpts.confetti : 90;
+        wwFxRocketGap = fxOpts.rocketGap != null ? fxOpts.rocketGap : 400;
+        const canvas = wwResizeFxCanvas();
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        wwFxEndAt = Date.now() + durationMs;
+        wwFxLastRocket = 0;
+        wwConfettiPieces = Array.from({ length: confettiN }, function () {
+            return {
+                x: Math.random() * canvas.width,
+                y: -20 - Math.random() * canvas.height,
+                r: 4 + Math.random() * 7,
+                vx: (Math.random() - 0.5) * 3,
+                vy: 2 + Math.random() * 4,
+                rot: Math.random() * 360,
+                vr: (Math.random() - 0.5) * 10,
+                color: palette[Math.floor(Math.random() * palette.length)]
+            };
+        });
+
+        function loop() {
+            if (!wwCelebrationAllowed || Date.now() > wwFxEndAt) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                wwFxAnimId = null;
+                wwConfettiPieces = [];
+                wwFxParticles = [];
+                wwFxRockets = [];
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (Date.now() - wwFxLastRocket > wwFxRocketGap * (0.55 + Math.random() * 0.65)) {
+                wwFxLastRocket = Date.now();
+                wwFxRockets.push({
+                    x: canvas.width * (0.12 + Math.random() * 0.76),
+                    y: canvas.height,
+                    ty: canvas.height * (0.12 + Math.random() * 0.38),
+                    vy: -9 - Math.random() * 4,
+                    color: palette[Math.floor(Math.random() * palette.length)]
+                });
+            }
+
+            wwFxRockets = wwFxRockets.filter(function (r) {
+                r.y += r.vy;
+                r.vy += 0.2;
+                ctx.beginPath();
+                ctx.arc(r.x, r.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = r.color;
+                ctx.fill();
+                if (r.vy >= -1 || r.y <= r.ty) {
+                    wwFxBurst(r.x, r.y, r.color);
+                    return false;
+                }
+                return true;
+            });
+
+            wwFxParticles = wwFxParticles.filter(function (p) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                p.life -= p.decay;
+                if (p.life <= 0) return false;
+                ctx.globalAlpha = Math.max(0, p.life);
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                return true;
+            });
+
+            wwConfettiPieces.forEach(function (p) {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rot += p.vr;
+                if (p.y > canvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                ctx.save();
+                ctx.globalAlpha = 0.88;
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rot * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+                ctx.restore();
+            });
+
+            wwFxAnimId = requestAnimationFrame(loop);
+        }
+        if (wwFxAnimId) cancelAnimationFrame(wwFxAnimId);
+        loop();
+    }
+
+    function wwPlaySurpriseScene(scene) {
+        const box = document.getElementById('surpriseScene');
+        if (!box) return;
+        box.innerHTML = '';
+        box.className = 'surprise-scene active';
+        const cheers = ['太棒啦！', '你真厉害！', '继续加油！', '小小学霸！'];
+
+        if (scene.id === 'hero') {
+            box.innerHTML =
+                '<div class="surprise-hero"><div class="badge">🏅</div><h2>' + scene.label + '</h2>' +
+                '<p>' + cheers[Math.floor(Math.random() * cheers.length)] + '</p></div>' +
+                '<div class="scene-label">✨ ' + scene.label + '</div>';
+        } else if (scene.id === 'parade') {
+            ['🎉', '🌟', '🎈', '🦸', '👏', '🎊', '💫', '🥳'].forEach(function (e, i) {
+                const span = document.createElement('span');
+                span.className = 'emoji-parade';
+                span.textContent = e;
+                span.style.top = (12 + i * 9) + '%';
+                span.style.animationDelay = (i * 0.3) + 's';
+                span.style.animationDuration = (3.2 + i * 0.15) + 's';
+                box.appendChild(span);
+            });
+            const lbl = document.createElement('div');
+            lbl.className = 'scene-label';
+            lbl.textContent = '🎪 ' + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === 'balloons') {
+            const colors = ['#ff8a80', '#ffd180', '#80cbc4', '#ce93d8', '#90caf9', '#a5d6a7'];
+            for (let i = 0; i < 16; i++) {
+                const b = document.createElement('div');
+                b.className = 'balloon';
+                b.style.left = (4 + Math.random() * 92) + '%';
+                b.style.background = colors[i % colors.length];
+                b.style.animationDelay = (Math.random() * 1.5) + 's';
+                b.style.setProperty('--drift', ((Math.random() - 0.5) * 100) + 'px');
+                box.appendChild(b);
+            }
+            const lbl = document.createElement('div');
+            lbl.className = 'scene-label';
+            lbl.style.position = 'absolute';
+            lbl.style.bottom = '18%';
+            lbl.textContent = '🎈 ' + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === 'rainbow') {
+            box.innerHTML = '<div class="rainbow-arc"></div><div class="scene-label">🌈 ' + scene.label + '</div>';
+            const arc = box.querySelector('.rainbow-arc');
+            if (arc && !arc.querySelector('.rainbow-svg')) arc.innerHTML = wwBuildRainbowSvg();
+        } else if (scene.id === 'stars') {
+            for (let i = 0; i < 24; i++) {
+                const s = document.createElement('span');
+                s.className = 'sky-star';
+                s.textContent = ['⭐', '✨', '💫'][i % 3];
+                s.style.left = (Math.random() * 100) + '%';
+                s.style.top = (Math.random() * 100) + '%';
+                s.style.animationDelay = (Math.random() * 2) + 's';
+                s.style.fontSize = (0.9 + Math.random() * 1.8) + 'rem';
+                box.appendChild(s);
+            }
+            const lbl = document.createElement('div');
+            lbl.className = 'scene-label';
+            lbl.textContent = '✨ ' + scene.label;
+            box.appendChild(lbl);
+        } else if (scene.id === 'rocket') {
+            box.innerHTML =
+                '<div class="rocket-msg">🚀</div>' +
+                '<p class="rocket-title">' + scene.label + '</p>' +
+                '<div class="scene-label">🚀 ' + cheers[Math.floor(Math.random() * cheers.length)] + '</div>';
+        }
+
+        if (wwSurpriseHideTimer) clearTimeout(wwSurpriseHideTimer);
+        const hideMs = (WW_SCENE_FX[scene.id] && WW_SCENE_FX[scene.id].duration) || 5200;
+        wwSurpriseHideTimer = setTimeout(function () {
+            wwSurpriseHideTimer = null;
+            box.classList.remove('active');
+            box.innerHTML = '';
+        }, hideMs);
+    }
+
+    function playWriteWordsCompleteCelebration() {
+        if (wwSurpriseHideTimer) {
+            clearTimeout(wwSurpriseHideTimer);
+            wwSurpriseHideTimer = null;
+        }
+        if (wwFxAnimId) cancelAnimationFrame(wwFxAnimId);
+        wwFxAnimId = null;
+        wwFxParticles = [];
+        wwFxRockets = [];
+        wwConfettiPieces = [];
+
+        wwCelebrationAllowed = true;
+        const scene = wwPickSurpriseScene();
+        const winTitle = WW_WIN_TITLES[Math.floor(Math.random() * WW_WIN_TITLES.length)];
+        const fxOpts = WW_SCENE_FX[scene.id] || {};
+        const duration = fxOpts.duration || 5500;
+
+        const layer = document.getElementById('celebrationLayer');
+        if (layer) {
+            layer.classList.remove('off');
+            void layer.offsetWidth;
+        }
+
+        document.getElementById('step-info').innerText = formatStepProgress();
+        var timeLine = sessionTimer > 0
+            ? '<p style="font-size:0.9em;color:#7a9bb5;margin:4px 0;">⏱ 本次耗时：' + formatDurationSeconds(sessionTimer) + '</p>'
+            : '';
+        var celebrateEl = document.getElementById('celebrate-anim');
+        if (celebrateEl) {
+            celebrateEl.innerHTML =
+                '<div class="complete-panel complete-panel--celebrate">' +
+                '<div class="complete-sparkles" aria-hidden="true">' +
+                '<i>✨</i><i>⭐</i><i>🌟</i><i>💫</i></div>' +
+                '<span class="complete-emoji">🎉</span>' +
+                '<p class="complete-title">' + winTitle + '</p>' +
+                timeLine +
+                '<p class="complete-sub">继续保持，明天见！</p>' +
+                '</div>';
+            void celebrateEl.offsetWidth;
+        }
+
+        function startCelebrationFx() {
+            if (!wwCelebrationAllowed) return;
+            wwLaunchCelebrationFx(duration, scene.id);
+            wwPlaySurpriseScene(scene);
+        }
+        requestAnimationFrame(function () {
+            requestAnimationFrame(startCelebrationFx);
+        });
+
+        setTimeout(function () {
+            wwStopCelebration();
+        }, duration + 300);
+    }
+
+    function endShowStats(){
+        finished = true;
+        flushDailyActivityDelta();
+        stopSessionTimer();
+        stopDailyActivityAutoFlush();
+
+        document.getElementById('word-card').innerText = '';
+        document.getElementById('word-card').style.display = 'none';
+        document.getElementById('chinese').innerText = '';
+        document.getElementById('chinese').style.display = 'none';
+        document.getElementById('input-area').innerHTML = '';
+        document.getElementById('countdown').innerText = '';
+
+        refreshDateSelectorLabel();
+
+        function runCompleteCelebration() {
+            playWriteWordsCompleteCelebration();
+            playSfx('complete');
+        }
+        var loadScreen = document.getElementById('load-screen');
+        if (loadScreen && !loadScreen.classList.contains('hidden')) {
+            setTimeout(runCompleteCelebration, 380);
+        } else {
+            runCompleteCelebration();
+        }
+        scheduleAutoSave();
+    }
+
+    function refreshDateSelectorLabel() {
+        var sel = document.getElementById('dateSelector');
+        if (!sel) return;
+        var opts = sel.querySelectorAll('option');
+        opts.forEach(function (opt) {
+            opt.textContent = formatDateOptionLabel(opt.value);
+        });
+    }
+
+    function logSaveIssue(msg) {
+        if (typeof console !== 'undefined' && console.warn) console.warn('[WriteWords]', msg);
+    }
+
+    function isSaveLockMessage(text) {
+        const s = String(text || '').toLowerCase();
+        return /busy|lock|占用|正在使用|sharing violation|eacces|eperm|ebusy|被打开/.test(s);
+    }
+
+    function applyPassMarksToWorkbook() {
+        const targetSheet = wb.Sheets[activeSheet];
+        if (!targetSheet) return;
+        const aoa = XLSX.utils.sheet_to_json(targetSheet, { header: 1, defval: '' });
+        if (!aoa.length) return;
+        const header = aoa[0];
+        let passCol = colIndexInHeader(header, ['通过']);
+        if (passCol === -1) {
+            header.push('通过');
+            passCol = header.length - 1;
+            aoa[0] = header;
+        }
+        const idxEn = colIndexInHeader(header, ['英文', 'English', 'english']);
+        if (idxEn < 0) return;
+        const passByWord = {};
+        wordsList.forEach(function (w) {
+            passByWord[w.english] = !!w.passed;
+        });
+        for (let i = 1; i < aoa.length; i++) {
+            const row = aoa[i];
+            if (!row) continue;
+            const eng = String(row[idxEn] || '').trim();
+            if (!eng) continue;
+            while (row.length <= passCol) row.push('');
+            row[passCol] = passByWord[eng] ? '是' : '否';
+            aoa[i] = row;
+        }
+        wb.Sheets[activeSheet] = XLSX.utils.aoa_to_sheet(aoa);
+    }
+
+    /** .xls 读入的 Props/Custprops 含 SheetJS 无法回写的 OLE 属性，写出前剥离以免 TypedPropertyValue 报错 */
+    function buildWorkbookForWrite(workbook, bookType) {
+        if (bookType !== 'biff8') return workbook;
+        const meta = workbook.Workbook || {};
+        const out = {
+            SheetNames: workbook.SheetNames.slice(),
+            Sheets: workbook.Sheets,
+            Workbook: {
+                Sheets: meta.Sheets,
+                Views: (meta.Views && meta.Views.length) ? meta.Views : [{}]
+            }
+        };
+        return out;
+    }
+
+    function writeWorkbookBuffer(workbook, filename) {
+        const m = String(filename || '').match(/\.(xls|xlsx)$/i);
+        const ext = m ? m[1].toLowerCase() : 'xlsx';
+        const bookType = ext === 'xls' ? 'biff8' : 'xlsx';
+        const payload = buildWorkbookForWrite(workbook, bookType);
+        try {
+            return {
+                filename: filename,
+                buf: XLSX.write(payload, { bookType: bookType, type: 'array' })
+            };
+        } catch (e) {
+            const msg = String((e && e.message) || e);
+            if (bookType !== 'biff8' || !/TypedPropertyValue|unrecognized type/i.test(msg)) throw e;
+            const xlsxName = String(filename).replace(/\.xls$/i, '.xlsx');
+            return {
+                filename: xlsxName,
+                buf: XLSX.write(buildWorkbookForWrite(workbook, 'xlsx'), { bookType: 'xlsx', type: 'array' }),
+                convertedFromXls: true
+            };
+        }
+    }
+
+    function startBackgroundSaveLoop(getPayload) {
+        if (backgroundSaveTask) return;
+        backgroundSaveTask = (async function () {
+            while (true) {
+                await sleep(SAVE_RETRY_MS);
+                if (!wb || !fileName) break;
+                try {
+                    const written = getPayload();
+                    const { res, text, data } = await postSaveWorkbook(written);
+                    if (res.status === 202 || data.queued) continue;
+                    if (!res.ok) {
+                        if (isSaveLockMessage(text)) continue;
+                        logSaveIssue('保存失败：' + text);
+                        break;
+                    }
+                    break;
+                } catch (e) {
+                    if (isSaveLockMessage(e && e.message)) continue;
+                    logSaveIssue('保存异常：' + ((e && e.message) || e));
+                    break;
+                }
+            }
+            backgroundSaveTask = null;
+        })();
+    }
+
+    function xlsSaveHeaders(filename) {
+        return {
+            'Content-Type': 'application/octet-stream',
+            'X-Filename': encodeURIComponent(filename)
+        };
+    }
+
+    async function postSaveWorkbook(written) {
+        try {
+            return await GiteeData.saveWorkbook(
+                GITEE_DATA_DIR,
+                written.filename,
+                written.buf,
+                '默写保存词库: ' + written.filename
+            );
+        } catch (e) {
+            const msg = (e && e.message) || String(e);
+            if (e && e.name === 'AbortError') {
+                throw new Error('保存超时，请检查网络与 Gitee Token 配置');
+            }
+            return {
+                res: { ok: false, status: 500 },
+                text: msg,
+                data: { ok: false, message: msg }
+            };
+        }
+    }
+
+    async function saveWorkbookToServer() {
+        if (!wb || !fileName) return;
+        if (typeof GiteeData === 'undefined') return;
+        if (saveInFlight) {
+            saveWanted = true;
+            return;
+        }
+        saveInFlight = true;
+        saveWanted = false;
+        try {
+            prepareWorkbookForSave();
+            const written = writeWorkbookBuffer(wb, fileName);
+            const { res, text, data } = await postSaveWorkbook(written);
+
+            if (res.status === 202 || data.queued) {
+                startBackgroundSaveLoop(function () {
+                    prepareWorkbookForSave();
+                    return writeWorkbookBuffer(wb, fileName);
+                });
+                return;
+            }
+            if (!res.ok) {
+                if (isSaveLockMessage(text)) {
+                    startBackgroundSaveLoop(function () {
+                        prepareWorkbookForSave();
+                        return writeWorkbookBuffer(wb, fileName);
+                    });
+                    return;
+                }
+                logSaveIssue('保存失败（' + res.status + '）：' + text);
+                return;
+            }
+            workbookDirty = false;
+            if (written.convertedFromXls) {
+                fileName = written.filename;
+                logSaveIssue('词库已另存为 ' + fileName);
+            }
+        } catch (e) {
+            logSaveIssue('保存失败：' + ((e && e.message) || e));
+        } finally {
+            saveInFlight = false;
+            if (saveWanted) {
+                saveWanted = false;
+                scheduleAutoSave();
+            }
+        }
+    }
+
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+            flushDailyActivityDelta();
+            if (workbookDirty && wb && fileName) saveWorkbookToServer();
+        }
+    });
+    window.addEventListener('pagehide', function () {
+        flushDailyActivityDelta();
+    });
+
+    window.startDictation = startDictation;
+    window.checkDictation = checkDictation;
+    window.onLetterTileClick = onLetterTileClick;
+    window.pickBackspace = pickBackspace;
+    window.pickClear = pickClear;
+    window.pickUndoFromSlot = pickUndoFromSlot;
+    window.skipWord = skipWord;
+    window.playSfx = playSfx;
+    </script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习工具箱</title>
+    <style>
+        *{ margin:0; padding:0; box-sizing:border-box }
+        body{
+            font-family:'Comic Sans MS','Nunito','PingFang SC','Microsoft YaHei',cursive,sans-serif;
+            min-height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(145deg,#d1f3ff 0%,#e0d4ff 45%,#ffe8d4 100%);
+            overflow:hidden;
+        }
+        .bubbles{ position:fixed; inset:0; pointer-events:none; z-index:0 }
+        .bubbles span{
+            position:absolute; display:block; border-radius:50%; opacity:.35;
+            animation:floatUp linear infinite;
+        }
+        @keyframes floatUp{
+            0%  { transform:translateY(100vh) scale(.6) rotate(0); opacity:0 }
+            10% { opacity:.35 }
+            90% { opacity:.35 }
+            100%{ transform:translateY(-10vh) scale(1) rotate(360deg); opacity:0 }
+        }
+        .container{ position:relative; z-index:1; width:92vw; max-width:420px }
+        .title{ text-align:center; margin-bottom:24px; animation:titleDrop .6s cubic-bezier(.34,1.56,.64,1) both }
+        @keyframes titleDrop{
+            from{ opacity:0; transform:translateY(-30px) scale(.8) }
+            to  { opacity:1; transform:translateY(0) scale(1) }
+        }
+        .title h1{
+            font-size:2.2rem; font-weight:900; letter-spacing:2px; color:#fff;
+            text-shadow:0 2px 0 #c9a0ff,0 4px 0 #a78bfa,0 6px 12px rgba(120,80,200,.25);
+        }
+        .title .sub{ font-size:.95rem; color:#8b6cc0; font-weight:700; margin-top:2px }
+        .cards{ list-style:none; display:flex; flex-direction:column; gap:14px }
+        .cards li{ animation:cardPop .45s cubic-bezier(.34,1.56,.64,1) both }
+        .cards li:nth-child(1){ animation-delay:.1s }
+        .cards li:nth-child(2){ animation-delay:.2s }
+        .cards li:nth-child(3){ animation-delay:.3s }
+        .cards li:nth-child(4){ animation-delay:.4s }
+        @keyframes cardPop{
+            from{ opacity:0; transform:translateY(20px) scale(.92) }
+            to  { opacity:1; transform:translateY(0) scale(1) }
+        }
+        .cards a{
+            display:flex; align-items:center; gap:14px; padding:16px 20px;
+            border-radius:20px; text-decoration:none; color:#4a3878;
+            background:rgba(255,255,255,.72); border:2.5px solid transparent;
+            backdrop-filter:blur(6px); box-shadow:0 4px 18px rgba(140,100,200,.12);
+            transition:all .2s ease;
+        }
+        .cards a:hover{
+            transform:translateY(-4px) scale(1.02); border-color:#c9a0ff;
+            box-shadow:0 10px 30px rgba(140,100,200,.2);
+        }
+        .cards a:active{ transform:scale(.97) }
+        .cards .icon{
+            font-size:1.7rem; width:48px; height:48px;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:14px; flex-shrink:0;
+            animation:iconWiggle 2.5s ease-in-out infinite;
+            box-shadow:0 3px 10px rgba(0,0,0,.08);
+        }
+        @keyframes iconWiggle{
+            0%,100%{ transform:rotate(0) }
+            25%{ transform:rotate(-6deg) }
+            75%{ transform:rotate(6deg) }
+        }
+        .cards li:nth-child(1) .icon{ background:linear-gradient(135deg,#ff91ad,#ff6b9d) }
+        .cards li:nth-child(2) .icon{ background:linear-gradient(135deg,#64b5f6,#42a5f5) }
+        .cards li:nth-child(3) .icon{ background:linear-gradient(135deg,#24d292,#1ec88a) }
+        .cards .info{ flex:1; min-width:0 }
+        .cards .name{ font-weight:800; font-size:1rem }
+        .cards .desc{
+            font-size:.8rem; color:#9a8ab8; margin-top:2px;
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .cards .arrow{ font-size:1.3rem; color:#c9a0ff; font-weight:bold; transition:transform .2s }
+        .cards a:hover .arrow{ transform:translateX(5px); color:#8b6cc0 }
+        .foot{
+            text-align:center; margin-top:18px; font-size:.78rem; color:#9a8ab8; font-weight:600;
+        }
+    </style>
+</head>
+<body>
+    <div class="bubbles" id="bubbles"></div>
+    <div class="container">
+        <div class="title">
+            <h1>学习工具箱</h1>
+            <div class="sub">Learning Toolbox</div>
+        </div>
+        <ul class="cards" id="projects"></ul>
+        <div class="foot">页面托管于 GitHub · 数据读写来自 Gitee LearningData</div>
+    </div>
+    <script>
+        (function(){
+            var colors = ['#ff91ad','#64b5f6','#a78bfa','#24d292','#ffb74d','#ff6b9d'];
+            var box = document.getElementById('bubbles');
+            for(var i=0;i<14;i++){
+                var s = document.createElement('span');
+                var size = 10 + Math.random()*28;
+                s.style.cssText =
+                    'width:'+size+'px;height:'+size+'px;'+
+                    'left:'+Math.random()*100+'%;'+
+                    'background:'+colors[i%colors.length]+';'+
+                    'animation-duration:'+(6+Math.random()*10)+'s;'+
+                    'animation-delay:'+(-Math.random()*12)+'s;';
+                box.appendChild(s);
+            }
+        })();
+
+        // 静态项目列表（GitHub Pages 无需本地服务）
+        var PROJECTS = [
+            {
+                name: '英语中文对对碰',
+                icon: '🎮',
+                description: '英语单词与中文释义配对游戏',
+                url: 'EnglishChineseMatchingGame/index.html'
+            },
+            {
+                name: '英语单词默写',
+                icon: '✏️',
+                description: '英语单词听写练习',
+                url: 'WriteWords/index.html'
+            },
+            {
+                name: '数学加减法练习',
+                icon: '🔢',
+                description: '小学数学加减法口算练习',
+                url: 'ShuXue_jiajian/index.html'
+            },
+            {
+                name: '句子朗读录音',
+                icon: '🎤',
+                description: '按日期朗读句子并上传录音',
+                url: 'ReadAloud/index.html'
+            }
+        ];
+
+        var ul = document.getElementById('projects');
+        PROJECTS.forEach(function(p){
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = p.url;
+            a.innerHTML =
+                '<span class="icon">'+(p.icon||'📂')+'</span>'+
+                '<span class="info">'+
+                    '<div class="name">'+p.name+'</div>'+
+                    (p.description?'<div class="desc">'+p.description+'</div>':'')+
+                '</span>'+
+                '<span class="arrow">›</span>';
+            li.appendChild(a);
+            ul.appendChild(li);
+        });
+    </script>
+</body>
+</html>

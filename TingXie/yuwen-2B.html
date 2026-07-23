@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>听写小程序</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: #f3f6fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 430px;
+            padding: 32px 18px 42px 18px;
+            margin: 38px auto 0 auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 14px #c4d3e38c;
+        }
+        h2 {
+            margin: 0 0 16px 0;
+            font-weight: 600;
+            color: #29487d;
+            letter-spacing: 1px;
+            font-size: 1.36rem;
+            text-align: center;
+        }
+        .input-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .input-row label {
+            flex: 1 0 90px;
+        }
+        .input-row input[type="number"] {
+            width: 70px;
+            margin-left: 5px;
+            padding: 4px 7px;
+            border-radius: 5px;
+            border: 1px solid #b8bac4;
+        }
+        .early-settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .early-setting {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-row {
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            background: #3679e0;
+            color: #fff;
+            font-weight: 500;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 20px;
+            font-size: 1.04rem;
+            cursor: pointer;
+            margin-right: 9px;
+            transition: background .18s;
+        }
+        button:disabled {
+            background: #90acd6;
+            cursor: not-allowed;
+        }
+        .status-bar {
+            color: #93a1b1;
+            font-size: .98rem;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .tips {
+            margin-top: 13px;
+            background: #e7f3fc;
+            color: #3872c1;
+            border-left: 4px solid #6aa2df;
+            padding: 7px 13px;
+            border-radius: 5px;
+            font-size: .97rem;
+        }
+        .range-row {
+            margin: 14px 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .range-row label {
+            font-size: .98rem;
+            margin-right: 2px;
+        }
+        .range-select {
+            padding: 3px;
+            border-radius: 5px;
+            border: 1px solid #b8bac4;
+            font-size: 1rem;
+        }
+        #wordsPreview {
+            margin: 15px 0 10px 0;
+            padding: 10px;
+            background: #f4f7fa;
+            color: #285285;
+            border-radius: 6px;
+            font-size: 1.11rem;
+            min-height: 32px;
+            line-height: 2;
+            word-break: break-all;
+            text-align: left;
+            letter-spacing: 2px;
+            transition: opacity 0.3s;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            /* 支持超出自动换行，统一缩进、视觉左齐 */
+            white-space: normal;  /* 关键：允许换行 */
+            overflow-wrap: anywhere; /* 关键：强制单词内换行以防溢出 */
+            /* 新增：当词太多时出现下拉条 */
+            max-height: 208px;
+            overflow-y: auto;
+        }
+        #wordsPreview.hide {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+        }
+        .preview-lesson-title {
+            font-weight:bold;
+            font-size:1.08em;
+            color:#397bbe;
+            margin-bottom:3px;
+        }
+        .preview-lesson-words {
+            display: flex;
+            flex-wrap: wrap;
+            line-height:2.1;
+            font-size:1.08em;
+            gap:0 22px;
+            margin-bottom: 7px;
+        }
+        .pinyin-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 0.5em;
+            margin-right: 0;
+            margin-bottom: 6px;
+        }
+        .pinyin-text {
+            font-size: 0.92em;
+            color: #8495bb;
+            line-height: 1.32;
+            margin-bottom: 2px;
+            user-select: none;
+            pointer-events: none;
+        }
+        .zi-text {
+            font-size: 1.08em;
+        }
+        @media (max-width: 500px) {
+            .container {
+                margin: 6px;
+                padding: 14px 3vw 22px 3vw;
+            }
+            h2 {
+                font-size: 1.02rem;
+            }
+            button {
+                padding: 6px 4vw;
+            }
+            .range-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            #wordsPreview {
+                font-size: .99rem;
+                padding: 7px 2vw;
+                max-height: 44vw;
+            }
+            .early-settings-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 7px;
+            }
+        }
+        #restartBtn {
+            background: #45d6a1;
+            color: #fff;
+            margin-right: 9px;
+            border: none;
+            border-radius: 7px;
+            padding: 8px 20px;
+            font-size: 1.04rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .18s;
+        }
+        #restartBtn:disabled {
+            background: #90e6c6;
+            cursor: not-allowed;
+        }
+        .relisten-row {
+            margin-top: 25px;
+            text-align: center;
+        }
+        .relisten-row button {
+            background: #45d6a1;
+            margin: 0 auto;
+            display: inline-block;
+            box-shadow: 0 1px 3px #9fe5cb4d;
+        }
+        /* 新增: 隐藏early-setting动态样式 */
+        .early-setting.hide {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>听写播报</h2>
+
+    <!-- 优先设置区：乱序/顺序、自动/手动、间隔、次数、语速 -->
+    <div class="early-settings-row">
+        <div class="early-setting" style="width:100%;margin-bottom:6px;">
+            <span>顺序：</span>
+            <label>
+                <input type="radio" name="shuffleOrder" value="order" id="orderRadio" checked> 顺序
+            </label>
+            <label>
+                <input type="radio" name="shuffleOrder" value="shuffle" id="shuffleRadio"> 乱序
+            </label>
+        </div>
+        <div class="early-setting" style="width:100%;margin-bottom:6px;">
+            <span>播放：</span>
+            <label>
+                <input type="radio" name="autoPlayType" value="manual" id="manualRadio" checked> 手动
+            </label>
+            <label>
+                <input type="radio" name="autoPlayType" value="auto" id="autoRadio"> 自动
+            </label>
+        </div>
+        <div class="early-setting" style="display:flex;gap:16px;width:100%;">
+            <div id="intervalSetting" style="display:flex;align-items:center;">
+                <label for="intervalEarly" style="margin-bottom:0;">间隔(秒):</label>
+                <input type="number" id="intervalEarly" value="20" min="1" style="width:60px;margin-left:5px;" disabled>
+            </div>
+            <div style="display:flex;align-items:center;">
+                <label for="repeatCountEarly" style="margin-bottom:0;">每词读次数:</label>
+                <input type="number" id="repeatCountEarly" value="2" min="1" max="10" style="width:60px;margin-left:5px;">
+            </div>
+        </div>
+        <div class="early-setting" style="width:100%;">
+            <!-- 语速(整数)：只允许整数1-3 -->
+            <label for="rateEarly" style="margin-bottom:0;">语速(1-3):</label>
+            <input type="number" id="rateEarly" value="1" min="1" max="3" step="1" style="width:60px;margin-left:5px;">
+        </div>
+    </div>
+
+    <!-- 课文范围选择器 -->
+    <div class="range-row">
+        <label for="startLesson">课文范围：</label>
+        <select id="startLesson" class="range-select"></select>
+        <span>—</span>
+        <select id="endLesson" class="range-select"></select>
+    </div>
+    <!-- 词语预览区，初始可见，听写时隐藏 -->
+    <div id="wordsPreview"></div>
+    <!-- 词语编辑和展示已移除。仅保留textarea用于存储和自定义编辑（隐藏） -->
+    <textarea id="words" style="display:none;"></textarea>
+    <!-- 保留原本的控制按钮，不再单独展示原复选框和参数输入 -->
+    <div class="btn-row">
+        <button id="startBtn">开始</button>
+        <button id="prevBtn" disabled>上一个</button>
+        <button id="nextBtn" disabled>下一个</button>
+        <button id="pauseContinueBtn" disabled>暂停</button>
+        <button id="resetBtn" style="display:none;">结束</button>
+    </div>
+    <div class="status-bar" id="status"></div>
+    <!-- 重新开始按钮始终展示，不要隐藏 -->
+    <div class="relisten-row" id="relistenRow">
+        <button id="restartBtn">重新开始</button>
+    </div>
+</div>
+
+<script>
+// 将 LESSONS 提前到全局，供 getWordPinyin 正常访问
+const LESSONS = [
+    {
+        "name": "阅读1",
+        "words": ["祝贺", "可喜可贺", "丝绸", "蚕丝", "吹拂", "春风拂面", "河堤", "堤岸"],
+        "pinyin": [["zhu", "he"],["ke", "xi", "ke", "he"],["si", "chou"],["can", "si"],["chui", "fu"],["chun", "feng","fu", "mian"],["he", "di"],["di", "an"]]
+    },
+	{
+        "name": "阅读2",
+        "words": ["春天", "寻找", "眉毛", "野花", "柳枝", "桃花"],
+        "pinyin": [["chūn", "tiān"], ["xún", "zhǎo"], ["méi", "mao"], ["yě", "huā"], ["liǔ", "zhī"], ["táo", "huā"]]
+    },
+    {
+        "name": "阅读3",
+        "words": ["鲜花", "先生", "原来", "大叔", "太太", "做客", "正巧", "惊奇", "快活", "美好", "礼物"],
+        "pinyin": [["xiān", "huā"], ["xiān", "sheng"], ["yuán", "lái"], ["dà", "shū"], ["tài", "tai"], ["zuò", "kè"], ["zhèng", "qiǎo"], ["jīng", "qí"], ["kuài", "huo"], ["měi", "hǎo"], ["lǐ", "wù"]]
+    },
+    {
+        "name": "阅读4",
+        "words": ["植树", "碧空如洗", "万里无云", "格外", "引人注目", "休息", "小心", "笔直"],
+        "pinyin": [["zhí", "shù"], ["bì", "kōng", "rú", "xǐ"], ["wàn", "lǐ", "wú", "yún"], ["gé", "wài"], ["yǐn", "rén", "zhù", "mù"], ["xiū", "xi"], ["xiǎo", "xīn"], ["bǐ", "zhí"]]
+    },
+    {
+        "name": "阅读5",
+        "words": ["雷锋", "叔叔", "昨天", "温暖", "爱心"],
+        "pinyin": [["léi", "fēng"], ["shū", "shu"], ["zuó", "tiān"], ["wēn", "nuǎn"], ["ài", "xīn"]]
+    },
+    {
+        "name": "阅读6",
+        "words": ["好奇", "也许", "桌子", "平时", "难道", "平常", "农民", "加工", "农具", "甜菜", "工具", "劳动", "经过", "应该"],
+        "pinyin": [["hào", "qí"], ["yě", "xǔ"], ["zhuō", "zi"], ["píng", "shí"], ["nán", "dào"], ["píng", "cháng"], ["nóng", "mín"], ["jiā", "gōng"], ["nóng", "jù"], ["tián", "cài"], ["gōng", "jù"], ["láo", "dòng"], ["jīng", "guò"], ["yīng", "gāi"]]
+    },
+    {
+        "name": "阅读7",
+        "words": ["弱小", "周末", "父母", "吸引", "芬芳", "背包", "雨衣", "为什么", "勇敢"],
+        "pinyin": [["ruò", "xiǎo"], ["zhōu", "mò"], ["fù", "mǔ"], ["xī", "yǐn"], ["fēn", "fāng"], ["bēi", "bāo"], ["yǔ", "yī"], ["wèi", "shén", "me"], ["yǒng", "gǎn"]]
+    },
+    {
+        "name": "识字1",
+        "words": ["神州", "中华", "山川", "长江", "长城", "民族", "情谊"],
+        "pinyin": [["shén", "zhōu"], ["zhōng", "huá"], ["shān", "chuān"], ["cháng", "jiāng"], ["cháng", "chéng"], ["mín", "zú"], ["qíng", "yì"]]
+    },
+    {
+        "name": "识字2",
+        "words": ["传统", "节日", "春节", "花灯", "清明节", "先人", "龙舟", "中秋", "转眼", "团圆"],
+        "pinyin": [["chuán", "tǒng"], ["jié", "rì"], ["chūn", "jié"], ["huā", "dēng"], ["qīng", "míng", "jié"], ["xiān", "rén"], ["lóng", "zhōu"], ["zhōng", "qiū"], ["zhuǎn", "yǎn"], ["tuán", "yuán"]]
+    },
+    {
+        "name": "识字3",
+        "words": ["故事", "生活", "甲骨文", "样子", "钱币", "钱财", "有关"],
+        "pinyin": [["gù", "shi"], ["shēng", "huó"], ["jiǎ", "gǔ", "wén"], ["yàng", "zi"], ["qián", "bì"], ["qián", "cái"], ["yǒu", "guān"]]
+    },
+    {
+        "name": "识字4",
+        "words": ["美食", "茄子", "烤鸭", "水煮鱼", "羊肉", "蛋炒饭"],
+        "pinyin": [["měi", "shí"], ["qié", "zi"], ["kǎo", "yā"], ["shuǐ", "zhǔ", "yú"], ["yáng", "ròu"], ["dàn", "chǎo", "fàn"]]
+    },
+    {
+        "name": "阅读8",
+        "words": ["彩色", "铅笔盒", "森林", "雪松", "歌声", "苹果", "精灵", "季节", "流动"],
+        "pinyin": [["cǎi", "sè"], ["qiān", "bǐ", "hé"], ["sēn", "lín"], ["xuě", "sōng"], ["gē", "shēng"], ["píng", "guǒ"], ["jīng", "líng"], ["jì", "jié"], ["liú", "dòng"]]
+    },
+    {
+        "name": "阅读9",
+        "words": ["出色", "妹妹", "碧绿", "波纹", "恋恋不舍", "柳树", "枝条", "不时"],
+        "pinyin": [["chū", "sè"], ["mèi", "mei"], ["bì", "lǜ"], ["bō", "wén"], ["liàn", "liàn", "bù", "shě"], ["liǔ", "shù"], ["zhī", "tiáo"], ["bù", "shí"]]
+    },
+    {
+        "name": "阅读10",
+        "words": ["绿色", "一直", "说话", "童话", "阿姨", "发现", "弟弟", "发明", "拼音", "字母", "上升"],
+        "pinyin": [["lǜ", "sè"], ["yī", "zhí"], ["shuō", "huà"], ["tóng", "huà"], ["ā", "yí"], ["fā", "xiàn"], ["dì", "di"], ["fā", "míng"], ["pīn", "yīn"], ["zì", "mǔ"], ["shàng", "shēng"]]
+    },
+    {
+        "name": "阅读11",
+        "words": ["亡羊补牢", "劝告", "禾苗", "力气", "明白"],
+        "pinyin": [["wáng", "yáng", "bǔ", "láo"], ["quàn", "gào"], ["hé", "miáo"], ["lì", "qi"], ["míng", "bai"]]
+    },
+    {
+        "name": "阅读12",
+        "words": ["杨桃", "图画", "讲桌", "座位", "教室", "老老实实", "时候", "哈哈大笑", "五角星", "画纸", "神情"],
+        "pinyin": [["yáng", "táo"], ["tú", "huà"], ["jiǎng", "zhuō"], ["zuò", "wèi"], ["jiào", "shì"], ["lǎo", "lǎo", "shí", "shí"], ["shí", "hou"], ["hā", "hā", "dà", "xiào"], ["wǔ", "jiǎo", "xīng"], ["huà", "zhǐ"], ["shén", "qíng"]]
+    },
+    {
+        "name": "阅读13",
+        "words": ["愿意", "飞快", "为难", "伯伯", "立刻", "突然", "吃惊", "认真", "难为情"],
+        "pinyin": [["yuàn", "yì"], ["fēi", "kuài"], ["wéi", "nán"], ["bó", "bo"], ["lì", "kè"], ["tū", "rán"], ["chī", "jīng"], ["rèn", "zhēn"], ["nán", "wéi", "qíng"]]
+    },
+    {
+        "name": "阅读15",
+        "words": ["雷雨", "乌云", "黑沉沉", "闪电", "雷声", "窗户", "清新", "迎面"],
+        "pinyin": [["léi", "yǔ"], ["wū", "yún"], ["hēi", "chén", "chén"], ["shǎn", "diàn"], ["léi", "shēng"], ["chuāng", "hu"], ["qīng", "xīn"], ["yíng", "miàn"]]
+    },
+    {
+        "name": "阅读16",
+        "words": ["野外", "天然", "指南针", "帮助", "方向", "忠实", "向导","指点", "北极星", "永远", "黑夜", "帮忙", "特别", "积雪"],
+        "pinyin": [["yě", "wài"], ["tiān", "rán"], ["zhǐ", "nán", "zhēn"], ["bāng", "zhù"], ["fāng", "xiàng"], ["zhōng", "shí"], ["xiàng", "dǎo"],["zhǐ", "diǎn"], ["běi", "jí", "xīng"], ["yǒng", "yuǎn"], ["hēi", "yè"], ["bāng", "máng"], ["tè", "bié"], ["jī", "xuě"]]
+    },
+    {
+        "name": "阅读17",
+        "words": ["航天员", "宇宙飞船", "空间站", "活动", "主要", "方便", "直接", "浴桶", "清理", "实在", "通常"],
+        "pinyin": [["háng", "tiān", "yuán"], ["yǔ", "zhòu", "fēi", "chuán"], ["kōng", "jiān", "zhàn"], ["huó", "dòng"], ["zhǔ", "yào"], ["fāng", "biàn"], ["zhí", "jiē"], ["yù", "tǒng"], ["qīng", "lǐ"], ["shí", "zài"], ["tōng", "cháng"]]
+    },
+    {
+        "name": "阅读18",
+        "words": ["大象", "耳朵", "扇子", "似的", "慢慢", "遇到", "一定", "毛病", "每天", "睡觉", "经常", "头痛", "人家"],
+        "pinyin": [["dà", "xiàng"], ["ěr", "duo"], ["shàn", "zi"], ["shì", "de"], ["màn", "màn"], ["yù", "dào"], ["yí", "dìng"], ["máo", "bìng"], ["měi", "tiān"], ["shuì", "jiào"], ["jīng", "cháng"], ["tóu", "tòng"], ["rén", "jiā"]]
+    },
+    {
+        "name": "阅读19",
+        "words": ["决定", "商店", "河马", "工夫", "终于", "星期"],
+        "pinyin": [["jué", "dìng"], ["shāng", "diàn"], ["hé", "mǎ"], ["gōng", "fu"], ["zhōng", "yú"], ["xīng", "qī"]]
+    },
+    {
+        "name": "阅读20",
+        "words": ["青蛙", "怎么样", "野鸭", "泉水", "花丛", "尽情", "游泳"],
+        "pinyin": [["qīng", "wā"], ["zěn", "me", "yàng"], ["yě", "yā"], ["quán", "shuǐ"], ["huā", "cóng"], ["jìn", "qíng"], ["yóu", "yǒng"]]
+    },
+    {
+        "name": "阅读21",
+        "words": ["新奇", "目光", "到处", "仿佛", "周游", "任何", "事情", "纺织", "怎样", "以前", "灵巧", "色彩", "花纹"],
+        "pinyin": [["xīn", "qí"], ["mù", "guāng"], ["dào", "chù"], ["fǎng", "fú"], ["zhōu", "yóu"], ["rèn", "hé"], ["shì", "qing"], ["fǎng", "zhī"], ["zěn", "yàng"], ["yǐ", "qián"], ["líng", "qiǎo"], ["sè", "cǎi"], ["huā", "wén"]]
+    },
+    {
+        "name": "阅读22",
+        "words": ["开始", "光明", "值日", "决心", "最后", "从此", "欢唱", "生机"],
+        "pinyin": [["kāi", "shǐ"], ["guāng", "míng"], ["zhí", "rì"], ["jué", "xīn"], ["zuì", "hòu"], ["cóng", "cǐ"], ["huān", "chàng"], ["shēng", "jī"]]
+    },
+    {
+        "name": "阅读23",
+        "words": ["传说", "首领", "步行", "忽然", "启发", "搬运", "号召", "民众", "自由", "道理", "根本", "果然", "提供", "便利"],
+        "pinyin": [["chuán", "shuō"], ["shǒu", "lǐng"], ["bù", "xíng"], ["hū", "rán"], ["qǐ", "fā"], ["bān", "yùn"], ["hào", "zhào"], ["mín", "zhòng"], ["zì", "yóu"], ["dào", "lǐ"], ["gēn", "běn"], ["guǒ", "rán"], ["tí", "gōng"], ["biàn", "lì"]]
+    },
+    {
+        "name": "阅读24",
+        "words": ["洪水", "痛苦", "百姓", "灾难", "必须", "反而", "仍然", "继续", "采用", "奔波", "带领", "农业", "安居乐业"],
+        "pinyin": [["hóng", "shuǐ"], ["tòng", "kǔ"], ["bǎi", "xìng"], ["zāi", "nàn"], ["bì", "xū"], ["fǎn", "ér"], ["réng", "rán"], ["jì", "xù"], ["cǎi", "yòng"], ["bēn", "bō"], ["dài", "lǐng"], ["nóng", "yè"], ["ān", "jū", "lè", "yè"]]
+    }
+];
+// 从数据列表获取拼音
+function getWordPinyin(word) {
+    // 遍历所有课文找到对应的词语
+    for (let lesson of LESSONS) {
+        for (let i = 0; i < lesson.words.length; i++) {
+            if (lesson.words[i] === word && lesson.pinyin && lesson.pinyin[i]) {
+                return lesson.pinyin[i];
+            }
+        }
+    }
+    // 如果找不到拼音，返回空数组
+    return [];
+}
+(function() {
+    // LESSONS 已在外部声明
+    // ... 下方所有原 js 逻辑不变 ...
+    // DOM
+    const wordsInput = document.getElementById('words');
+    const shuffleRadio = document.getElementById('shuffleRadio');
+    const orderRadio = document.getElementById('orderRadio');
+    const autoRadio = document.getElementById('autoRadio');
+    const manualRadio = document.getElementById('manualRadio');
+    const intervalEarly = document.getElementById('intervalEarly');
+    const repeatCountEarly = document.getElementById('repeatCountEarly');
+    const rateEarly = document.getElementById('rateEarly');
+    const intervalSetting = document.getElementById('intervalSetting');
+
+    let shuffleCb = { checked: false };
+    let autoNextCb = { checked: false };
+    let intervalInput = { value: intervalEarly.value, disabled: intervalEarly.disabled };
+    let repeatCountInput = { value: repeatCountEarly.value };
+    let rateInput = { value: rateEarly.value };
+
+    const startBtn = document.getElementById('startBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pauseContinueBtn = document.getElementById('pauseContinueBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const statusDiv = document.getElementById('status');
+    const startLessonSel = document.getElementById('startLesson');
+    const endLessonSel = document.getElementById('endLesson');
+    const wordsPreview = document.getElementById('wordsPreview');
+    const relistenRow = document.getElementById('relistenRow');
+
+    let words = [];
+    let currentIndex = 0;
+    let playing = false;
+    let paused = false;
+    let timer = null;
+    let orderedList = [];
+    let speechSynthesis = window.speechSynthesis;
+    let speaking = false;
+    let currentRepeat = 1;
+    let stopped = false;
+    let lastWordsArr = [];
+    let lastOrderedList = [];
+    let lastShuffleChecked = false;
+    let lastAutoNextChecked = false;
+    let lastIntervalValue = 4;
+    let lastRepeatCount = 1;
+    let lastRate = 1;
+
+    // ===== 补充下面变量和辅助函数，实现顺序播放时每课首词前朗读课名 =====
+    let wordToLessonNameList = []; // 用于顺序播放时，每个词对应其课文名
+    let lessonNameArr = []; // 选中范围课文名列表
+    let wordsFlatArr = []; // 选中范围内的完整顺序词语数组
+    function buildWordToLessonMapForCurrentRange() {
+        // 用于顺序朗读时，为每个词记录课文名
+        wordToLessonNameList = [];
+        lessonNameArr = [];
+        wordsFlatArr = [];
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        for (let i = startIdx; i <= endIdx; i++) {
+            const lesson = LESSONS[i];
+            // 对当前课的每个词标记课名
+            for (let j = 0; j < lesson.words.length; j++) {
+                wordToLessonNameList.push(lesson.name);
+                wordsFlatArr.push(lesson.words[j]);
+            }
+            lessonNameArr.push(lesson.name);
+        }
+    }
+    // ===============================
+
+    function updateShuffle() {
+        shuffleCb.checked = shuffleRadio.checked;
+    }
+    shuffleRadio.addEventListener('change', function() {
+        updateShuffle();
+    });
+    orderRadio.addEventListener('change', function() {
+        updateShuffle();
+    });
+    updateShuffle();
+
+    function updateAutoNext() {
+        autoNextCb.checked = autoRadio.checked;
+        intervalEarly.disabled = !autoRadio.checked;
+        if (autoRadio.checked) {
+            intervalSetting.classList.remove('hide');
+        } else {
+            intervalSetting.classList.add('hide');
+        }
+    }
+    autoRadio.addEventListener('change', function(){
+        updateAutoNext();
+        if(playing && !paused) {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;  // 添加这一行
+            }
+            if(autoNextCb.checked) {
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused || !playing) {  // 增加 !playing 检查
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        }
+    });
+
+    manualRadio.addEventListener('change', function(){
+        updateAutoNext();
+        if(playing && !paused) {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;  // 添加这一行
+            }
+            if(autoNextCb.checked) {
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused || !playing) {  // 增加 !playing 检查
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        }
+    });
+    updateAutoNext();
+
+    intervalEarly.addEventListener('input', function() {
+        intervalInput.value = intervalEarly.value;
+        if(playing && !paused && autoNextCb.checked) {
+            if (timer) {
+                clearTimeout(timer);
+                timer = null;  // 添加这一行
+            }
+            timer = setTimeout(function autoGo(){
+                if (speaking || paused || !playing) {  // 增加 !playing 检查
+                    setTimeout(autoGo, 100);
+                    return;
+                }
+                nextWord(true);
+            }, Number(intervalInput.value)*1000);
+        }
+    });
+    repeatCountEarly.addEventListener('input', function() {
+        repeatCountInput.value = repeatCountEarly.value;
+        if(playing && !paused && orderedList.length > 0){
+            if (speechSynthesis.speaking) {
+                try { speechSynthesis.cancel(); }catch(e){}
+            }
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && orderedList.length > 0 && currentIndex < orderedList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+    rateEarly.addEventListener('input', function() {
+        // 只允许整数1-3
+        let intVal = parseInt(rateEarly.value) || 1;
+        if (intVal < 1) intVal = 1;
+        if (intVal > 3) intVal = 3;
+        rateEarly.value = intVal;
+        rateInput.value = rateEarly.value;
+        if(playing && !paused && orderedList.length > 0){
+            if (speechSynthesis.speaking) {
+                try { speechSynthesis.cancel(); }catch(e){}
+            }
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && orderedList.length > 0 && currentIndex < orderedList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+    intervalInput.value = intervalEarly.value;
+    intervalInput.disabled = intervalEarly.disabled;
+    repeatCountInput.value = repeatCountEarly.value;
+    rateInput.value = rateEarly.value;
+
+    function populateLessonSelects() {
+        startLessonSel.innerHTML = "";
+        endLessonSel.innerHTML = "";
+        for (let i = 0; i < LESSONS.length; i++) {
+            const opt1 = document.createElement("option");
+            const opt2 = document.createElement("option");
+            opt1.value = i;
+            opt2.value = i;
+            opt1.textContent = LESSONS[i].name;
+            opt2.textContent = LESSONS[i].name;
+            startLessonSel.appendChild(opt1);
+            endLessonSel.appendChild(opt2);
+        }
+        endLessonSel.selectedIndex = LESSONS.length - 1;
+    }
+
+    // 修改: 按课文分组返回对象 { 课文名字: [词语数组] }
+    function getWordsGroupedByLessonRange(startIdx, endIdx) {
+        if (startIdx > endIdx) return {};
+        const res = {};
+        for (let i = startIdx; i <= endIdx; i++) {
+            res[LESSONS[i].name] = LESSONS[i].words.slice();
+        }
+        return res;
+    }
+    // 保留原有的数组构造，用于实际听写流程
+    function getWordsByLessonRange(startIdx, endIdx) {
+        if (startIdx > endIdx) return [];
+        const res = [];
+        for (let i = startIdx; i <= endIdx; i++) {
+            res.push(...LESSONS[i].words);
+        }
+        return res;
+    }
+    function getWordsArrayFromInput() {
+        let arr = wordsInput.value
+            .replace(/[\r\n]+/g, ' ')
+            .split(/[\s,，、]+/).map(w=>w.trim()).filter(w=>w.length);
+        return arr;
+    }
+
+    // 按课文分块展示词语预览
+    function showWordsPreview() {
+        // 获取所选课文区间
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        if (isNaN(startIdx) || isNaN(endIdx) || startIdx > endIdx) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        const grouped = getWordsGroupedByLessonRange(startIdx, endIdx);
+
+        // 如果没有词语
+        let hasWords = false;
+        Object.values(grouped).forEach(arr => { if (arr.length) hasWords = true; });
+        if (!hasWords) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        let html = '';
+        let lessonIdx = 0;
+        for (const [lessonName, wordArr] of Object.entries(grouped)) {
+            html += `<div class="preview-lesson-title">${lessonName}</div>`;
+            html += `<div class="preview-lesson-words">`;
+            for (let i = 0; i < wordArr.length; i++) {
+                let word = wordArr[i];
+                let pinyins = getWordPinyin(word) || [];
+                // 避免拼音未对齐出错
+                let pinyinHTML = '<div class="pinyin-text" style="display:flex;gap:3px;">'
+                    + word.split('').map((c,j) => `<span>${(pinyins[j]!==undefined?pinyins[j]:"")}</span>`).join('')
+                    + '</div>';
+                let ziHTML = `<div class="zi-text">${word}</div>`;
+                html += `<span class="pinyin-item">${pinyinHTML}${ziHTML}</span>`;
+            }
+            html += "</div>";
+            lessonIdx++;
+        }
+        wordsPreview.innerHTML = html;
+        wordsPreview.classList.remove("hide");
+    }
+
+    function hideWordsPreview() {
+        wordsPreview.classList.add("hide");
+    }
+    function updateWordsPreviewOnRangeChange() {
+        syncWordsInput();
+        showWordsPreview();
+    }
+    // 填充 textarea 词语（仍为打平行）
+    function syncWordsInput() {
+        const startIdx = Number(startLessonSel.value);
+        const endIdx = Number(endLessonSel.value);
+        const selectedWords = getWordsByLessonRange(startIdx, endIdx);
+        wordsInput.value = selectedWords.join('\n');
+    }
+    function syncRangeSelection(e) {
+        let startIdx = Number(startLessonSel.value);
+        let endIdx = Number(endLessonSel.value);
+        if (startIdx > endIdx) {
+            if (e && e.target === startLessonSel) {
+                endLessonSel.value = startLessonSel.value;
+            } else {
+                startLessonSel.value = endLessonSel.value;
+            }
+            [startIdx, endIdx] = [Math.min(startIdx, endIdx), Math.max(startIdx, endIdx)];
+        }
+        updateWordsPreviewOnRangeChange();
+    }
+    function shuffleArr(arr) {
+        let a = arr.slice();
+        for(let i=a.length-1;i>0;i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [a[i],a[j]]=[a[j],a[i]];
+        }
+        return a;
+    }
+    function speak(text, opts, onend) {
+        if (!('speechSynthesis' in window)) {
+            alert("该浏览器不支持语音朗读(speechSynthesis)！");
+            if (onend) onend();
+            return;
+        }
+        if (speechSynthesis.speaking) {
+            try { speechSynthesis.cancel(); } catch(e) {}
+        }
+        let msg = new window.SpeechSynthesisUtterance(text.trim());
+        msg.lang = 'zh-CN';
+        // 用整数rate，只能1-3三档，实际语速设置为(0.4,1,1.4) 分别对应 1,2,3 ，更符合实际
+        let rateVal = 1;
+        if (typeof opts?.rate === 'string' || typeof opts?.rate === 'number') {
+            rateVal = Number(opts.rate);
+        }
+        if (rateVal < 1) rateVal = 1;
+        if (rateVal > 3) rateVal = 3;
+        // 1 => 0.4, 2 => 1, 3 => 1.4
+        let realRate = 1;
+        if (rateVal === 1) realRate = 0.4;
+        else if (rateVal === 2) realRate = 1;
+        else if (rateVal === 3) realRate = 1.4;
+        msg.rate = realRate;
+        speaking = true;
+        msg.onend = function() {
+            speaking = false;
+            if (onend) onend();
+        };
+        msg.onerror = function() {
+            speaking = false;
+            if (onend) onend();
+        };
+        speechSynthesis.speak(msg);
+    }
+    function showStatus(idx, repeatN, totalWords, repeatMax) {
+        if (!totalWords || idx < 0 || idx >= totalWords) {
+            statusDiv.textContent = "";
+            return;
+        }
+        statusDiv.textContent = `第 ${idx+1} / ${totalWords} 个  |  第 ${repeatN} / ${repeatMax} 次`;
+    }
+
+
+    // ========== 重写 playCurrentWordWithRepeat 函数 ==========
+    function playCurrentWordWithRepeat(cb) {
+        if (!orderedList.length || paused) {
+            if (cb) cb();
+            return;
+        }
+        let repeatMax = Number(repeatCountInput.value) || 1;
+        currentRepeat = 1;
+
+        // 新增变量：用于顺序朗读课名
+        let pendingLessonName = null;
+        let lessonNameToSpeak = null;
+
+        // 仅顺序播放（shuffle=false）生效：
+        if (!shuffleCb.checked) {
+            // 确保最新的映射
+            buildWordToLessonMapForCurrentRange();
+            // 找到orderedList[currentIndex]在wordsFlatArr中的index
+            let allIdx = wordsFlatArr.indexOf(orderedList[currentIndex]);
+            if (allIdx !== -1 && wordToLessonNameList.length === wordsFlatArr.length && wordToLessonNameList.length > 0) {
+                // 在当前顺序中，检测是否为每课第1个词
+                // 只有在第0个 或 前一个词课名不同，则要朗读新的课名
+                if (allIdx === 0 || wordToLessonNameList[allIdx] !== wordToLessonNameList[allIdx-1]) {
+                    // 朗读课名，完毕后朗读词语
+                    pendingLessonName = wordToLessonNameList[allIdx];
+                }
+            }
+        }
+
+        function actuallySpeakWord() {
+            showStatus(currentIndex, currentRepeat, orderedList.length, repeatMax);
+            let intRate = parseInt(rateInput.value) || 1;
+            if (intRate < 1) intRate = 1;
+            if (intRate > 3) intRate = 3;
+            speak(orderedList[currentIndex], { rate: intRate }, function() {
+                if (!playing) { 
+                    if (cb) cb(); 
+                    return; 
+                }
+                if (paused) return;
+                if (currentRepeat < repeatMax) {
+                    currentRepeat++;
+                    setTimeout(actuallySpeakWord, 450);
+                } else {
+                    currentRepeat = 1;
+                    if (cb) cb();
+                }
+            });
+        }
+
+        if (pendingLessonName) {
+            // 用和词语朗读同样的语速
+            let intRate = parseInt(rateInput.value) || 1;
+            if (intRate < 1) intRate = 1;
+            if (intRate > 3) intRate = 3;
+            speak(pendingLessonName, { rate: intRate }, function() {
+                setTimeout(actuallySpeakWord, 200); // 课名+词之间稍做停顿
+            });
+        } else {
+            actuallySpeakWord();
+        }
+    }
+    // ========== END playCurrentWordWithRepeat 重写 ==========
+
+
+    function nextWord(auto=false) {
+        if (!orderedList.length || paused) return;
+        currentIndex += 1;
+        if (currentIndex >= orderedList.length) {
+            currentIndex = orderedList.length-1;
+            pausePlay(true);
+            return;
+        }
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused) {
+                timer = setTimeout(function waitIfSpeaking(){
+                    if (speaking || paused) {
+                        setTimeout(waitIfSpeaking, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+    function prevWord() {
+        if (!orderedList.length || paused) return;
+        if (currentIndex > 0) {
+            currentIndex -= 1;
+            currentRepeat = 1;
+            playCurrentWordWithRepeat();
+        } else {
+            currentRepeat = 1;
+            playCurrentWordWithRepeat();
+        }
+    }
+    function pausePlay(forceStop = false) {
+        if (timer) clearTimeout(timer);
+        timer = null;
+        if (forceStop) {
+            playing = false;
+            paused = false;
+            stopped = true;
+            startBtn.disabled = true;
+            pauseContinueBtn.disabled = true;
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            resetBtn.style.display = '';
+            pauseContinueBtn.textContent = "暂停";
+            statusDiv.textContent += "｜已停止";
+            try { speechSynthesis.cancel(); } catch(e) {}
+            showWordsPreview();
+            return;
+        }
+        if (!playing || paused) {
+            return;
+        }
+        paused = true;
+        pauseContinueBtn.textContent = "继续";
+        pauseContinueBtn.disabled = false;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        try { speechSynthesis.cancel(); } catch(e) {}
+        statusDiv.textContent += "｜已暂停";
+    }
+    function continuePlay() {
+        if (!paused) return;
+        paused = false;
+        pauseContinueBtn.textContent = "暂停";
+        pauseContinueBtn.disabled = false;
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        if (!playing || stopped) return;
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+        statusDiv.textContent = statusDiv.textContent.replace(/｜已暂停$/, "");
+    }
+    function resetAll(){
+        stopped = false;
+        playing = false;
+        paused = false;
+        timer = null;
+        currentIndex = 0;
+        words = [];
+        orderedList = [];
+        currentRepeat = 1;
+        statusDiv.textContent = "";
+        startBtn.disabled = false;
+        pauseContinueBtn.disabled = true;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        resetBtn.style.display = 'none';
+        populateLessonSelects();
+        updateWordsPreviewOnRangeChange();
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+        try{ speechSynthesis.cancel(); }catch(e){}
+    }
+    function startPlay() {
+        // 在函数开头添加定时器清理
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        if (stopped) return;
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+
+        words = getWordsArrayFromInput();
+        if (words.length === 0) {
+            alert("请先选择课文范围，或填写词语！");
+            return;
+        }
+        orderedList = shuffleCb.checked ? shuffleArr(words) : words.slice();
+        currentIndex = 0;
+        currentRepeat = 1;
+        playing = true;
+        paused = false;
+        stopped = false;
+        lastWordsArr = words.slice();
+        lastShuffleChecked = shuffleCb.checked;
+        lastAutoNextChecked = autoNextCb.checked;
+        lastIntervalValue = intervalInput.value;
+        lastRepeatCount = repeatCountInput.value;
+        lastRate = rateInput.value;
+        lastOrderedList = orderedList.slice();
+
+        // 若顺序，更新映射
+        if (!shuffleCb.checked) buildWordToLessonMapForCurrentRange();
+
+        startBtn.disabled = true;
+        pauseContinueBtn.disabled = false;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        resetBtn.style.display = 'none';
+        hideWordsPreview();
+        statusDiv.textContent = "";
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused && orderedList.length > 0 && currentIndex < orderedList.length - 1) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+    function restartPlay() {
+        // 在函数开头添加定时器清理
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+        }
+        if (!lastWordsArr.length) {
+            alert("没有可重新听写的词语（请先点击“开始”完整听写一轮）");
+            return;
+        }
+        updateShuffle();
+        updateAutoNext();
+        intervalInput.value = intervalEarly.value;
+        intervalInput.disabled = intervalEarly.disabled;
+        repeatCountInput.value = repeatCountEarly.value;
+        rateInput.value = rateEarly.value;
+
+        words = getWordsArrayFromInput();
+        if (words.length === 0) {
+            alert("请先选择课文范围，或填写词语！");
+            return;
+        }
+        orderedList = shuffleCb.checked ? shuffleArr(words) : words.slice();
+        currentIndex = 0;
+        currentRepeat = 1;
+        playing = true;
+        paused = false;
+        stopped = false;
+        lastWordsArr = words.slice();
+        lastShuffleChecked = shuffleCb.checked;
+        lastAutoNextChecked = autoNextCb.checked;
+        lastIntervalValue = intervalInput.value;
+        lastRepeatCount = repeatCountInput.value;
+        lastRate = rateInput.value;
+        lastOrderedList = orderedList.slice();
+
+        // 若顺序，更新映射
+        if (!shuffleCb.checked) buildWordToLessonMapForCurrentRange();
+
+        startBtn.disabled = true;
+        pauseContinueBtn.disabled = false;
+        pauseContinueBtn.textContent = "暂停";
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        resetBtn.style.display = 'none';
+        hideWordsPreview();
+        statusDiv.textContent = "";
+        playCurrentWordWithRepeat(function() {
+            if (autoNextCb.checked && playing && !paused && orderedList.length > 0 && currentIndex < orderedList.length - 1) {
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function autoGo(){
+                    if (speaking || paused) {
+                        setTimeout(autoGo, 100);
+                        return;
+                    }
+                    nextWord(true);
+                }, Number(intervalInput.value)*1000);
+            }
+        });
+    }
+
+    startBtn.addEventListener('click', () => {
+        if (!stopped && !playing) startPlay();
+    });
+
+    pauseContinueBtn.addEventListener('click', () => {
+        if (!playing) return;
+        if (!paused) {
+            pausePlay();
+        } else {
+            continuePlay();
+        }
+    });
+
+    resetBtn.addEventListener('click', () => {
+        resetAll();
+    });
+
+    restartBtn.addEventListener('click', () => {
+        restartPlay();
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (!orderedList.length || paused) return;
+        if (timer) clearTimeout(timer);  // 清除现有定时器
+        timer = null;  // 添加这一行，确保定时器完全重置
+        if (currentIndex < orderedList.length-1) {
+            currentIndex++;
+            currentRepeat = 1;
+            playCurrentWordWithRepeat(function() {
+                if (autoNextCb.checked && playing && !paused && currentIndex < orderedList.length - 1) {
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(function autoGo(){
+                        if (speaking || paused) {
+                            setTimeout(autoGo, 100);
+                            return;
+                        }
+                        nextWord(true);
+                    }, Number(intervalInput.value)*1000);
+                }
+            });
+        }
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (!orderedList.length || paused) return;
+        if (timer) clearTimeout(timer);
+        prevWord();
+    });
+
+    startLessonSel.addEventListener('change', syncRangeSelection);
+    endLessonSel.addEventListener('change', syncRangeSelection);
+
+    populateLessonSelects();
+    updateWordsPreviewOnRangeChange();
+
+    wordsInput.addEventListener('input', function() {
+        // 用户自定义编辑文本时，不使用分组，只用自动分词+打平方式。
+        let arr = getWordsArrayFromInput();
+        if(arr.length === 0) {
+            wordsPreview.innerHTML = "<span style='color:#c44'>（当前无词语）</span>";
+            wordsPreview.classList.remove("hide");
+            return;
+        }
+        let html = '<div class="preview-lesson-title">自定义词语</div>';
+        html += `<div class="preview-lesson-words">`;
+        for (let i = 0; i < arr.length; i++) {
+            let word = arr[i];
+            let pinyins = getWordPinyin(word) || [];
+            let pinyinHTML = '<div class="pinyin-text" style="display:flex;gap:3px;">'
+                + word.split('').map((c,j) => `<span>${(pinyins[j]!==undefined?pinyins[j]:"")}</span>`).join('')
+                + '</div>';
+            let ziHTML = `<div class="zi-text">${word}</div>`;
+            html += `<span class="pinyin-item">${pinyinHTML}${ziHTML}</span>`;
+        }
+        html += "</div>";
+        wordsPreview.innerHTML = html;
+        wordsPreview.classList.remove("hide");
+    });
+
+    document.addEventListener('keydown', function(e){
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            if(!stopped && !playing) startPlay();
+        }
+    });
+
+    showWordsPreview();
+    updateShuffle();
+    updateAutoNext();
+    intervalInput.value = intervalEarly.value;
+    intervalInput.disabled = intervalEarly.disabled;
+    repeatCountInput.value = repeatCountEarly.value;
+    rateInput.value = rateEarly.value;
+    updateAutoNext();
+})();
+</script>
