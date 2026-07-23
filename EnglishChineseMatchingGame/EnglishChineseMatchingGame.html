@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <title>英文中文对对碰</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
@@ -764,6 +765,13 @@
             background: #faf8ff;
             padding: 8px 10px;
         }
+        .review-hint {
+            flex-shrink: 0;
+            margin: 0 0 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #9b7ec8;
+        }
         .review-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -773,6 +781,17 @@
             font-weight: 800;
             font-size: 0.95rem;
             color: var(--text);
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background .15s, transform .12s;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .review-row:hover { background: #f3ebff; }
+        .review-row:active { transform: scale(0.985); }
+        .review-row.speaking {
+            background: #ffe8f3;
+            box-shadow: inset 0 0 0 2px #ff7eb3;
         }
         .review-row:last-child { border-bottom: none; }
         .review-en { color: #b86a00; }
@@ -817,6 +836,7 @@
         <div class="modal-box modal-box-review" role="dialog" aria-labelledby="reviewModalTitle">
             <h3 id="reviewModalTitle">复习一下</h3>
             <p id="reviewModalMeta"></p>
+            <p class="review-hint">👆 点单词听读：先英语，停顿一下，再中文</p>
             <div class="review-list" id="reviewList"></div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-primary" id="reviewCloseBtn">关闭</button>
@@ -1105,10 +1125,13 @@
     const EnglishSpeech = (function () {
         const synth = window.speechSynthesis;
         let enVoice = null;
+        let zhVoice = null;
         let speaking = false;
+        let pairToken = 0;
+        const PAIR_PAUSE_MS = 550;
 
-        const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie/i;
-        const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)/i;
+        const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie|huihui|yaoyao|xiaoxiao|xiaoyi|xiaohan|xiaochen/i;
+        const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)|kangkang|yunyang/i;
         const QUALITY_HINT = /neural|natural|premium|enhanced|online|google|microsoft.*online|wavenet/i;
 
         function scoreEnVoice(v) {
@@ -1127,6 +1150,19 @@
             return score;
         }
 
+        function scoreZhVoice(v) {
+            if (!/^zh(-|_)/i.test(v.lang || "") && !/chinese|中文|普通话|国语/i.test(v.name || "")) return -1;
+            const blob = ((v.name || "") + " " + (v.voiceURI || "")).toLowerCase();
+            let score = 0;
+            if (FEMALE_HINT.test(blob)) score += 80;
+            if (MALE_HINT.test(blob)) score -= 60;
+            if (QUALITY_HINT.test(blob)) score += 45;
+            if (/zh-cn|cmn-hans|china/i.test(v.lang || "")) score += 20;
+            if (/google|microsoft/i.test(blob)) score += 15;
+            if (!v.localService) score += 8;
+            return score;
+        }
+
         function pickBestFemaleEnVoice(voices) {
             const ranked = voices
                 .map(v => ({ v, score: scoreEnVoice(v) }))
@@ -1137,12 +1173,23 @@
             return ranked[0] ? ranked[0].v : null;
         }
 
+        function pickBestZhVoice(voices) {
+            const ranked = voices
+                .map(v => ({ v, score: scoreZhVoice(v) }))
+                .filter(x => x.score >= 0)
+                .sort((a, b) => b.score - a.score);
+            return ranked[0] ? ranked[0].v : null;
+        }
+
         function refreshVoice() {
             if (!synth) return;
             const voices = synth.getVoices();
             enVoice = pickBestFemaleEnVoice(voices) ||
                 voices.find(v => /^en(-|_)/i.test(v.lang || "")) ||
                 voices.find(v => /english/i.test(v.name || "")) ||
+                null;
+            zhVoice = pickBestZhVoice(voices) ||
+                voices.find(v => /^zh(-|_)/i.test(v.lang || "")) ||
                 null;
         }
 
@@ -1156,6 +1203,37 @@
             return speaking || synth.speaking || !!synth.pending;
         }
 
+        function cancel() {
+            pairToken++;
+            if (synth) synth.cancel();
+            clearSpeaking();
+        }
+
+        function wait(ms, token) {
+            return new Promise(function (resolve) {
+                setTimeout(function () {
+                    resolve(token === pairToken);
+                }, ms);
+            });
+        }
+
+        function speakText(text, lang, voice, rate) {
+            return new Promise(function (resolve) {
+                if (!synth) { resolve(false); return; }
+                const t = String(text || "").trim();
+                if (!t) { resolve(false); return; }
+                const u = new SpeechSynthesisUtterance(t);
+                u.lang = lang;
+                u.rate = rate;
+                if (voice) u.voice = voice;
+                u.onstart = function () { speaking = true; };
+                u.onend = function () { clearSpeaking(); resolve(true); };
+                u.onerror = function () { clearSpeaking(); resolve(false); };
+                synth.speak(u);
+                speaking = synth.speaking || !!synth.pending;
+            });
+        }
+
         if (synth) {
             refreshVoice();
             synth.addEventListener("voiceschanged", refreshVoice);
@@ -1167,7 +1245,7 @@
             const text = (label && label.textContent || "").trim();
             if (!text) return false;
             if (!enVoice) refreshVoice();
-            synth.cancel();
+            cancel();
             const u = new SpeechSynthesisUtterance(text);
             u.lang = "en-US";
             u.rate = 0.8; // 慢速
@@ -1180,7 +1258,28 @@
             return true;
         }
 
-        return { speak, isBusy };
+        async function speakPair(en, zh) {
+            if (!synth) return false;
+            const enText = String(en || "").trim();
+            const zhText = String(zh || "").trim();
+            if (!enText && !zhText) return false;
+            const token = ++pairToken;
+            synth.cancel();
+            clearSpeaking();
+            if (!enVoice || !zhVoice) refreshVoice();
+            if (enText) {
+                const ok = await speakText(enText, "en-US", enVoice, 0.8);
+                if (!ok || token !== pairToken) return false;
+                const still = await wait(PAIR_PAUSE_MS, token);
+                if (!still) return false;
+            }
+            if (zhText && token === pairToken) {
+                await speakText(zhText, "zh-CN", zhVoice, 0.9);
+            }
+            return token === pairToken;
+        }
+
+        return { speak, speakPair, cancel, isBusy };
     })();
 
     /** 英文朗读进行中时不播配对提示音，避免与 Web Audio 冲突导致无声 */
@@ -2242,6 +2341,10 @@
         pairs.forEach(p => {
             const row = document.createElement("div");
             row.className = "review-row";
+            row.setAttribute("role", "button");
+            row.tabIndex = 0;
+            row.title = "点读：先英语，再中文";
+            row.setAttribute("aria-label", "点读 " + p.en + " " + p.zh);
             const en = document.createElement("span");
             en.className = "review-en";
             en.textContent = p.en;
@@ -2250,6 +2353,24 @@
             zh.textContent = p.zh;
             row.appendChild(en);
             row.appendChild(zh);
+
+            function playThisRow() {
+                list.querySelectorAll(".review-row.speaking").forEach(function (el) {
+                    el.classList.remove("speaking");
+                });
+                row.classList.add("speaking");
+                EnglishSpeech.speakPair(p.en, p.zh).finally(function () {
+                    row.classList.remove("speaking");
+                });
+            }
+
+            row.addEventListener("click", playThisRow);
+            row.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    playThisRow();
+                }
+            });
             list.appendChild(row);
         });
     }
@@ -2269,12 +2390,18 @@
     }
 
     function hideReviewModal() {
+        if (EnglishSpeech && EnglishSpeech.cancel) EnglishSpeech.cancel();
         const modal = document.getElementById("reviewModal");
         modal.classList.remove("show");
         modal.setAttribute("aria-hidden", "true");
         unlockBodyForReviewModal();
         const list = document.getElementById("reviewList");
-        if (list) list.scrollTop = 0;
+        if (list) {
+            list.scrollTop = 0;
+            list.querySelectorAll(".review-row.speaking").forEach(function (el) {
+                el.classList.remove("speaking");
+            });
+        }
     }
 
     function showReviewModal() {
