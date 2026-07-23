@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>听写播报 · 入口</title>
+    <style>
+        body {
+            font-family: "Nunito", "PingFang SC", "Microsoft YaHei", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(160deg, #e3f2fd, #bbdefb 45%, #fff3e0 100%);
+        }
+        .box {
+            background: rgba(255,254,249,.94);
+            border: 4px solid #90caf9;
+            border-radius: 32px;
+            padding: 48px 36px 40px;
+            min-width: 340px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(54,121,224,.14);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .logo { font-size: 2.5rem; margin-bottom: 4px; user-select: none; }
+        h1 {
+            margin: 0 0 6px; color: #1565c0; font-size: 2rem;
+            letter-spacing: 1px; font-weight: 800;
+        }
+        .desc {
+            color: #607d8b; margin: 0; font-size: 1.05rem;
+            line-height: 1.7; font-weight: 600;
+        }
+        .entry-list {
+            width: 100%; display: flex; flex-direction: column;
+            align-items: center; gap: 14px; margin-top: 8px;
+        }
+        .entry-list a {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 10px; min-width: 220px; padding: 16px 28px;
+            border-radius: 18px; font-weight: 800; text-decoration: none;
+            color: #fff; font-size: 1.1rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,.08);
+            transition: transform .14s, box-shadow .15s;
+            font-family: inherit;
+        }
+        .entry-list a:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 32px rgba(0,0,0,.12);
+        }
+        .entry-list a .icon { font-size: 1.35em; }
+        .entry-list a .sub {
+            display: block; font-size: .78rem; font-weight: 700;
+            opacity: .9; margin-top: 2px;
+        }
+        .entry-list a .label { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+        .back {
+            color: #90a4ae; font-size: .9rem; margin-top: 6px;
+            font-weight: 700; text-decoration: none;
+        }
+        .back:hover { color: #1565c0; }
+        .footnote {
+            color: #90a4ae; font-size: .9rem; margin-top: 4px;
+            font-weight: 600; line-height: 1.5;
+        }
+        @media (max-width: 460px) {
+            .box { padding: 28px 7vw 30px; border-radius: 20px; min-width: 0; }
+            h1 { font-size: 1.4rem; }
+            .entry-list a { min-width: 180px; font-size: 1rem; padding: 13px 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="logo" aria-hidden="true">📝🎧</div>
+        <h1>听写播报</h1>
+        <div class="desc">
+            选科目开始听写。<br>
+            标题在 <code>lessons.js</code> 里配置👇
+        </div>
+        <div class="entry-list" id="entryList"></div>
+        <a class="back" href="../index.html">← 返回学习工具箱</a>
+        <div class="footnote">新增课目：改 lessons.js + 放对应 html</div>
+    </div>
+    <script src="lessons.js"></script>
+    <script>
+        (function () {
+            var box = document.getElementById("entryList");
+            var lessons = (window.TingXieLessons && TingXieLessons.list()) || [];
+            if (!lessons.length) {
+                box.innerHTML = '<p style="color:#c00;font-weight:700">请先在 lessons.js 配置课目</p>';
+                return;
+            }
+            lessons.forEach(function (item) {
+                var a = document.createElement("a");
+                a.href = item.file;
+                var c = item.color || "#3679e0";
+                a.style.cssText +=
+                    ";background:" + c +
+                    ";background-image:linear-gradient(135deg," + c + "," + c + ");";
+                var sub = item.desc
+                    ? '<span class="sub">' + item.desc + "</span>"
+                    : "";
+                a.innerHTML =
+                    '<span class="icon" aria-hidden="true">' + (item.icon || "📝") + "</span>" +
+                    '<span class="label"><span>' + item.title + "</span>" + sub + "</span>";
+                box.appendChild(a);
+            });
+        })();
+    </script>
+</body>
+</html>

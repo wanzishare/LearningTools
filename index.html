@@ -44,6 +44,8 @@
         .cards li:nth-child(2){ animation-delay:.2s }
         .cards li:nth-child(3){ animation-delay:.3s }
         .cards li:nth-child(4){ animation-delay:.4s }
+        .cards li:nth-child(5){ animation-delay:.5s }
+        .cards li:nth-child(6){ animation-delay:.6s }
         @keyframes cardPop{
             from{ opacity:0; transform:translateY(20px) scale(.92) }
             to  { opacity:1; transform:translateY(0) scale(1) }
@@ -75,6 +77,9 @@
         .cards li:nth-child(1) .icon{ background:linear-gradient(135deg,#ff91ad,#ff6b9d) }
         .cards li:nth-child(2) .icon{ background:linear-gradient(135deg,#64b5f6,#42a5f5) }
         .cards li:nth-child(3) .icon{ background:linear-gradient(135deg,#24d292,#1ec88a) }
+        .cards li:nth-child(4) .icon{ background:linear-gradient(135deg,#a78bfa,#7c5cbf) }
+        .cards li:nth-child(5) .icon{ background:linear-gradient(135deg,#ffb74d,#ff9800) }
+        .cards li:nth-child(6) .icon{ background:linear-gradient(135deg,#4dd0e1,#00acc1) }
         .cards .info{ flex:1; min-width:0 }
         .cards .name{ font-weight:800; font-size:1rem }
         .cards .desc{
@@ -140,6 +145,19 @@
                 icon: '🎤',
                 description: '按日期朗读句子并上传录音',
                 url: 'ReadAloud/index.html'
+            },
+            {
+                name: '听写播报',
+                icon: '📝',
+                description: '语文 / 英语听写播报',
+                url: 'TingXie/index.html'
+            },
+            {
+                name: '英语点读',
+                icon: '🔊',
+                description: '沪教牛津版英语点读资源',
+                url: 'https://tengxunyun-wanzi-2gplqqvv330edb16.webapps.tcloudbase.com/',
+                external: true
             }
         ];
 
@@ -148,6 +166,10 @@
             var li = document.createElement('li');
             var a = document.createElement('a');
             a.href = p.url;
+            if (p.external) {
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+            }
             a.innerHTML =
                 '<span class="icon">'+(p.icon||'📂')+'</span>'+
                 '<span class="info">'+

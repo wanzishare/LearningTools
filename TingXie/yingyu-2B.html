@@ -5,6 +5,12 @@
     <link rel="icon" href="../favicon.svg" type="image/svg+xml">
     <title>听写小程序</title>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <script src="lessons.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.TingXieLessons) TingXieLessons.applyPageTitle();
+        });
+    </script>
     <style>
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
@@ -229,7 +235,8 @@
 </head>
 <body>
 <div class="container">
-    <h2>听写播报</h2>
+    <h2 id="pageTitle">听写播报</h2>
+    <p style="text-align:center;margin:-8px 0 14px;"><a href="index.html" style="color:#607d8b;font-size:.9rem;text-decoration:none;">← 听写主菜单</a></p>
     <div class="early-settings-row">
         <div class="early-setting" style="width:100%;margin-bottom:6px;">
             <span>顺序：</span>
