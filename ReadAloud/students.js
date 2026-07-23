@@ -14,6 +14,8 @@
       key: "mm",
       label: "满满",
       icon: "👧",
+      color: "#ff7eb3",
+      bg: "#ffe8f3",
       files: ["read_aloud_2A_all.xlsx"],
     },
     // { key: "bb", label: "贝贝", icon: "👦", files: ["read_aloud-bb.xlsx"] },

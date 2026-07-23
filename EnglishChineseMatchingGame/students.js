@@ -14,7 +14,7 @@
   "use strict";
 
   var STUDENTS = [
-    { key: "mm", label: "满满", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
+    { key: "mm", label: "满满", icon: "👧", color: "#ff7eb3", bg: "#ffe8f3" },
     { key: "bb", label: "贝贝", icon: "👦", color: "#3ecda0", bg: "#ecfff6" },
     { key: "xx", label: "萱萱", icon: "👧", color: "#ff9a5c", bg: "#fff9e6" },
   ];
