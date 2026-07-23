@@ -39,9 +39,9 @@ LearningTools/
 编辑 `gitee-data.js`：
 
 ```js
-REPOSITORY: '你的用户名/LearningData',
+REPOSITORY: 'bufan1990/learning-data',
 TOKEN: '你的 Gitee Token',
-BRANCH: 'master',   // 或 main
+BRANCH: 'main',
 ```
 
 | 工具 | GITEE_DATA_DIR | 数据文件 |
