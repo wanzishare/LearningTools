@@ -9,11 +9,11 @@
 
   var CONFIG = {
     // Gitee 仓库，格式：用户名/仓库名（对应 LearningData）
-    REPOSITORY: "bufan1990/LearningData",
+    REPOSITORY: "bufan1990/learning-data",
     // Gitee Personal Access Token（需要 projects 权限）
     TOKEN: "f62b136877bc9f4a2491f1ef30286857",
     API_BASE: "https://gitee.com/api/v5",
-    BRANCH: "master",
+    BRANCH: "main",
   };
 
   /** @type {Record<string, string>} path -> sha */
