@@ -187,6 +187,9 @@
 
     try {
       var fileData = await fetchContentsJson(path);
+      if (Array.isArray(fileData) || !fileData || fileData.type !== "file") {
+        throw new Error("FILE_NOT_FOUND");
+      }
       if (fileData.sha) shaCache[path] = fileData.sha;
 
       if (fileData.content && fileData.encoding === "base64") {

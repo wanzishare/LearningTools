@@ -626,7 +626,7 @@
 
     <!-- 依赖js-xlsx，直接开放xls文件读取 -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <script src="../gitee-data.js?v=20260828a"></script>
+    <script src="../gitee-data.js?v=20260828d"></script>
     <script src="students.js"></script>
     <script>
     const GITEE_DATA_DIR = "WriteWords";
@@ -649,6 +649,8 @@
     let workbookDirty = false;
     let pickState = null;
     const STAT_HEADERS = ['单词', '默写正确', '默写错误', '默写准确率'];
+    const WORD_LIST_SHEET = '单词列表';
+    const WORD_DAY_HEADERS = ['英文', '中文', '通过'];
     const AUTO_SAVE_MS = 1500;
     const DAILY_STAT_HEADERS = ['日期', '当日耗时'];
     let sessionTimer = 0;
@@ -853,28 +855,68 @@
         return prefix + name + suffix;
     }
 
+    /** 从「单词列表」Sheet 读取全量单词（英文 + 中文） */
+    function parseWordListPairs() {
+        if (!wb || !wb.Sheets[WORD_LIST_SHEET]) return [];
+        var rows = XLSX.utils.sheet_to_json(wb.Sheets[WORD_LIST_SHEET], { header: 1, defval: '' });
+        if (!rows.length) return [];
+        var header = rows[0];
+        var idxEn = colIndexInHeader(header, ['英文', 'English', 'english']);
+        var idxZh = colIndexInHeader(header, ['中文', 'Chinese', 'chinese']);
+        if (idxEn < 0) idxEn = 0;
+        if (idxZh < 0) idxZh = 1;
+        var pairs = [];
+        for (var i = 1; i < rows.length; i++) {
+            var r = rows[i];
+            var en = String((r && r[idxEn]) || '').trim();
+            var zh = String((r && r[idxZh]) || '').trim();
+            if (!en || !zh) continue;
+            pairs.push({ en: en, zh: zh });
+        }
+        return pairs;
+    }
+
+    function buildDateSheetAoaFromWordList(pairs) {
+        var aoa = [WORD_DAY_HEADERS.slice()];
+        pairs.forEach(function (p) {
+            aoa.push([p.en, p.zh, '']);
+        });
+        return aoa;
+    }
+
+    function copyDateSheetFromFallback(fallbackName) {
+        var srcSheet = wb.Sheets[fallbackName];
+        var srcAoa = XLSX.utils.sheet_to_json(srcSheet, { header: 1, defval: '' });
+        var header = srcAoa[0] || [];
+        var passCol = colIndexInHeader(header, ['通过', 'passed']);
+        return srcAoa.map(function (row, ri) {
+            if (ri === 0) return row.slice();
+            var r = row.slice();
+            if (passCol >= 0 && r.length > passCol) r[passCol] = '';
+            return r;
+        });
+    }
+
     function ensureWeekDateSheets() {
         if (!wb) return;
         var names = getWeekDateNames(new Date());
+        var wordList = parseWordListPairs();
         var changed = false;
         names.forEach(function (name) {
             if (wb.Sheets[name]) return;
-            var fallback = findClosestDateSheet(wb.SheetNames, name);
-            if (fallback) {
-                var srcSheet = wb.Sheets[fallback];
-                var srcAoa = XLSX.utils.sheet_to_json(srcSheet, { header: 1, defval: '' });
-                var header = srcAoa[0] || [];
-                var passCol = colIndexInHeader(header, ['通过', 'passed']);
-                var newAoa = srcAoa.map(function (row, ri) {
-                    if (ri === 0) return row.slice();
-                    var r = row.slice();
-                    if (passCol >= 0 && r.length > passCol) r[passCol] = '';
-                    return r;
-                });
-                wb.Sheets[name] = XLSX.utils.aoa_to_sheet(newAoa);
+            var newAoa;
+            if (wordList.length) {
+                // 优先从「单词列表」生成本周新 Sheet（英文 + 中文，「通过」留空）
+                newAoa = buildDateSheetAoaFromWordList(wordList);
             } else {
-                return;
+                var fallback = findClosestDateSheet(wb.SheetNames, name);
+                if (fallback) {
+                    newAoa = copyDateSheetFromFallback(fallback);
+                } else {
+                    newAoa = [WORD_DAY_HEADERS.slice()];
+                }
             }
+            wb.Sheets[name] = XLSX.utils.aoa_to_sheet(newAoa);
             wb.SheetNames.push(name);
             changed = true;
         });
@@ -1066,9 +1108,11 @@
                 }
                 const ok = await loadWorkbookBuffer(buf, name);
                 if (ok) return;
-                lastErr = name + ' 中未找到今日 sheet（' + today + '）且无更早日期的有效单词';
+                lastErr = name + ' 中无可用单词。请添加「单词列表」Sheet（表头：英文、中文），或保留至少一个含单词的日期 Sheet';
             } catch (e) {
-                lastErr = (e && e.message) || String(e);
+                const msg = (e && e.message) || String(e);
+                if (msg === 'FILE_NOT_FOUND') continue;
+                lastErr = msg;
             }
         }
 
