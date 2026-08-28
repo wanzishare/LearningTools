@@ -48,9 +48,9 @@
     );
   }
 
-  /** GET：优先带 Token；若 401/403 再降级为无 Token（公开仓库可读） */
+  /** GET：公开仓库优先无 Token（避免跨域预检）；401/403 再带 Token 重试 */
   async function fetchContentsJson(filePath, preferToken) {
-    var useTokenFirst = preferToken !== false;
+    var useTokenFirst = preferToken === true;
     var attempts = useTokenFirst
       ? [{ withToken: true }, { withToken: false }]
       : [{ withToken: false }, { withToken: true }];
@@ -59,9 +59,12 @@
       var opt = attempts[i];
       if (opt.withToken && !CONFIG.TOKEN) continue;
       try {
+        // 不加自定义请求头，保持「简单请求」，避免部分网络/浏览器 CORS 预检失败 → Failed to fetch
         var res = await fetch(apiContentsUrl(filePath, opt), {
           method: "GET",
-          headers: { Accept: "application/json", "Cache-Control": "no-cache" },
+          mode: "cors",
+          credentials: "omit",
+          cache: "no-store",
         });
         if (res.status === 401 || res.status === 403) {
           lastErr = new Error("Gitee 鉴权失败: " + res.status);
@@ -192,11 +195,13 @@
         return buf;
       }
 
-      // 大文件可能只有 download_url
+      // 大文件可能只有 download_url（同样不加自定义头，避免 CORS 预检）
       if (fileData.download_url) {
         var dl = await fetch(fileData.download_url, {
           method: "GET",
-          headers: { Accept: "application/octet-stream", "Cache-Control": "no-cache" },
+          mode: "cors",
+          credentials: "omit",
+          cache: "no-store",
         });
         if (!dl.ok) throw new Error("download_url 失败: " + dl.status);
         var ab = await dl.arrayBuffer();
@@ -205,30 +210,14 @@
       }
       throw new Error("Gitee 返回无 content/download_url");
     } catch (err) {
-      console.warn("[GiteeData] API 获取失败，尝试 raw 链接:", err);
-      var rawUrl =
-        "https://gitee.com/" +
-        CONFIG.REPOSITORY +
-        "/raw/" +
-        CONFIG.BRANCH +
-        "/" +
-        path +
-        "?t=" +
-        Date.now();
-      var rawRes = await fetch(rawUrl, {
-        method: "GET",
-        headers: { Accept: "application/octet-stream" },
-      });
-      if (!rawRes.ok) {
-        throw new Error(
-          "无法从 Gitee 获取文件 " + path + ": " + ((err && err.message) || err)
-        );
-      }
-      var rawBuf = await rawRes.arrayBuffer();
-      console.log("[GiteeData] 下载成功(raw):", path, rawBuf.byteLength);
-      // raw 成功后尽量补齐 sha，便于后续保存
-      getFileMeta(path).catch(function () {});
-      return rawBuf;
+      var detail = (err && err.message) || String(err);
+      throw new Error(
+        "无法从 Gitee 获取文件 " +
+          path +
+          "（" +
+          detail +
+          "）。请确认仓库为公开、网络可访问 gitee.com，或在浏览器控制台查看具体拦截原因。"
+      );
     }
   }
 
