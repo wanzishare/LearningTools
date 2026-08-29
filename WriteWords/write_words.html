@@ -777,7 +777,7 @@
         let speaking = false;
         let loopTimer = null;
         let loopToken = 0;
-        const LOOP_MS = 1000;
+        const LOOP_MS = 2000;
 
         const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie|huihui|yaoyao|xiaoxiao|xiaoyi|xiaohan|xiaochen/i;
         const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)|kangkang|yunyang/i;
@@ -837,7 +837,7 @@
             cancel();
             const u = new SpeechSynthesisUtterance(t);
             u.lang = 'en-US';
-            u.rate = 0.8;
+            u.rate = 0.55;
             if (enVoice) u.voice = enVoice;
             u.onstart = function () { speaking = true; };
             u.onend = clearSpeaking;
@@ -856,7 +856,7 @@
             cancel();
         }
 
-        /** 单词出现后立即读一遍，之后约每 1 秒再读一次（读完再等足间隔），直到 stopLoop */
+        /** 单词出现后立即读一遍，之后约每 2 秒再读一次（读完再等足间隔），直到 stopLoop */
         function startLoop(text) {
             stopLoop();
             const word = String(text || '').trim();
@@ -878,7 +878,7 @@
                 const startedAt = Date.now();
                 const u = new SpeechSynthesisUtterance(t);
                 u.lang = 'en-US';
-                u.rate = 0.8;
+                u.rate = 0.55;
                 if (enVoice) u.voice = enVoice;
                 u.onstart = function () { speaking = true; };
                 u.onend = function () {
