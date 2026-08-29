@@ -770,6 +770,140 @@
         try { WwSfx.play(name); } catch (_) {}
     }
 
+    /** 英文朗读（参考对对碰 EnglishSpeech），预览时循环播单词 */
+    const EnglishSpeech = (function () {
+        const synth = window.speechSynthesis;
+        let enVoice = null;
+        let speaking = false;
+        let loopTimer = null;
+        let loopToken = 0;
+        const LOOP_MS = 1000;
+
+        const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie|huihui|yaoyao|xiaoxiao|xiaoyi|xiaohan|xiaochen/i;
+        const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)|kangkang|yunyang/i;
+        const QUALITY_HINT = /neural|natural|premium|enhanced|online|google|microsoft.*online|wavenet/i;
+
+        function scoreEnVoice(v) {
+            if (!/^en(-|_)/i.test(v.lang || '')) return -1;
+            const name = String(v.name || '');
+            const blob = (name + ' ' + (v.voiceURI || '')).toLowerCase();
+            let score = 0;
+            if (FEMALE_HINT.test(blob)) score += 80;
+            if (MALE_HINT.test(blob)) score -= 60;
+            if (QUALITY_HINT.test(blob)) score += 45;
+            if (/google/i.test(blob)) score += 25;
+            if (/microsoft/i.test(blob) && FEMALE_HINT.test(blob)) score += 20;
+            if (/^en-us/i.test(v.lang || '')) score += 12;
+            else if (/^en-gb/i.test(v.lang || '')) score += 6;
+            if (!v.localService) score += 8;
+            return score;
+        }
+
+        function pickBestFemaleEnVoice(voices) {
+            const ranked = voices
+                .map(function (v) { return { v: v, score: scoreEnVoice(v) }; })
+                .filter(function (x) { return x.score >= 0; })
+                .sort(function (a, b) { return b.score - a.score; });
+            const female = ranked.find(function (x) {
+                return FEMALE_HINT.test((x.v.name + ' ' + x.v.voiceURI).toLowerCase());
+            });
+            if (female) return female.v;
+            return ranked[0] ? ranked[0].v : null;
+        }
+
+        function refreshVoice() {
+            if (!synth) return;
+            const voices = synth.getVoices();
+            enVoice = pickBestFemaleEnVoice(voices) ||
+                voices.find(function (v) { return /^en(-|_)/i.test(v.lang || ''); }) ||
+                voices.find(function (v) { return /english/i.test(v.name || ''); }) ||
+                null;
+        }
+
+        function clearSpeaking() {
+            speaking = false;
+        }
+
+        function cancel() {
+            if (synth) synth.cancel();
+            clearSpeaking();
+        }
+
+        function speakOnce(text) {
+            if (!synth) return false;
+            const t = String(text || '').trim();
+            if (!t) return false;
+            if (!enVoice) refreshVoice();
+            cancel();
+            const u = new SpeechSynthesisUtterance(t);
+            u.lang = 'en-US';
+            u.rate = 0.8;
+            if (enVoice) u.voice = enVoice;
+            u.onstart = function () { speaking = true; };
+            u.onend = clearSpeaking;
+            u.onerror = clearSpeaking;
+            synth.speak(u);
+            speaking = synth.speaking || !!synth.pending;
+            return true;
+        }
+
+        function stopLoop() {
+            loopToken++;
+            if (loopTimer) {
+                clearTimeout(loopTimer);
+                loopTimer = null;
+            }
+            cancel();
+        }
+
+        /** 单词出现后立即读一遍，之后约每 1 秒再读一次（读完再等足间隔），直到 stopLoop */
+        function startLoop(text) {
+            stopLoop();
+            const word = String(text || '').trim();
+            if (!word || !synth) return;
+            const token = ++loopToken;
+
+            function scheduleNext(fromMs) {
+                if (token !== loopToken) return;
+                const wait = Math.max(0, LOOP_MS - (Date.now() - fromMs));
+                loopTimer = setTimeout(tick, wait);
+            }
+
+            function tick() {
+                if (token !== loopToken) return;
+                if (!enVoice) refreshVoice();
+                cancel();
+                const t = String(word).trim();
+                if (!t) return;
+                const startedAt = Date.now();
+                const u = new SpeechSynthesisUtterance(t);
+                u.lang = 'en-US';
+                u.rate = 0.8;
+                if (enVoice) u.voice = enVoice;
+                u.onstart = function () { speaking = true; };
+                u.onend = function () {
+                    clearSpeaking();
+                    scheduleNext(startedAt);
+                };
+                u.onerror = function () {
+                    clearSpeaking();
+                    scheduleNext(startedAt);
+                };
+                synth.speak(u);
+                speaking = synth.speaking || !!synth.pending;
+            }
+
+            tick();
+        }
+
+        if (synth) {
+            refreshVoice();
+            synth.addEventListener('voiceschanged', refreshVoice);
+        }
+
+        return { speakOnce: speakOnce, startLoop: startLoop, stopLoop: stopLoop, cancel: cancel };
+    })();
+
     function getTodaySheetName() {
         var n = new Date();
         return n.getFullYear() + '-' +
@@ -1366,9 +1500,12 @@
             '<button type="button" onclick="startDictation()" style="font-size:1.15em;">记住了，开始拼字母！</button>';
         document.getElementById('btn-next').style.display = 'none';
         document.getElementById('step-info').innerText = formatStepProgress();
+        // 预览阶段循环朗读单词，开始答题后暂停
+        EnglishSpeech.startLoop(w.english);
     }
     // 倒计时3秒后进入默写输入
     function startDictation(){
+        EnglishSpeech.stopLoop();
         playSfx('start');
         document.getElementById('celebrate-anim').innerHTML = '⏳';
         let k = 3;
@@ -1963,6 +2100,7 @@
 
     function endShowStats(){
         finished = true;
+        EnglishSpeech.stopLoop();
         flushDailyActivityDelta();
         stopSessionTimer();
         stopDailyActivityAutoFlush();
