@@ -777,7 +777,10 @@
         let speaking = false;
         let loopTimer = null;
         let loopToken = 0;
-        const LOOP_MS = 2000;
+        /** 读完后的静音间隔（不含播放时长） */
+        const GAP_MS = 2000;
+        /** 语速：听写用更慢（听写播报慢速约 0.4） */
+        const SPEECH_RATE = 0.35;
 
         const FEMALE_HINT = /female|woman|zira|samantha|karen|victoria|fiona|susan|hazel|serena|jenny|aria|natasha|linda|moira|tessa|salli|joanna|kimberly|ivy|kendra|lisa|emily|sara\b|anna\b|helen|michelle|olivia|lucy|nicky|kate|alice|sophie|huihui|yaoyao|xiaoxiao|xiaoyi|xiaohan|xiaochen/i;
         const MALE_HINT = /\bmale\b|david|mark\b|james|daniel|george|richard|ryan|guy\b|thomas|fred\b|alex\b(?!a)|kangkang|yunyang/i;
@@ -829,6 +832,12 @@
             clearSpeaking();
         }
 
+        /** 按词长估算最短播放时间，避免浏览器过早触发 onend 把间隔算进播放里 */
+        function minSpeakMs(word) {
+            const len = String(word || '').replace(/\s+/g, '').length;
+            return Math.max(700, Math.round(len * 220 / SPEECH_RATE));
+        }
+
         function speakOnce(text) {
             if (!synth) return false;
             const t = String(text || '').trim();
@@ -837,7 +846,7 @@
             cancel();
             const u = new SpeechSynthesisUtterance(t);
             u.lang = 'en-US';
-            u.rate = 0.55;
+            u.rate = SPEECH_RATE;
             if (enVoice) u.voice = enVoice;
             u.onstart = function () { speaking = true; };
             u.onend = clearSpeaking;
@@ -856,41 +865,70 @@
             cancel();
         }
 
-        /** 单词出现后立即读一遍，之后约每 2 秒再读一次（读完再等足间隔），直到 stopLoop */
+        /** 读完 → 再静音 GAP_MS → 再读；间隔不含播放时长 */
         function startLoop(text) {
             stopLoop();
             const word = String(text || '').trim();
             if (!word || !synth) return;
             const token = ++loopToken;
 
-            function scheduleNext(fromMs) {
-                if (token !== loopToken) return;
-                const wait = Math.max(0, LOOP_MS - (Date.now() - fromMs));
-                loopTimer = setTimeout(tick, wait);
-            }
-
             function tick() {
                 if (token !== loopToken) return;
                 if (!enVoice) refreshVoice();
-                cancel();
                 const t = String(word).trim();
                 if (!t) return;
+
                 const startedAt = Date.now();
+                const needMs = minSpeakMs(t);
+                let settled = false;
+                let safetyTimer = null;
+
+                function clearLoopTimers() {
+                    if (loopTimer) {
+                        clearTimeout(loopTimer);
+                        loopTimer = null;
+                    }
+                    if (safetyTimer) {
+                        clearTimeout(safetyTimer);
+                        safetyTimer = null;
+                    }
+                }
+
+                /** 确认播完后，再静音 GAP_MS，然后下一轮 */
+                function afterSpeakDone() {
+                    if (settled || token !== loopToken) return;
+                    settled = true;
+                    clearLoopTimers();
+                    const elapsed = Date.now() - startedAt;
+                    const waitSpeak = Math.max(0, needMs - elapsed);
+                    loopTimer = setTimeout(function () {
+                        if (token !== loopToken) return;
+                        loopTimer = setTimeout(tick, GAP_MS);
+                    }, waitSpeak);
+                }
+
                 const u = new SpeechSynthesisUtterance(t);
                 u.lang = 'en-US';
-                u.rate = 0.55;
+                u.rate = SPEECH_RATE;
                 if (enVoice) u.voice = enVoice;
                 u.onstart = function () { speaking = true; };
                 u.onend = function () {
                     clearSpeaking();
-                    scheduleNext(startedAt);
+                    afterSpeakDone();
                 };
                 u.onerror = function () {
                     clearSpeaking();
-                    scheduleNext(startedAt);
+                    afterSpeakDone();
                 };
                 synth.speak(u);
                 speaking = synth.speaking || !!synth.pending;
+
+                // onend 丢失时兜底
+                safetyTimer = setTimeout(function () {
+                    if (settled || token !== loopToken) return;
+                    clearSpeaking();
+                    afterSpeakDone();
+                }, needMs + 2000);
             }
 
             tick();
