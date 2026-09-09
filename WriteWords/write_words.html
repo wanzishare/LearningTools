@@ -427,6 +427,25 @@
             cursor: default;
             transform: none;
         }
+        .letter-type-wrap {
+            margin-top: 10px;
+        }
+        .letter-type-input {
+            width: 78%;
+            max-width: 280px;
+            padding: 0.55em 0.6em;
+            border: 2px solid #b5e2fa;
+            font-size: 1.15em;
+            border-radius: 10px;
+            text-align: center;
+            letter-spacing: 2px;
+            outline: none;
+            box-shadow: 0 1px 5px #ddeaff44;
+        }
+        .letter-type-input:focus {
+            border-color: #12a0e3;
+            box-shadow: 0 0 0 3px rgba(18,160,227,.15);
+        }
         .pick-actions {
             margin-top: 12px;
         }
@@ -648,8 +667,11 @@
     let saveWanted = false;
     let workbookDirty = false;
     let pickState = null;
+    let gameConfig = { showLetterTiles: true };
     const STAT_HEADERS = ['单词', '默写正确', '默写错误', '默写准确率'];
     const WORD_LIST_SHEET = '单词列表';
+    const CONFIG_SHEET = '配置';
+    const CONFIG_KEY_SHOW_LETTERS = '展示字母用于拼接';
     const WORD_DAY_HEADERS = ['英文', '中文', '通过'];
     const AUTO_SAVE_MS = 1500;
     const DAILY_STAT_HEADERS = ['日期', '当日耗时'];
@@ -1294,6 +1316,60 @@
         if (lastErr) alertBox('词库加载失败：' + lastErr);
     }
 
+    function findConfigSheet() {
+        if (!wb) return null;
+        var names = wb.SheetNames || [];
+        for (var i = 0; i < names.length; i++) {
+            var n = String(names[i] || '').trim();
+            if (n === CONFIG_SHEET || /^config$/i.test(n)) return wb.Sheets[names[i]];
+        }
+        return null;
+    }
+
+    function isShowLettersConfigKey(key) {
+        var k = String(key || '').trim();
+        if (!k) return false;
+        if (k === CONFIG_KEY_SHOW_LETTERS) return true;
+        return /是否?展示字母|展示字母.*拼接|字母.*拼接|show.*letter/i.test(k);
+    }
+
+    /** 是/true 为展示；否/false 为不展示；空值按默认展示 */
+    function parseShowLettersValue(val) {
+        if (val === true || val === 1) return true;
+        if (val === false || val === 0) return false;
+        var s = String(val == null ? '' : val).trim();
+        if (!s) return true;
+        if (/^(0|false|no|n|否|关闭|关|off)$/i.test(s)) return false;
+        if (/^(是|对|yes|true|√|✓|y|ok|开启|开|on|1)$/i.test(s)) return true;
+        return true;
+    }
+
+    function shouldShowLetterTiles() {
+        return gameConfig.showLetterTiles !== false;
+    }
+
+    /** 读取「配置」Sheet；没有该 Sheet 或没有该项时，默认展示字母拼接 */
+    function loadGameConfig() {
+        gameConfig = { showLetterTiles: true };
+        var sheet = findConfigSheet();
+        if (!sheet) return gameConfig;
+        var rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i] || [];
+            var key = String(row[0] == null ? '' : row[0]).trim();
+            var val = row[1];
+            if (!key) continue;
+            if (i === 0) {
+                var h1 = String(val == null ? '' : val).trim();
+                if (/配置|项目|key/i.test(key) && /值|value/i.test(h1)) continue;
+            }
+            if (isShowLettersConfigKey(key)) {
+                gameConfig.showLetterTiles = parseShowLettersValue(val);
+            }
+        }
+        return gameConfig;
+    }
+
     function findClosestDateSheet(sheetNames, todayStr) {
         const dateRe = /^\d{4}-\d{2}-\d{2}$/;
         let best = null;
@@ -1308,6 +1384,7 @@
     async function loadWorkbookBuffer(buf, name) {
         fileName = name;
         wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+        loadGameConfig();
 
         ensureWeekDateSheets();
 
@@ -1611,31 +1688,48 @@
         const w = wordsList[currentIdx];
         const answer = w.english.trim();
         initPickState(answer);
+        const showTiles = shouldShowLetterTiles();
 
         const wordCard = document.getElementById('word-card');
         wordCard.className = 'word-card';
         wordCard.innerHTML = '<div class="letter-slots">' + renderLetterSlots() + '</div>';
 
+        const hint = showTiles
+            ? '👇 点击下方<strong>英文字母</strong>，按顺序拼出单词'
+            : '请用键盘按顺序输入英文字母拼出单词';
         document.getElementById('chinese').innerHTML =
             '<span style="font-size:1.1em;">' + w.chinese + '</span><br>' +
-            '<span style="font-size:0.95em;color:#7a9bb5;">👇 点击下方<strong>英文字母</strong>，按顺序拼出单词</span>';
+            '<span style="font-size:0.95em;color:#7a9bb5;">' + hint + '</span>';
         document.getElementById('countdown').innerText = '';
 
-        let tilesHtml = '';
-        pickState.tiles.forEach(function (t, idx) {
-            tilesHtml += '<button type="button" class="letter-tile" data-tile-idx="' + idx + '"' +
-                (t.used ? ' disabled' : '') + ' onclick="onLetterTileClick(' + idx + ')">' +
-                t.char + '</button>';
-        });
+        let pickHtml = '';
+        if (showTiles) {
+            let tilesHtml = '';
+            pickState.tiles.forEach(function (t, idx) {
+                tilesHtml += '<button type="button" class="letter-tile" data-tile-idx="' + idx + '"' +
+                    (t.used ? ' disabled' : '') + ' onclick="onLetterTileClick(' + idx + ')">' +
+                    t.char + '</button>';
+            });
+            pickHtml = '<div class="letter-tiles" id="letter-tiles">' + tilesHtml + '</div>';
+        } else {
+            pickHtml =
+                '<div class="letter-type-wrap">' +
+                '<input type="text" class="letter-type-input" id="letter-type-input" autocomplete="off" ' +
+                'autocapitalize="off" autocorrect="off" spellcheck="false" lang="en" ' +
+                'maxlength="' + answer.length + '" placeholder="在此输入英文单词" ' +
+                'oninput="onLetterTypeInput()">' +
+                '</div>';
+        }
 
         document.getElementById('input-area').innerHTML =
-            '<div class="letter-tiles" id="letter-tiles">' + tilesHtml + '</div>' +
+            pickHtml +
             '<div class="pick-actions">' +
             '<button type="button" class="secondary" onclick="pickBackspace()">退格</button>' +
             '<button type="button" class="secondary" onclick="pickClear()">清空</button>' +
             '<button class="skip-btn" onclick="skipWord()">跳过</button>' +
             '</div>' +
             '<div id="pick-hint" class="pick-hint"></div>';
+        focusTypeInput();
     }
 
     function setPickHint(text, isError) {
@@ -1645,15 +1739,65 @@
         el.className = 'pick-hint' + (isError ? ' err' : '');
     }
 
+    function focusTypeInput() {
+        const inp = document.getElementById('letter-type-input');
+        if (!inp) return;
+        setTimeout(function () {
+            try { inp.focus(); } catch (_) {}
+        }, 0);
+    }
+
+    function syncTypeInputFromPicked() {
+        const inp = document.getElementById('letter-type-input');
+        if (!inp) return;
+        const s = currentPickString();
+        if (inp.value !== s) inp.value = s;
+    }
+
     function refreshPickDisplay() {
         const wordCard = document.getElementById('word-card');
         wordCard.innerHTML = '<div class="letter-slots">' + renderLetterSlots() + '</div>';
         const container = document.getElementById('letter-tiles');
-        if (!container || !pickState) return;
-        const buttons = container.querySelectorAll('.letter-tile');
-        pickState.tiles.forEach(function (t, idx) {
-            if (buttons[idx]) buttons[idx].disabled = t.used;
+        if (container && pickState) {
+            const buttons = container.querySelectorAll('.letter-tile');
+            pickState.tiles.forEach(function (t, idx) {
+                if (buttons[idx]) buttons[idx].disabled = t.used;
+            });
+        }
+        syncTypeInputFromPicked();
+    }
+
+    function sanitizeTypedLetters(raw, answer) {
+        const allowed = {};
+        String(answer || '').split('').forEach(function (c) {
+            allowed[c] = true;
+            allowed[c.toLowerCase()] = true;
+            allowed[c.toUpperCase()] = true;
         });
+        return String(raw || '').split('').filter(function (c) {
+            return /[a-zA-Z]/.test(c) || allowed[c];
+        }).join('');
+    }
+
+    function applyTypedLetters(raw) {
+        if (!pickState) return;
+        const prevLen = pickState.picked.length;
+        let s = sanitizeTypedLetters(raw, pickState.answer);
+        if (s.length > pickState.answer.length) s = s.slice(0, pickState.answer.length);
+        pickState.picked = s.split('').map(function (c) {
+            return { char: c, tileIdx: -1 };
+        });
+        if (s.length > prevLen) playSfx('letter');
+        refreshPickDisplay();
+        if (s.length === pickState.answer.length) {
+            setTimeout(function () { checkDictation(); }, 0);
+        }
+    }
+
+    function onLetterTypeInput() {
+        const inp = document.getElementById('letter-type-input');
+        if (!inp || !pickState) return;
+        applyTypedLetters(inp.value);
     }
 
     function onLetterTileClick(tileIdx) {
@@ -1677,9 +1821,11 @@
         if (!pickState || !pickState.picked.length) return;
         playSfx('backspace');
         const last = pickState.picked.pop();
-        const tile = pickState.tiles[last.tileIdx];
-        if (tile) tile.used = false;
+        if (last.tileIdx >= 0 && pickState.tiles[last.tileIdx]) {
+            pickState.tiles[last.tileIdx].used = false;
+        }
         refreshPickDisplay();
+        focusTypeInput();
     }
 
     function pickClear() {
@@ -1688,6 +1834,7 @@
         pickState.picked = [];
         pickState.tiles.forEach(function (t) { t.used = false; });
         refreshPickDisplay();
+        focusTypeInput();
     }
 
     function pickUndoFromSlot(slotIdx) {
@@ -1695,11 +1842,13 @@
         playSfx('backspace');
         while (pickState.picked.length > slotIdx) {
             const last = pickState.picked.pop();
-            const tile = pickState.tiles[last.tileIdx];
-            if (tile) tile.used = false;
+            if (last.tileIdx >= 0 && pickState.tiles[last.tileIdx]) {
+                pickState.tiles[last.tileIdx].used = false;
+            }
         }
         refreshPickDisplay();
         setPickHint('');
+        focusTypeInput();
     }
 
     /** 答错时保留前面拼对的字母，只撤回后面不对的部分 */
@@ -1714,8 +1863,9 @@
         if (keep === 0) keep = pickState.picked.length - 1;
         while (pickState.picked.length > keep) {
             const last = pickState.picked.pop();
-            const tile = pickState.tiles[last.tileIdx];
-            if (tile) tile.used = false;
+            if (last.tileIdx >= 0 && pickState.tiles[last.tileIdx]) {
+                pickState.tiles[last.tileIdx].used = false;
+            }
         }
     }
 
@@ -1755,6 +1905,7 @@
                 setPickHint('');
                 window._pickHintTimer = null;
             }, 2200);
+            focusTypeInput();
         }
     }
 

@@ -1670,6 +1670,36 @@
         return wordListPairs.every(p => isWordMastered(p));
     }
 
+    function clearWordRecordsMemory() {
+        Object.keys(wordRecords).forEach(k => delete wordRecords[k]);
+        (wordListPairs || []).forEach(p => {
+            p.wordTotal = 0;
+        });
+    }
+
+    function writeEmptyWordRecordSheet() {
+        if (!gWorkbook) return;
+        ensureWordRecordSheet();
+        gWorkbook.Sheets[WORD_RECORD_SHEET] = XLSX.utils.aoa_to_sheet([
+            [WORD_RECORD_EN_HEADER, WORD_RECORD_COUNT_HEADER]
+        ]);
+    }
+
+    /** 单词列表全部达到掌握总分后无法再出每日词：清空「单词统计」以便重新轮换 */
+    function resetWordRecordsIfAllMastered() {
+        if (!isSheetFullyMastered()) return false;
+        clearWordRecordsMemory();
+        writeEmptyWordRecordSheet();
+        return true;
+    }
+
+    async function persistClearedWordRecords() {
+        if (!gWorkbook) return;
+        writeEmptyWordRecordSheet();
+        gWorkbook = workbookToClean(gWorkbook);
+        await saveWorkbookFile();
+    }
+
     function hasMoreUnmasteredInWordList() {
         syncPairsWordTotals(wordListPairs);
         return wordListPairs.some(p => !isWordMastered(p));
@@ -1865,6 +1895,10 @@
         if (!pair) return;
         const next = getWordTotal(pair) + delta;
         setWordTotal(pair, next);
+        if (resetWordRecordsIfAllMastered()) {
+            queueSave(() => persistClearedWordRecords());
+            return;
+        }
         queueSave(() => persistWordRecordValue(pair, next));
     }
 
@@ -2202,6 +2236,29 @@
             }
         }
         return 0;
+    }
+
+    /** 从「每日统计」读取已提交的当日步数、当日耗时 */
+    function getDailyActivity(dateKey) {
+        if (!gWorkbook || !dateKey) return { steps: 0, timeSec: 0 };
+        const rows = getReviewCountRows();
+        const cols = parseDailyStatsColumnIndices(rows[0].map(a => String(a ?? "").trim()));
+        for (let i = 1; i < rows.length; i++) {
+            if (String(rows[i][cols.idxDate] ?? "").trim() !== dateKey) continue;
+            const steps =
+                cols.idxSteps >= 0 ? parseInt(String(rows[i][cols.idxSteps] ?? "").trim(), 10) || 0 : 0;
+            const timeSec =
+                cols.idxTime >= 0 ? parseInt(String(rows[i][cols.idxTime] ?? "").trim(), 10) || 0 : 0;
+            return { steps, timeSec };
+        }
+        return { steps: 0, timeSec: 0 };
+    }
+
+    /** 当日批次在日期 Sheet 里已提交的错误次数合计 */
+    function getSheetErrorTotal(sheetName) {
+        if (!sheetName) return 0;
+        syncSheetDoneFlags(sheetName);
+        return getDailySlice(sheetName).reduce((sum, p) => sum + (parseErrorCount(p && p.errors) || 0), 0);
     }
 
     async function persistReviewCount(dateKey, count) {
@@ -2645,13 +2702,15 @@
             return { ok: false, reason: "empty" };
         }
         syncPairsWordTotals(wordListPairs);
+        const wordStatsReset = resetWordRecordsIfAllMastered();
         const dict = parsed.dict || {};
         const weekCreated = ensureWeekDateSheets(new Date());
-        if (weekCreated) {
+        if (weekCreated || wordStatsReset) {
             try {
+                if (wordStatsReset) gWorkbook = workbookToClean(gWorkbook);
                 await saveWorkbookFile();
             } catch (err) {
-                console.warn("[week sheets]", err);
+                console.warn("[week sheets / word stats]", err);
             }
         }
         if (!applyGameData(dict)) {
@@ -2663,7 +2722,9 @@
         }
         syncSheetDoneFlags(picked.sheet);
         startSheet(picked.sheet, picked.isToday);
-        if (isSheetAllDone(picked.sheet)) {
+        if (wordStatsReset && getActivePairs(picked.sheet).length) {
+            toast("词库已全部掌握过一轮，已重新开始出每日单词", false);
+        } else if (isSheetAllDone(picked.sheet)) {
             const n = getDailySlice(picked.sheet).length;
             toast(dayLabelForSheet(picked.sheet) + "每日 " + n + " 个单词已全部消除", false);
         }
@@ -2943,10 +3004,27 @@
         document.getElementById("totalPairs").textContent = total;
     }
 
-    function initErrorLimit() {
-        errorLimit = Math.max(1, curPairs ? curPairs.length : 0);
-        wrongCount = 0;
+    function applyStatsDisplay() {
+        updateMatchedStat();
         updateErrorStat();
+        const moveEl = document.getElementById("moveCount");
+        const timerEl = document.getElementById("timer");
+        if (moveEl) moveEl.textContent = String(moveCount);
+        if (timerEl) timerEl.textContent = String(timer);
+    }
+
+    /** 统计栏按表格已提交数据还原：已消除、错误次数、当日步数、当日耗时 */
+    function restoreStatsFromWorkbook(sheetName) {
+        const stats = sheetName ? getSheetPairStats(sheetName) : { total: 0, done: 0 };
+        matchedCount = stats.done || 0;
+        errorLimit = Math.max(1, stats.total || (curPairs ? curPairs.length : 0));
+        wrongCount = sheetName ? getSheetErrorTotal(sheetName) : 0;
+        const activity = getDailyActivity(sheetName);
+        moveCount = activity.steps;
+        timer = activity.timeSec;
+        activityPersistedMoves = moveCount;
+        activityPersistedTime = timer;
+        applyStatsDisplay();
     }
 
     function updateErrorStat() {
@@ -3051,28 +3129,24 @@
         opt.textContent = formatDateOptionLabel(sheetName, st.left, st.total);
     }
 
-    function startGame(fromDateSwitch) {
+    function startGame(fromDateSwitch, keepSessionStats) {
         if (fromDateSwitch) stopCelebration();
-        const sheetStats = currentSheet ? getSheetPairStats(currentSheet) : { total: 0, done: 0, left: 0 };
-        matchedCount = sheetStats.done;
+        stopDailyActivityAutoFlush();
+        if (keepSessionStats) {
+            if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
+            if (currentSheet) matchedCount = getSheetPairStats(currentSheet).done;
+            applyStatsDisplay();
+        } else {
+            restoreStatsFromWorkbook(currentSheet);
+        }
 
         if (!replayMode && (!curPairs || !curPairs.length)) {
             hideLoadArea();
             replayMode = false;
-            stopDailyActivityAutoFlush();
-            if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
-            moveCount = 0;
-            timer = 0;
-            resetActivityPersistBaseline();
             selectedTile = null;
             lockBoard = false;
-            document.getElementById("moveCount").textContent = "0";
-            document.getElementById("timer").textContent = "0";
-            wrongCount = 0;
-            errorLimit = 0;
-            updateErrorStat();
-            updateMatchedStat();
             if (timerInt) clearInterval(timerInt);
+            timerInt = null;
             const emptyMsg = getEmptyBoardMessage();
             document.getElementById("gameBoard").innerHTML =
                 '<p class="match-hint">' + emptyMsg + "</p>";
@@ -3088,17 +3162,9 @@
             return;
         }
         hideLoadArea();
-        stopDailyActivityAutoFlush();
-        if (currentSheet) flushDailyActivityDelta(currentSheet, { silent: true });
-        moveCount = 0;
-        timer = 0;
-        resetActivityPersistBaseline();
         selectedTile = null;
         lockBoard = false;
-        document.getElementById("moveCount").textContent = "0";
-        document.getElementById("timer").textContent = "0";
-        initErrorLimit();
-        updateMatchedStat();
+        applyStatsDisplay();
         const over = document.getElementById("gameOverMsg");
         over.style.display = "none";
         over.className = "";
@@ -3183,7 +3249,13 @@
                         extraText: dayLabelForSheet(sheet) + "每日 " + n + " 个单词已全部消除 🎉"
                     });
                 } else {
-                    toast(dayLabelForSheet(sheet) + "当前批次已练完，点击「再玩一次」可重新练习");
+                    curPairs = getActivePairs(sheet);
+                    if (curPairs.length) {
+                        startGame(false, true);
+                        toast("已继续出今日剩余单词", false);
+                    } else {
+                        toast(getEmptyBoardMessage(), true);
+                    }
                 }
             }
         }, 400);
