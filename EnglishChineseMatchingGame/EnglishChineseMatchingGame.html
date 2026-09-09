@@ -2601,7 +2601,7 @@
         const label = dayLabelForSheet(currentSheet);
         const stats = getSheetPairStats(currentSheet);
         if (isSheetAllDone(currentSheet)) {
-            return label + "每日 " + stats.dailyQuota + " 个单词已全部消除 🎉";
+            return label + " " + stats.dailyQuota + " 个单词已全部消除 🎉";
         }
         if (isSheetFullyMastered()) {
             return label + "全部单词已掌握（≥" + gameConfig.masterScore + " 分，共 " + stats.sheetTotal + " 个）";
@@ -2734,9 +2734,6 @@
         startSheet(picked.sheet, picked.isToday);
         if (wordStatsReset && getActivePairs(picked.sheet).length) {
             toast("词库已全部掌握过一轮，已重新开始出每日单词", false);
-        } else if (isSheetAllDone(picked.sheet)) {
-            const n = getDailySlice(picked.sheet).length;
-            toast(dayLabelForSheet(picked.sheet) + "每日 " + n + " 个单词已全部消除", false);
         }
         hideLoadArea();
         return { ok: true };
@@ -3161,12 +3158,13 @@
             if (timerInt) clearInterval(timerInt);
             timerInt = null;
             const emptyMsg = getEmptyBoardMessage();
-            document.getElementById("gameBoard").innerHTML =
-                '<p class="match-hint">' + emptyMsg + "</p>";
             const over = document.getElementById("gameOverMsg");
             if (currentSheet && (isSheetAllDone(currentSheet) || isSheetFullyMastered())) {
+                document.getElementById("gameBoard").innerHTML = "";
                 showAllDoneQuiet({ extraText: emptyMsg });
             } else {
+                document.getElementById("gameBoard").innerHTML =
+                    '<p class="match-hint">' + emptyMsg + "</p>";
                 over.style.display = "none";
                 over.className = "";
                 stopCelebration();
