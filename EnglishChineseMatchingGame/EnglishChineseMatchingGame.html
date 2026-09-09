@@ -2254,11 +2254,21 @@
         return { steps: 0, timeSec: 0 };
     }
 
-    /** 当日批次在日期 Sheet 里已提交的错误次数合计 */
+    /** 错误次数上限：配置中的每日单词数（如 15），不随已消除数量减少 */
+    function getDailyErrorLimit() {
+        const n = parseInt(gameConfig.dailyWords, 10);
+        if (Number.isFinite(n) && n >= 1) return n;
+        return Math.max(1, curPairs ? curPairs.length : 1);
+    }
+
+    /** 日期 Sheet 里已提交的错误次数合计（含已消除、未消除） */
     function getSheetErrorTotal(sheetName) {
         if (!sheetName) return 0;
         syncSheetDoneFlags(sheetName);
-        return getDailySlice(sheetName).reduce((sum, p) => sum + (parseErrorCount(p && p.errors) || 0), 0);
+        return (gameData[sheetName] || []).reduce(
+            (sum, p) => sum + (parseErrorCount(p && p.errors) || 0),
+            0
+        );
     }
 
     async function persistReviewCount(dateKey, count) {
@@ -3017,7 +3027,7 @@
     function restoreStatsFromWorkbook(sheetName) {
         const stats = sheetName ? getSheetPairStats(sheetName) : { total: 0, done: 0 };
         matchedCount = stats.done || 0;
-        errorLimit = Math.max(1, stats.total || (curPairs ? curPairs.length : 0));
+        errorLimit = getDailyErrorLimit();
         wrongCount = sheetName ? getSheetErrorTotal(sheetName) : 0;
         const activity = getDailyActivity(sheetName);
         moveCount = activity.steps;
@@ -3028,6 +3038,7 @@
     }
 
     function updateErrorStat() {
+        errorLimit = getDailyErrorLimit();
         const wcEl = document.getElementById("wrongCount");
         const limEl = document.getElementById("errorLimit");
         const pill = document.getElementById("errorStatPill");
@@ -3075,7 +3086,9 @@
     }
 
     function registerWrongMatch() {
-        wrongCount++;
+        errorLimit = getDailyErrorLimit();
+        const fromSheet = currentSheet ? getSheetErrorTotal(currentSheet) : 0;
+        wrongCount = Math.max(wrongCount + 1, fromSheet);
         updateErrorStat();
         if (wrongCount >= errorLimit) {
             setTimeout(() => handleErrorLimitExceeded(), 480);
